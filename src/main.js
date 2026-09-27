@@ -337,7 +337,7 @@ function setupEventEditorForm() {
 }
 
 // ==============================================================================
-// 7. BOTÓN FINAL DE LLUVIA DE FLORES Y CELEBRACIÓN
+// 7. BOTÓN FINAL DE LLUVIA DE GLOBOS Y CELEBRACIÓN 🎈✨
 // ==============================================================================
 function setupFinalCelebrationButton() {
   const btn = document.getElementById('btn-burst-celebration');
