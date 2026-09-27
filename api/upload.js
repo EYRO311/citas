@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { Readable } from 'stream';
+import { getSupabase, uploadMemory } from './_supabase.js';
 
 // Drive limita cada appProperty a 124 bytes (clave + valor, UTF-8)
 function fitAppProperty(key, value) {
@@ -45,6 +46,29 @@ export default async function handler(req, res) {
       location: location || '',
       caption: caption || ''
     };
+
+    // 0. Supabase Storage (bucket "anuncios", prefijo propuesta/) si está configurado
+    const supabase = getSupabase();
+    if (supabase) {
+      try {
+        const memory = await uploadMemory(supabase, {
+          buffer: Buffer.from(cleanBase64, 'base64'),
+          mimeType: fileMime,
+          meta
+        });
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        return res.end(JSON.stringify({
+          success: true,
+          mode: 'supabase',
+          storageId: memory.storageId,
+          imageUrl: memory.imageUrl,
+          message: '¡Recuerdo guardado en la nube! ☁️✨'
+        }));
+      } catch (supabaseErr) {
+        console.warn('Error subiendo a Supabase, continuando con Google Drive:', supabaseErr);
+      }
+    }
 
     // 1. Verificar si hay Webhook de Google Apps Script configurado
     const webhookUrl = (req.body?.webhookUrl || process.env.GOOGLE_DRIVE_WEBHOOK_URL || '').trim();

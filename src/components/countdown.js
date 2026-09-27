@@ -4,6 +4,7 @@
 
 import { getEvents, isEventReadyToDisplay } from '../utils/storage.js';
 import { sounds } from '../utils/audio.js';
+import { icons } from '../utils/icons.js';
 
 export class CountdownTimer {
   constructor(containerId = 'countdown-section') {
@@ -13,11 +14,11 @@ export class CountdownTimer {
     this.targetDate = null;
     this.activeEventTitle = '';
     this.quotes = [
-      'Contando cada segundo para volver a verte sonreír 🌻',
-      'El tiempo se hace eterno cuando no estás, y vuela cuando estamos juntos ✨',
-      'Tengo mil cosas que contarte y más ganas de abrazarte 💖',
-      'Cada segundo que pasa es un segundo más cerca de nuestro momento 🥰',
-      '¡Prometo que esta salida será inolvidable! 🥂'
+      'Contando cada segundo para volver a verte sonreír',
+      'El tiempo se hace eterno cuando no estás, y vuela cuando estamos juntos',
+      'Tengo mil cosas que contarte y más ganas de abrazarte',
+      'Cada segundo que pasa es un segundo más cerca de nuestro momento',
+      '¡Prometo que esta salida será inolvidable!'
     ];
     this.currentQuoteIndex = 0;
     this.init();
@@ -52,7 +53,7 @@ export class CountdownTimer {
     } else {
       // Si ambos ya pasaron o no hay futuros, poner por defecto 5 días adelante
       this.targetDate = now + 86400000 * 5;
-      this.activeEventTitle = 'Nuestra Próxima Cita Mágica 🌻';
+      this.activeEventTitle = 'Nuestra Próxima Cita Mágica';
     }
   }
 
@@ -103,10 +104,10 @@ export class CountdownTimer {
 
         <div class="countdown-footer">
           <button id="btn-edit-date" class="btn-ghost-sm" title="Ajustar fecha de la cita">
-            <span>📅 Ajustar fecha u hora</span>
+            <span>${icons.calendar('ui-icon-blue')} Ajustar fecha u hora</span>
           </button>
           <div id="countdown-status" class="countdown-status-text">
-            <span>✨ Cuenta regresiva en tiempo real</span>
+            <span>${icons.sparkle('ui-icon-gold')} Cuenta regresiva en tiempo real</span>
           </div>
         </div>
       </div>

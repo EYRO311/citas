@@ -15,6 +15,7 @@ import {
   getEventRevealTimestamp,
   isEventReadyToDisplay
 } from './utils/storage.js';
+import { icons } from './utils/icons.js';
 
 // Código fuente de Google Apps Script para copiarlo al portapapeles
 const CODE_GS_CONTENT = `// ==============================================================================
@@ -447,7 +448,7 @@ class AdminDashboard {
     if (events.length === 0) {
       container.innerHTML = `
         <div class="empty-state-box">
-          <div class="empty-icon">🌻</div>
+          <div class="empty-icon">${icons.calendar('ui-icon-gold ui-icon-xl')}</div>
           <h3>No hay citas en esta categoría</h3>
           <p>Usa el formulario de la izquierda para planificar un nuevo momento romántico.</p>
         </div>
@@ -471,22 +472,22 @@ class AdminDashboard {
               ${isHidden ? (
                 isReady ? `
                   <span class="status-badge-secret" style="background: rgba(16, 185, 129, 0.15); color: #047857; border-color: #6ee7b7;">
-                    🎉 Ya visible para Adi
+                    ${icons.sparkle('ui-icon-emerald')} Ya visible para Adi
                   </span>
                 ` : `
                   <span class="status-badge-secret" style="background: rgba(239, 68, 68, 0.15); color: #b91c1c; border-color: #fca5a5;">
-                    ⏳ Oculta (Sin mostrarse a Adi)
+                    ${icons.hourglass('ui-icon-amber')} Oculta (Sin mostrarse a Adi)
                   </span>
                 `
               ) : `
-                <span class="status-badge-public">💌 Pública</span>
+                <span class="status-badge-public">${icons.envelope('ui-icon-blue')} Pública</span>
               `}
             </div>
             <div class="admin-rsvp-tag">
               ${isAccepted ? `
-                <span class="rsvp-accepted">💖 Aceptada por Adi</span>
+                <span class="rsvp-accepted">${icons.heart('ui-icon-rose')} Aceptada por Adi</span>
               ` : `
-                <span class="rsvp-pending">⏳ Invitación Pendiente</span>
+                <span class="rsvp-pending">${icons.hourglass('ui-icon-amber')} Invitación Pendiente</span>
               `}
             </div>
           </div>
@@ -496,20 +497,20 @@ class AdminDashboard {
 
           <div class="admin-meta-grid">
             <div class="admin-meta-item">
-              <span class="meta-icon">📅</span>
+              <span class="meta-icon">${icons.calendar('ui-icon-blue')}</span>
               <span>${dateFormatted} (${event.time || '19:30'} hrs)</span>
             </div>
             <div class="admin-meta-item">
-              <span class="meta-icon">📍</span>
+              <span class="meta-icon">${icons.location('ui-icon-rose')}</span>
               <span>${event.location}</span>
             </div>
             <div class="admin-meta-item">
-              <span class="meta-icon">👗</span>
+              <span class="meta-icon">${icons.dress('ui-icon-amber')}</span>
               <span>${event.dressCode}</span>
             </div>
             ${event.secretHint ? `
               <div class="admin-meta-item">
-                <span class="meta-icon">🤫</span>
+                <span class="meta-icon">${icons.sparkle('ui-icon-gold')}</span>
                 <span style="font-style: italic;">${event.secretHint}</span>
               </div>
             ` : ''}
@@ -517,7 +518,7 @@ class AdminDashboard {
 
           ${isHidden ? `
             <div class="admin-secret-info-box">
-              <div class="secret-info-title">🔒 Configuración de Cita Oculta:</div>
+              <div class="secret-info-title">${icons.lock('ui-icon-amber')} Configuración de Cita Oculta:</div>
               <div class="secret-info-row">
                 <strong>Palabra mágica para Adi:</strong> 
                 <code>${event.secretCode || '(Sin palabra requerida, revela al pulsar)'}</code>
@@ -532,7 +533,7 @@ class AdminDashboard {
               <!-- ESTADO EXACTO DE REVELACIÓN PARA ADI -->
               <div class="secret-info-row" style="margin-top: 8px; padding: 10px 12px; background: ${!isReady ? 'rgba(239, 68, 68, 0.08)' : 'rgba(16, 185, 129, 0.1)'}; border-radius: 8px; border-left: 4px solid ${!isReady ? '#ef4444' : '#10b981'};">
                 <div style="font-weight: 700; color: ${!isReady ? '#b91c1c' : '#047857'}; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
-                  <span>${!isReady ? '⛔ SIN MOSTRARSE A ADI HASTA LA HORA' : '👁️ YA MOSTRADA A ADI'}</span>
+                  <span>${!isReady ? `${icons.lock('ui-icon-amber')} SIN MOSTRARSE A ADI HASTA LA HORA` : `${icons.eye('ui-icon-emerald')} YA MOSTRADA A ADI`}</span>
                   <span style="font-size: 0.8rem; font-weight: normal; color: #4b5563;">
                     ${!isReady ? timeRemaining : (event.forceReveal ? '(Revelación forzada)' : '(Hora alcanzada)')}
                   </span>
@@ -553,24 +554,24 @@ class AdminDashboard {
           <div class="admin-card-actions">
             ${isHidden ? `
               <button class="btn-action-icon btn-toggle-force-reveal" data-id="${event.id}" title="${event.forceReveal ? 'Volver a bloquear hasta la hora exacta' : 'Forzar que se muestre a Adi inmediatamente'}">
-                <span>${event.forceReveal ? '⏳ Bloquear hasta la hora' : '👁️ Mostrar a Adi ahora'}</span>
+                <span>${event.forceReveal ? `${icons.hourglass('ui-icon-amber')} Bloquear hasta la hora` : `${icons.eye('ui-icon-blue')} Mostrar a Adi ahora`}</span>
               </button>
             ` : ''}
 
             <button class="btn-action-icon btn-toggle-visibility" data-id="${event.id}" title="${isHidden ? 'Hacer pública esta cita' : 'Ocultar esta cita (Hacer secreta)'}">
-              <span>${isHidden ? '🔓 Hacer Pública' : '🔒 Hacer Oculta'}</span>
+              <span>${isHidden ? `${icons.unlock('ui-icon-blue')} Hacer Pública` : `${icons.lock('ui-icon-amber')} Hacer Oculta`}</span>
             </button>
 
             <button class="btn-action-icon btn-edit-event" data-id="${event.id}" title="Editar contenido">
-              <span>✏️ Editar</span>
+              <span>${icons.edit('ui-icon-blue')} Editar</span>
             </button>
 
             <button class="btn-action-icon btn-toggle-rsvp" data-id="${event.id}" title="${isAccepted ? 'Marcar como pendiente' : 'Marcar como aceptada'}">
-              <span>${isAccepted ? '↩️ Marcar Pendiente' : '💖 Marcar Aceptada'}</span>
+              <span>${isAccepted ? `${icons.undo('ui-icon-blue')} Marcar Pendiente` : `${icons.heart('ui-icon-rose')} Marcar Aceptada`}</span>
             </button>
 
             <button class="btn-action-icon btn-action-delete btn-delete-event" data-id="${event.id}" title="Eliminar cita">
-              <span>🗑️ Eliminar</span>
+              <span>${icons.trash('ui-icon-rose')} Eliminar</span>
             </button>
           </div>
         </div>
@@ -933,10 +934,12 @@ class AdminDashboard {
 
             if (status) {
               status.style.color = '#16a34a';
-              status.textContent = '✅ ¡Foto subida exitosamente a Google Drive!';
+              status.textContent = data.mode === 'supabase'
+                ? '✅ ¡Foto subida exitosamente a Supabase!'
+                : '✅ ¡Foto subida exitosamente a Google Drive!';
             }
             sounds.playCelebration();
-            this.showToast('¡Foto de prueba subida a Google Drive! ✨');
+            this.showToast(data.mode === 'supabase' ? '¡Foto de prueba subida a Supabase! ✨' : '¡Foto de prueba subida a Google Drive! ✨');
             setTimeout(() => this.checkDriveStatus(false), 800);
           };
           reader.readAsDataURL(file);

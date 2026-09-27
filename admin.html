@@ -35,7 +35,9 @@
        ============================================================================== -->
   <div id="admin-pin-lock" class="admin-lock-overlay">
     <div class="glass-panel admin-lock-card">
-      <div class="lock-icon-badge">🔒✨</div>
+      <div class="lock-icon-badge">
+        <svg class="ui-icon ui-icon-xl ui-icon-amber" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+      </div>
       <h2 class="admin-lock-title">Acceso de Creador</h2>
       <p class="admin-lock-desc">
         Ingresa tu PIN personal para gestionar las citas y preparar sorpresas secretas para Adi.
@@ -55,10 +57,10 @@
           />
         </div>
         <div id="pin-error-msg" class="pin-error-msg hidden">
-          PIN incorrecto. Vuelve a intentarlo 🌻
+          PIN incorrecto. Vuelve a intentarlo.
         </div>
         <button type="submit" class="btn-primary" style="width: 100%;">
-          <span>Desbloquear panel 🔑</span>
+          <span><svg class="ui-icon ui-icon-white" viewBox="0 0 24 24"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg> Desbloquear panel</span>
         </button>
       </form>
 
@@ -87,10 +89,10 @@
       </div>
       <div class="topbar-right">
         <button id="btn-change-pin" class="btn-ghost-sm" title="Cambiar tu PIN de seguridad">
-          <span>🔑 Cambiar PIN</span>
+          <span><svg class="ui-icon ui-icon-amber" viewBox="0 0 24 24"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg> Cambiar PIN</span>
         </button>
         <button id="btn-admin-logout" class="btn-ghost-sm" title="Cerrar sesión de creador">
-          <span>🔒 Bloquear</span>
+          <span><svg class="ui-icon ui-icon-blue" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg> Bloquear</span>
         </button>
       </div>
     </header>
@@ -98,10 +100,10 @@
     <!-- NAVEGACIÓN PRINCIPAL DE ADMIN: CITAS VS GOOGLE DRIVE -->
     <nav class="admin-nav-tabs glass-panel" aria-label="Secciones del panel de administración">
       <button id="tab-btn-events" class="admin-nav-btn active" data-tab="events">
-        <span>📅 Citas & Eventos Ocultos</span>
+        <span><svg class="ui-icon ui-icon-blue" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h5v5H7z"/></svg> Citas & Eventos Ocultos</span>
       </button>
       <button id="tab-btn-drive" class="admin-nav-btn" data-tab="drive">
-        <span>☁️ Conectar Google Drive</span>
+        <span><svg class="ui-icon ui-icon-blue" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg> Conectar Google Drive</span>
         <span id="drive-nav-dot" class="status-dot-sm yellow"></span>
       </button>
     </nav>
@@ -109,35 +111,35 @@
     <!-- ESTADÍSTICAS RÁPIDAS -->
     <section class="admin-stats-grid" aria-label="Resumen de Citas y Álbum">
       <div class="stat-card glass-panel">
-        <div class="stat-icon">📅</div>
+        <div class="stat-icon"><svg class="ui-icon ui-icon-lg ui-icon-blue" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h5v5H7z"/></svg></div>
         <div class="stat-data">
           <span id="stat-total-events" class="stat-number">0</span>
           <span class="stat-label">Total Citas</span>
         </div>
       </div>
       <div class="stat-card glass-panel">
-        <div class="stat-icon">💌</div>
+        <div class="stat-icon"><svg class="ui-icon ui-icon-lg ui-icon-rose" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
         <div class="stat-data">
           <span id="stat-public-events" class="stat-number">0</span>
           <span class="stat-label">Públicas</span>
         </div>
       </div>
       <div class="stat-card glass-panel stat-card-secret">
-        <div class="stat-icon">🔒</div>
+        <div class="stat-icon"><svg class="ui-icon ui-icon-lg ui-icon-amber" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg></div>
         <div class="stat-data">
           <span id="stat-secret-events" class="stat-number">0</span>
           <span class="stat-label">Ocultas (Secretas)</span>
         </div>
       </div>
       <div class="stat-card glass-panel stat-card-accepted">
-        <div class="stat-icon">💖</div>
+        <div class="stat-icon"><svg class="ui-icon ui-icon-lg ui-icon-rose" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
         <div class="stat-data">
           <span id="stat-accepted-events" class="stat-number">0</span>
           <span class="stat-label">Aceptadas</span>
         </div>
       </div>
       <div class="stat-card glass-panel stat-card-drive" id="stat-card-drive-click" style="cursor: pointer;" title="Ver estado de conexión con Google Drive">
-        <div class="stat-icon">☁️</div>
+        <div class="stat-icon"><svg class="ui-icon ui-icon-lg ui-icon-blue" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg></div>
         <div class="stat-data">
           <span id="stat-drive-status" class="stat-number" style="font-size: 1.1rem; line-height: 1.2;">Modo Local</span>
           <span class="stat-label">Google Drive</span>
@@ -157,7 +159,7 @@
       <section class="admin-form-section">
         <div class="glass-panel admin-form-card">
           <div class="admin-form-header">
-            <div class="header-icon" id="form-mode-icon">✨</div>
+            <div class="header-icon" id="form-mode-icon"><svg class="ui-icon ui-icon-lg ui-icon-gold" viewBox="0 0 24 24"><path d="M12 2L9.5 8.5 3 11l6.5 2.5L12 20l2.5-6.5L21 11l-6.5-2.5L12 2zm7 13l-1.25 3.25L14.5 19.5l3.25 1.25L19 24l1.25-3.25L23.5 19.5l-3.25-1.25L19 15z"/></svg></div>
             <div>
               <h2 id="form-mode-title" class="admin-section-title">Crear Nueva Cita</h2>
               <p id="form-mode-desc" class="admin-section-subtitle">Completa los detalles para preparar la invitación</p>
@@ -172,7 +174,7 @@
             <div class="secret-toggle-card">
               <div class="toggle-info">
                 <div class="toggle-icon-wrap">
-                  <span id="toggle-state-icon">🔓</span>
+                  <span id="toggle-state-icon"><svg class="ui-icon ui-icon-amber" viewBox="0 0 24 24"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5-2.28 0-4.27 1.54-4.84 3.75l1.94.51C10.45 3.86 11.66 3 13 3c1.66 0 3 1.34 3 3v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H6V10h12v10z"/></svg></span>
                 </div>
                 <div>
                   <label for="event-is-hidden" class="toggle-title">¿Es una Cita Oculta (Sorpresa Secreta)?</label>
@@ -192,7 +194,7 @@
               <div class="secret-panel-glow"></div>
               <div class="secret-panel-inner">
                 <div class="secret-panel-header">
-                  <span class="secret-badge">🔒 Revelación Programada por Hora</span>
+                  <span class="secret-badge"><svg class="ui-icon ui-icon-amber" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg> Revelación Programada por Hora</span>
                 </div>
 
                 <!-- FECHA Y HORA EXACTA DE REVELACIÓN -->
@@ -220,13 +222,13 @@
                   </div>
                 </div>
                 <p class="field-help-text" style="color: #4338ca; font-weight: 600; margin-bottom: 10px;">
-                  ⏰ <strong>Sin mostrarse:</strong> Esta cita no aparecerá en la página hasta que llegue este momento exacto.
+                  <svg class="ui-icon ui-icon-blue" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2C11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg> <strong>Sin mostrarse:</strong> Esta cita no aparecerá en la página hasta que llegue este momento exacto.
                 </p>
 
                 <div class="form-group" style="background: rgba(255,255,255,0.7); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid #c7d2fe;">
                   <label for="event-force-reveal" style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; color: #1e3a8a; margin: 0;">
                     <input type="checkbox" id="event-force-reveal" />
-                    <span>👁️ <strong>Forzar revelación inmediata</strong> (mostrar desde ya a Adi, ignorando la hora)</span>
+                    <span><svg class="ui-icon ui-icon-blue" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg> <strong>Forzar revelación inmediata</strong> (mostrar desde ya a Adi, ignorando la hora)</span>
                   </label>
                 </div>
 
@@ -356,7 +358,7 @@
             <!-- BOTONES DE ACCIÓN DEL FORMULARIO -->
             <div class="form-actions-group">
               <button type="submit" id="btn-save-event" class="btn-primary">
-                <span id="btn-save-text">💾 Guardar Cita</span>
+                <span id="btn-save-text"><svg class="ui-icon ui-icon-white" viewBox="0 0 24 24"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg> Guardar Cita</span>
               </button>
               <button type="button" id="btn-cancel-edit" class="btn-ghost-sm hidden">
                 <span>Cancelar edición</span>
@@ -381,7 +383,7 @@
             <div class="admin-filter-tabs">
               <button class="filter-tab active" data-filter="all">Todas (<span id="count-all">0</span>)</button>
               <button class="filter-tab" data-filter="public">Públicas (<span id="count-public">0</span>)</button>
-              <button class="filter-tab" data-filter="hidden">Ocultas 🔒 (<span id="count-hidden">0</span>)</button>
+              <button class="filter-tab" data-filter="hidden">Ocultas <svg class="ui-icon ui-icon-amber" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg> (<span id="count-hidden">0</span>)</button>
             </div>
           </div>
 
@@ -404,7 +406,7 @@
         <!-- COLUMNA IZQUIERDA: CONFIGURACIÓN Y ESTADO -->
         <div class="glass-panel admin-drive-card">
           <div class="admin-form-header">
-            <div class="header-icon">☁️</div>
+            <div class="header-icon"><svg class="ui-icon ui-icon-lg ui-icon-blue" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg></div>
             <div>
               <h2 class="admin-section-title">Conexión con Google Drive</h2>
               <p class="admin-section-subtitle">Sincroniza las fotos de sus salidas en una carpeta compartida</p>
@@ -425,10 +427,10 @@
             </p>
             <div class="status-actions-row">
               <button type="button" id="btn-test-drive" class="btn-primary" style="padding: 8px 16px; font-size: 0.88rem;">
-                <span>🔄 Probar Conexión Ahora</span>
+                <span><svg class="ui-icon ui-icon-white" viewBox="0 0 24 24"><path d="M11 21h-1l1-7H7.5c-.88 0-.33-.75-.31-.78C8.48 10.94 10.42 7.54 13.01 3h1l-1 7h3.5c.49 0 .73.28.53.64-1.92 3.52-3.87 7.04-6.04 10.36z"/></svg> Probar Conexión Ahora</span>
               </button>
               <a id="btn-open-drive-folder" href="#" target="_blank" rel="noopener noreferrer" class="btn-ghost-sm hidden">
-                <span>📁 Abrir Carpeta en Drive</span>
+                <span>Abrir Carpeta en Drive</span>
               </a>
             </div>
           </div>
@@ -470,17 +472,17 @@
 
             <div class="form-actions-group">
               <button type="submit" id="btn-save-drive" class="btn-primary">
-                <span>💾 Guardar y Conectar</span>
+                <span><svg class="ui-icon ui-icon-white" viewBox="0 0 24 24"><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg> Guardar y Conectar</span>
               </button>
               <button type="button" id="btn-clear-drive" class="btn-ghost-sm" style="color: #ef4444; border-color: #fca5a5;">
-                <span>🗑️ Desconectar</span>
+                <span><svg class="ui-icon ui-icon-rose" viewBox="0 0 24 24"><path d="M14.59 8L12 5.41 9.41 8 8 6.59 12 2.58l4 4.01L14.59 8zM12 21.42l-4-4.01L9.41 16 12 18.59 14.59 16 16 17.41l-4 4.01zM11 11h2v2h-2v-2z"/></svg> Desconectar</span>
               </button>
             </div>
           </form>
 
           <!-- FOTO DE PRUEBA -->
           <div class="drive-test-upload-card" style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
-            <h3 style="font-size: 1rem; color: #1e3a8a; margin-bottom: 6px;">📸 Probar subida a Google Drive</h3>
+            <h3 style="font-size: 1rem; color: #1e3a8a; margin-bottom: 6px;"><svg class="ui-icon ui-icon-blue" viewBox="0 0 24 24"><path d="M9.4 4l-1.8 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-3.6l-1.8-2h-5.2zm2.6 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm0-10c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/></svg> Probar subida a Google Drive</h3>
             <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 12px;">
               Sube una foto de prueba para verificar que se guarde en tu carpeta de Drive.
             </p>

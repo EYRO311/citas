@@ -12,6 +12,7 @@ import {
   isEventReadyToDisplay
 } from '../utils/storage.js';
 import { sounds } from '../utils/audio.js';
+import { icons } from '../utils/icons.js';
 
 export class EventsInvitations {
   constructor(containerId = 'events-container', onRSVPChange = null) {
@@ -20,12 +21,12 @@ export class EventsInvitations {
     this.shyButtonCount = 0;
     this.lastVisibleCount = 0;
     this.shyPhrases = [
-      '¿Segura? 🥺',
-      '¡Habrá tu postre favorito! 🍰',
-      '¡No te hagas del rogar jeje! 🥰',
-      '¡Prometo hacerte reír mucho! ✨',
-      '¡Di que sí por favor! 🌻',
-      '¡Ya casi le das al Sí! 💖'
+      '¿Segura?',
+      '¡Habrá tu postre favorito!',
+      '¡No te hagas del rogar jeje!',
+      '¡Prometo hacerte reír mucho!',
+      '¡Di que sí por favor!',
+      '¡Ya casi le das al Sí!'
     ];
     this.init();
   }
@@ -69,7 +70,7 @@ export class EventsInvitations {
     if (visibleEvents.length === 0) {
       this.container.innerHTML = `
         <div class="glass-panel" style="text-align: center; padding: 40px 20px; border-radius: var(--radius-lg);">
-          <span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">🌻</span>
+          <span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">${icons.flower('ui-icon-gold ui-icon-xl')}</span>
           <h3 style="font-family: var(--font-display); font-size: 1.4rem; color: #1e3a8a; margin-bottom: 8px;">
             No hay citas programadas por el momento
           </h3>
@@ -113,24 +114,24 @@ export class EventsInvitations {
       <article class="event-card glass-panel event-card-secret locked" data-event-id="${event.id}">
         <!-- Cinta superior de misterio -->
         <div class="card-top-seal">
-          <span class="badge-event badge-secret">🔒 CITA SECRETA & SORPRESA</span>
-          <span class="status-badge-pending">✨ Por Descubrir</span>
+          <span class="badge-event badge-secret">${icons.lock('ui-icon-amber')} CITA SECRETA & SORPRESA</span>
+          <span class="status-badge-pending">${icons.sparkle('ui-icon-gold')} Por Descubrir</span>
         </div>
 
         <div class="secret-card-inner">
           <div class="secret-lock-glow-icon">
-            <span class="lock-emoji">🔒</span>
-            <span class="sparkle-emoji">✨</span>
+            <span class="lock-emoji">${icons.lock('ui-icon-amber ui-icon-xl')}</span>
+            <span class="sparkle-emoji">${icons.sparkle('ui-icon-gold ui-icon-lg')}</span>
           </div>
 
-          <h3 class="event-title secret-card-title">Una Cita Secreta Te Espera... 🤫</h3>
+          <h3 class="event-title secret-card-title">Una Cita Secreta Te Espera...</h3>
           <p class="event-description secret-card-desc">
             Eyro ha preparado una sorpresa secreta para ti. Para descubrir el lugar, la hora y todos los detalles románticos, revela esta tarjeta.
           </p>
 
           ${event.secretClue ? `
             <div class="secret-clue-box">
-              <span class="clue-icon">🌻</span>
+              <span class="clue-icon">${icons.key('ui-icon-gold')}</span>
               <div class="clue-content">
                 <span class="clue-label">Pista de Eyro para Adi:</span>
                 <p class="clue-text">"${event.secretClue}"</p>
@@ -155,7 +156,7 @@ export class EventsInvitations {
                     data-event-id="${event.id}" 
                   />
                   <button class="btn-primary btn-unlock-secret" data-event-id="${event.id}">
-                    <span>Descubrir ✨</span>
+                    <span>${icons.key('ui-icon-white')} Descubrir</span>
                   </button>
                 </div>
                 <p id="secret-feedback-${event.id}" class="secret-feedback-error hidden"></p>
@@ -164,7 +165,7 @@ export class EventsInvitations {
               <div style="text-align: center; margin-top: 10px;">
                 <p class="unlock-direct-prompt">Toca el botón para abrir el sobre y descubrir la sorpresa:</p>
                 <button class="btn-primary btn-unlock-direct" data-event-id="${event.id}" style="width: 100%;">
-                  <span>🎁 ¡Abrir y Revelar Sorpresa! ✨</span>
+                  <span>${icons.unlock('ui-icon-white')} ¡Abrir y Revelar Sorpresa!</span>
                 </button>
               </div>
             `}
@@ -173,7 +174,7 @@ export class EventsInvitations {
 
         <!-- Pie de tarjeta secreta -->
         <div class="secret-card-footer">
-          <span>💌 Preparada con amor por Eyro</span>
+          <span>${icons.heart('ui-icon-rose')} Preparada con amor por Eyro</span>
         </div>
       </article>
     `;
@@ -192,16 +193,16 @@ export class EventsInvitations {
         <!-- Cinta o sello superior -->
         <div class="card-top-seal">
           <span class="badge-event ${isRevealedSecret ? 'badge-secret' : ''}">
-            ${isRevealedSecret ? '✨ SORPRESA REVELADA' : (event.badge || `CITA #${event.id}`)}
+            ${isRevealedSecret ? `${icons.sparkle('ui-icon-gold')} SORPRESA REVELADA` : (event.badge || `CITA #${event.id}`)}
           </span>
           ${isAccepted 
-            ? '<span class="status-badge-accepted">💖 ¡ACEPTADA!</span>' 
-            : '<span class="status-badge-pending">💌 Invitación Abierta</span>'}
+            ? `<span class="status-badge-accepted">${icons.heart('ui-icon-rose')} ¡ACEPTADA!</span>` 
+            : `<span class="status-badge-pending">${icons.envelope('ui-icon-blue')} Invitación Abierta</span>`}
         </div>
 
         ${isRevealedSecret ? `
           <div class="secret-revealed-banner">
-            <span>🎉 ¡Sorpresa desbloqueada! Aquí tienes todos los detalles mágicos:</span>
+            <span>${icons.sparkle('ui-icon-gold')} ¡Sorpresa desbloqueada! Aquí tienes todos los detalles mágicos:</span>
           </div>
         ` : ''}
 
@@ -211,28 +212,28 @@ export class EventsInvitations {
         <!-- Detalles de la Cita -->
         <div class="event-details-box">
           <div class="detail-row">
-            <span class="detail-icon">📅</span>
+            <span class="detail-icon">${icons.calendar('ui-icon-blue')}</span>
             <div class="detail-info">
               <span class="detail-label">Fecha</span>
               <strong class="detail-value">${dateFormatted}</strong>
             </div>
           </div>
           <div class="detail-row">
-            <span class="detail-icon">⏰</span>
+            <span class="detail-icon">${icons.clock('ui-icon-blue')}</span>
             <div class="detail-info">
               <span class="detail-label">Hora</span>
               <strong class="detail-value">${event.time || '19:30'} hrs</strong>
             </div>
           </div>
           <div class="detail-row">
-            <span class="detail-icon">📍</span>
+            <span class="detail-icon">${icons.location('ui-icon-rose')}</span>
             <div class="detail-info">
               <span class="detail-label">Lugar</span>
               <strong class="detail-value">${event.location}</strong>
             </div>
           </div>
           <div class="detail-row">
-            <span class="detail-icon">👗</span>
+            <span class="detail-icon">${icons.dress('ui-icon-amber')}</span>
             <div class="detail-info">
               <span class="detail-label">Código de vestimenta</span>
               <strong class="detail-value">${event.dressCode}</strong>
@@ -240,7 +241,7 @@ export class EventsInvitations {
           </div>
           ${event.secretHint ? `
             <div class="detail-row highlight-row">
-              <span class="detail-icon">🤫</span>
+              <span class="detail-icon">${icons.sparkle('ui-icon-gold')}</span>
               <div class="detail-info">
                 <span class="detail-label">Detalle secreto</span>
                 <span class="detail-value-italic">${event.secretHint}</span>
@@ -253,31 +254,31 @@ export class EventsInvitations {
         <div class="event-actions">
           ${isAccepted ? `
             <div class="accepted-banner">
-              <div class="accepted-icon">🎉</div>
+              <div class="accepted-icon">${icons.heart('ui-icon-rose ui-icon-lg')}</div>
               <div>
-                <strong>¡Aceptaste salir conmigo! 💖</strong>
+                <strong>¡Aceptaste salir conmigo!</strong>
                 <p>Estoy preparando todo para que sea un día perfecto.</p>
               </div>
             </div>
             <div class="calendar-actions">
               <a href="${this.generateGoogleCalendarLink(event)}" target="_blank" rel="noopener noreferrer" class="btn-calendar">
-                📅 Añadir a Google Calendar
+                ${icons.calendar('ui-icon-blue')} Añadir a Google Calendar
               </a>
               <button class="btn-ghost-sm btn-undo-rsvp" data-event-id="${event.id}">
-                Cambiar respuesta
+                ${icons.undo('ui-icon-blue')} Cambiar respuesta
               </button>
             </div>
           ` : `
             <div class="rsvp-prompt">
-              <span>¿Aceptas esta invitación especial? 🌻</span>
+              <span>¿Aceptas esta invitación especial?</span>
             </div>
             <div class="buttons-group">
               <button class="btn-accept btn-primary" data-event-id="${event.id}">
-                <span class="btn-heart-icon">💖</span>
+                <span class="btn-heart-icon">${icons.heart('ui-icon-white')}</span>
                 <span>¡Sí, acepto con todo mi amor!</span>
               </button>
               <button class="btn-shy btn-secondary" data-event-id="${event.id}">
-                <span>Mmm... tal vez 🤔</span>
+                <span>Mmm... tal vez</span>
               </button>
             </div>
           `}
@@ -287,11 +288,11 @@ export class EventsInvitations {
         <div class="card-footer-edit">
           ${isRevealedSecret ? `
             <button class="btn-link-edit btn-relock-secret" data-event-id="${event.id}" title="Volver a poner candado a esta sorpresa">
-              🔒 Volver a ocultar secreto
+              ${icons.lock('ui-icon-amber')} Volver a ocultar secreto
             </button>
           ` : `
             <button class="btn-link-edit" data-event-id="${event.id}">
-              ✏️ Editar detalles de esta cita
+              ${icons.edit('ui-icon-blue')} Editar detalles de esta cita
             </button>
           `}
         </div>

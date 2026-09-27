@@ -38,6 +38,33 @@
   --radius-full: 9999px;
 }
 
+/* ==============================================================================
+   ICONOS VECTORIALES (ESTILO FLATICON / MODERN WEB)
+   ============================================================================== */
+.ui-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: -0.16em;
+  width: 1.15em;
+  height: 1.15em;
+  flex-shrink: 0;
+  fill: currentColor;
+}
+.ui-icon-lg {
+  width: 1.4em;
+  height: 1.4em;
+}
+.ui-icon-xl {
+  width: 2rem;
+  height: 2rem;
+}
+.ui-icon-gold { color: #f59e0b; }
+.ui-icon-blue { color: #2563eb; }
+.ui-icon-rose { color: #f43f5e; }
+.ui-icon-emerald { color: #10b981; }
+.ui-icon-amber { color: #d97706; }
+
 /* Reset general y protección contra desbordamiento */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -1306,344 +1333,369 @@ dialog::backdrop {
 }
 
 /* ==============================================================================
-   7.1 CARTA EN PERGAMINO DE LUJO (FINE ART ROMANCE)
+   7.1 CARTA DE AMOR (PAPEL DE ALGODÓN · ORO · ZAFIRO)
    ============================================================================== */
-.dialog-parchment {
-  max-width: 600px;
-  width: 95vw;
-  border-radius: 12px;
+.letter-dialog {
+  --paper: #FBF7EE;
+  --paper-edge: #EFE6D2;
+  --ink: #26303F;
+  --ink-soft: #5B6474;
+  --gold: #C5A059;
+  --gold-soft: rgba(197, 160, 89, 0.45);
+
+  max-width: 620px;
+  width: calc(100vw - 24px);
+  max-height: min(88vh, 900px);
+  border-radius: 14px;
   overflow: visible;
-  box-shadow: 0 25px 60px rgba(8, 20, 38, 0.6);
+  box-shadow: 0 30px 70px rgba(8, 20, 38, 0.55), 0 2px 6px rgba(8, 20, 38, 0.25);
 }
 
-.dialog-parchment::backdrop {
-  background: radial-gradient(circle at center, rgba(10, 26, 48, 0.8) 0%, rgba(5, 12, 24, 0.92) 100%);
-  backdrop-filter: blur(10px);
-}
-
-.parchment-card {
-  position: relative;
-  background: #FCFAF5;
-  background-image: 
-    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.9) 0%, rgba(246, 241, 229, 0.7) 100%),
-    linear-gradient(180deg, #FDFBF7 0%, #F7F3E8 100%);
-  border-radius: 10px;
-  padding: clamp(14px, 3.5vw, 32px);
-  box-shadow: 
-    0 12px 35px rgba(12, 35, 64, 0.25),
-    inset 0 0 50px rgba(197, 160, 89, 0.08);
-  border: 1px solid #E8DFCC;
-  box-sizing: border-box;
-  max-height: 88vh;
-  overflow-y: auto;
-}
-
-.parchment-close-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: #F1ECE1;
-  border: 1px solid #D5CABA;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  font-size: 1.2rem;
-  color: #574B39;
-  cursor: pointer;
+.letter-dialog[open] {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  z-index: 20;
+  animation: letterIn 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.parchment-close-btn:hover {
-  background: #E5DCCE;
-  color: #1E293B;
+.letter-dialog::backdrop {
+  background: radial-gradient(circle at 50% 40%, rgba(12, 35, 64, 0.72) 0%, rgba(5, 12, 24, 0.9) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+@keyframes letterIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Papel con veta sutil (ruido SVG) y luz cálida arriba */
+.letter-paper {
+  width: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 14px;
+  padding: clamp(10px, 2.2vw, 14px);
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(ellipse 120% 60% at 50% 0%, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.36 0 0 0 0 0.2 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  box-shadow: inset 0 0 0 1px var(--paper-edge);
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-soft) transparent;
+}
+
+/* Marco doble en oro: crece con el contenido */
+.letter-inner {
+  position: relative;
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  box-shadow: 0 0 0 4px var(--paper), 0 0 0 5px var(--gold-soft);
+  margin: 5px;
+  padding: clamp(20px, 5vw, 44px) clamp(18px, 5.5vw, 48px) clamp(22px, 5vw, 40px);
+  color: var(--ink);
+}
+
+.letter-inner:focus {
+  outline: none;
+}
+
+/* Botón cerrar: fuera del área que hace scroll, siempre visible */
+.letter-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 5;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--gold-soft);
+  background: rgba(251, 247, 238, 0.92);
+  color: #6B5A3E;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 8px rgba(12, 35, 64, 0.12);
+  transition: transform 0.25s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.letter-close:hover {
+  background: #FFFFFF;
+  color: var(--color-blue-deep);
   transform: rotate(90deg);
 }
 
-/* Doble marco de filigrana con esquinas elegantes */
-.parchment-inner {
-  border: 1.5px solid #C5A059;
-  border-radius: 6px;
-  padding: clamp(14px, 3.5vw, 28px);
-  position: relative;
-  background: rgba(255, 255, 255, 0.70);
-  box-sizing: border-box;
-}
-
-.parchment-inner::before {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border: 1px dashed rgba(37, 99, 235, 0.22);
-  pointer-events: none;
-  border-radius: 4px;
-}
-
-/* Encabezado Postal Vintage */
-.parchment-header {
+/* Encabezado postal */
+.letter-head {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 20px;
-  padding-bottom: 14px;
-  border-bottom: 1px dashed #DCD3C0;
+  gap: 16px;
+  padding-right: 34px; /* espacio para el botón cerrar */
+  padding-bottom: 18px;
+  margin-bottom: clamp(20px, 4vw, 28px);
+  border-bottom: 1px solid rgba(197, 160, 89, 0.35);
 }
 
-.postal-vintage-group {
+.letter-postage {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
-/* Estampilla de Correo con Girasol y bordes dentados */
-.vintage-stamp {
-  width: 50px;
-  height: 62px;
-  background: #FFFDF8;
-  border: 2px dashed #C5A059;
-  border-radius: 3px;
+.letter-stamp {
+  width: 60px;
+  height: 72px;
+  transform: rotate(-4deg);
+  filter: drop-shadow(0 3px 5px rgba(90, 60, 20, 0.18));
+}
+
+.letter-postmark {
+  width: 132px;
+  height: 64px;
+  margin-left: -20px; /* el matasellos pisa la estampilla, como en el correo real */
+  opacity: 0.7;
+  transform: rotate(-7deg);
+  mix-blend-mode: multiply;
+}
+
+.letter-meta {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-  padding: 3px;
-  transform: rotate(-3deg);
-  background: radial-gradient(circle at center, #FFFDEB 0%, #FFF8DC 100%);
-}
-
-.stamp-flower {
-  font-size: 1.35rem;
-  line-height: 1;
-}
-
-.stamp-value {
-  font-family: var(--font-display);
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: #B45309;
-}
-
-.stamp-label {
-  font-size: 0.52rem;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  color: #78716C;
-}
-
-/* Matasellos postal con ondas */
-.postal-cancellation {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  opacity: 0.75;
-}
-
-.cancellation-circle {
-  width: 42px;
-  height: 42px;
-  border: 1.5px solid #1D4ED8;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #1D4ED8;
-  transform: rotate(-10deg);
-}
-
-.cancellation-lines {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.cancellation-lines span {
-  width: 22px;
-  height: 1.5px;
-  background: #1D4ED8;
-  border-radius: 1px;
-}
-
-.parchment-date-meta {
+  align-items: flex-end;
   text-align: right;
-  display: flex;
-  flex-direction: column;
+  gap: 2px;
 }
 
-.meta-label {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: #8C7B65;
+.letter-meta-label {
+  font-family: var(--font-ui);
+  font-size: 0.66rem;
   font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #9A7B45;
 }
 
-.meta-date {
+.letter-meta-date {
   font-family: var(--font-serif);
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-style: italic;
   color: var(--color-blue-navy);
 }
 
-/* Saludo de la carta */
-.parchment-salutation {
-  text-align: center;
-  margin-bottom: 18px;
-}
-
-.salutation-title {
+/* Saludo */
+.letter-greeting {
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 5vw, 2.1rem);
-  font-weight: 700;
+  font-size: clamp(1.7rem, 6vw, 2.35rem);
+  font-weight: 600;
   font-style: italic;
-  color: #0F233D;
-  margin-bottom: 6px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-align: center;
+  color: var(--color-blue-deep);
 }
 
-.salutation-divider {
+.letter-ornament {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
+  margin: 12px 0 clamp(22px, 4vw, 30px);
 }
 
-.divider-line {
-  width: 36px;
+.letter-ornament-line {
+  width: 56px;
   height: 1px;
-  background: #C5A059;
+  background: linear-gradient(90deg, transparent, var(--gold));
 }
 
-.divider-icon {
-  color: #C5A059;
-  font-size: 0.95rem;
+.letter-ornament-line:last-child {
+  background: linear-gradient(90deg, var(--gold), transparent);
 }
 
-/* Cuerpo de la carta */
-.parchment-body {
+.letter-ornament-flower {
+  width: 20px;
+  height: 20px;
+}
+
+/* Cuerpo: alineado a la izquierda (sin huecos del justificado) */
+.letter-body {
   font-family: var(--font-serif);
-  font-size: clamp(1.02rem, 3.2vw, 1.22rem);
-  line-height: 1.7;
-  color: #1E293B;
-  text-align: justify;
+  font-size: clamp(1.1rem, 3.4vw, 1.24rem);
+  line-height: 1.72;
+  color: var(--ink);
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  text-wrap: pretty;
 }
 
-.parchment-paragraph {
-  margin-bottom: 14px;
+.letter-body p + p {
+  margin-top: 1em;
 }
 
-.drop-cap {
+.letter-lead::first-letter {
   float: left;
   font-family: var(--font-display);
-  font-size: 3.2rem;
-  line-height: 0.8;
-  padding-top: 4px;
-  padding-right: 8px;
-  padding-bottom: 2px;
-  color: var(--color-blue-royal);
-  font-style: italic;
-  font-weight: 700;
-  text-shadow: 1px 1px 0 #C5A059;
-}
-
-.parchment-question {
-  text-align: center;
+  font-size: 3.55em;
   font-weight: 600;
+  line-height: 0.82;
+  margin: 0.08em 0.1em 0 -0.02em;
+  color: var(--color-blue-royal);
+}
+
+/* La pregunta: cita centrada entre filetes dorados */
+.letter-question {
+  position: relative;
+  margin: clamp(26px, 5vw, 34px) auto;
+  max-width: 30ch;
+  padding: 18px 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.12rem, 3.6vw, 1.32rem);
   font-style: italic;
-  color: #0F233D;
-  padding: 10px 12px;
-  background: rgba(224, 242, 254, 0.45);
-  border-radius: var(--radius-sm);
-  border: 1px dashed #BAE6FD;
+  font-weight: 500;
+  line-height: 1.45;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--color-blue-deep);
 }
 
-/* Despedida y Firma */
-.parchment-footer {
-  margin-top: 20px;
-  padding-top: 14px;
-  border-top: 1px dashed #DCD3C0;
+.letter-question::before,
+.letter-question::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  width: 64px;
+  height: 1px;
+  transform: translateX(-50%);
+  background: var(--gold);
 }
 
-.parchment-ps {
+.letter-question::before { top: 0; }
+.letter-question::after { bottom: 0; }
+
+/* Posdata */
+.letter-ps {
+  padding-left: 14px;
+  border-left: 2px solid var(--gold-soft);
   font-family: var(--font-serif);
-  font-size: 0.94rem;
+  font-size: 1.02rem;
   font-style: italic;
-  color: #475569;
-  margin-bottom: 16px;
-  line-height: 1.5;
+  line-height: 1.55;
+  color: var(--ink-soft);
 }
 
-.signature-block {
+.letter-ps-label {
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #9A7B45;
+  margin-right: 4px;
+}
+
+/* Firma con sello de cera */
+.letter-sign {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: clamp(22px, 4vw, 30px);
+}
+
+.letter-sign-text {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 2px;
 }
 
-.signature-intro {
+.letter-sign-intro {
   font-family: var(--font-serif);
-  font-size: 0.95rem;
+  font-size: 1.02rem;
   font-style: italic;
-  color: #64748B;
+  color: var(--ink-soft);
 }
 
-.signature-handwritten {
+.letter-sign-name {
   font-family: 'Alex Brush', cursive, var(--font-display);
-  font-size: 2.6rem;
-  color: var(--color-blue-royal);
+  font-size: clamp(2.6rem, 8vw, 3.1rem);
   line-height: 1;
-  transform: rotate(-3deg);
-  margin-right: 8px;
+  color: var(--color-blue-royal);
+  transform: rotate(-4deg);
+  margin-top: 2px;
 }
 
-.signature-mini-seal {
-  width: 32px;
-  height: 32px;
-  background: radial-gradient(circle at 35% 35%, #2563EB 0%, #1D4ED8 100%);
+.letter-seal {
+  flex-shrink: 0;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1.5px solid #FFFFFF;
-  box-shadow: 0 4px 10px rgba(29, 78, 216, 0.35);
-  margin-top: -6px;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 34% 30%, #3B6FEA 0%, #1D4ED8 45%, #102F7A 100%);
+  box-shadow:
+    0 6px 14px rgba(16, 47, 122, 0.35),
+    inset 0 2px 3px rgba(255, 255, 255, 0.35),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.25);
+  transform: rotate(-10deg);
 }
 
-.signature-mini-seal span {
+.letter-seal span {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(232, 204, 140, 0.8);
+  display: grid;
+  place-items: center;
   font-family: var(--font-display);
-  font-size: 0.65rem;
+  font-size: 0.8rem;
+  font-style: italic;
   font-weight: 700;
+  letter-spacing: 0.04em;
   color: #FFFFFF;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
-.parchment-cta-container {
-  margin-top: 22px;
-  text-align: center;
+/* Botón final */
+.letter-cta {
+  display: flex;
+  justify-content: center;
+  margin-top: clamp(26px, 5vw, 34px);
+  padding-top: clamp(20px, 4vw, 26px);
+  border-top: 1px solid rgba(197, 160, 89, 0.35);
 }
 
-.btn-parchment-action {
-  box-shadow: 0 8px 24px rgba(29, 78, 216, 0.32), 0 0 0 2px rgba(197, 160, 89, 0.35);
+.letter-cta-btn {
+  width: auto;
+  min-width: min(100%, 300px);
+  padding: 14px 28px;
+  box-shadow: 0 10px 24px rgba(29, 78, 216, 0.3), 0 0 0 3px rgba(197, 160, 89, 0.28);
 }
 
-@media (max-width: 440px) {
-  .parchment-header {
+@media (max-width: 480px) {
+  .letter-head {
     flex-direction: column;
     align-items: center;
+    padding-right: 0;
     text-align: center;
   }
-  .parchment-date-meta {
-    text-align: center;
-  }
-  .signature-block {
+  .letter-meta {
     align-items: center;
     text-align: center;
+  }
+  .letter-close {
+    top: 12px;
+    right: 12px;
+  }
+  .letter-cta-btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .letter-dialog[open] {
+    animation: none;
   }
 }
 
@@ -2479,27 +2531,6 @@ dialog::backdrop {
   opacity: 1;
 }
 
-/* Enlace discreto a admin en el footer */
-.creator-admin-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.8rem;
-  color: #64748b;
-  text-decoration: none;
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  border: 1px solid #cbd5e1;
-  background: rgba(255, 255, 255, 0.6);
-  transition: all 0.2s ease;
-}
-
-.creator-admin-link:hover {
-  color: #1e3a8a;
-  border-color: #93c5fd;
-  background: #ffffff;
-}
-
 /* Ajustes Responsive en pantallas ultra angostas (hasta 300px) */
 @media (max-width: 480px) {
   .admin-topbar {
@@ -2799,4 +2830,82 @@ dialog::backdrop {
   text-decoration: underline;
 }
 
+/* ==============================================================================
+   11. PULIDO GENERAL: LEGIBILIDAD SOBRE EL ÓLEO Y ACCESIBILIDAD
+   ============================================================================== */
 
+/* Encabezados de sección sobre una placa de cristal para leerse sobre las flores */
+.events-section-header,
+.gallery-header-bar > div:first-child {
+  max-width: 720px;
+  margin-inline: auto;
+  padding: clamp(18px, 3vw, 24px) clamp(18px, 4vw, 36px);
+  text-align: center;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  box-shadow: var(--glass-card-shadow);
+}
+
+.events-section-header .section-title,
+.gallery-header-bar .section-title {
+  color: var(--color-blue-deep);
+  text-shadow: none;
+  text-wrap: balance;
+}
+
+.events-section-header .section-title::after,
+.gallery-header-bar .section-title::after {
+  content: '';
+  display: block;
+  width: 64px;
+  height: 1px;
+  margin: 12px auto 0;
+  background: linear-gradient(90deg, transparent, var(--color-accent-gold), transparent);
+}
+
+.events-section-header .section-subtitle,
+.gallery-header-bar .section-subtitle {
+  color: var(--color-slate-text);
+  text-shadow: none;
+  text-wrap: pretty;
+}
+
+/* Álbum: encabezado centrado y acciones bajo el título */
+.gallery-header-bar {
+  flex-direction: column;
+  align-items: center;
+}
+
+.gallery-actions-bar {
+  justify-content: center;
+}
+
+#btn-add-memory {
+  width: auto;
+  padding-inline: 26px;
+}
+
+@media (max-width: 480px) {
+  #btn-add-memory {
+    width: 100%;
+  }
+}
+
+/* Pie de página */
+.romantic-footer p {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  background: rgba(12, 35, 64, 0.32);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* Foco visible y elegante para navegación con teclado */
+:where(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid #E8CC8C;
+  outline-offset: 3px;
+}

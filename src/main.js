@@ -166,7 +166,7 @@ function setupUploadMemoryForm() {
       const caption = document.getElementById('memory-caption').value.trim();
 
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span>⏳ Guardando y subiendo a Google Drive...</span>';
+      submitBtn.innerHTML = '<span>⏳ Guardando y subiendo a la nube...</span>';
       statusIndicator.classList.remove('hidden');
       statusIndicator.style.color = '#d97706';
       statusIndicator.textContent = 'Procesando foto...';
@@ -197,7 +197,7 @@ function setupUploadMemoryForm() {
 
       // 2. Intentar subir al endpoint de Google Drive en segundo plano
       try {
-        statusIndicator.textContent = 'Sincronizando con Google Drive ☁️...';
+        statusIndicator.textContent = 'Subiendo a la nube ☁️...';
         const res = await fetch('/api/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -216,12 +216,17 @@ function setupUploadMemoryForm() {
 
         if (res.ok) {
           const data = await res.json();
-          if (data.driveFileId) {
+          if (data.storageId) {
+            newMemory.storageId = data.storageId;
+            newMemory.isLocal = false;
+            await saveMemory(newMemory);
+            if (galleryInstance) await galleryInstance.refresh();
+          } else if (data.driveFileId) {
             newMemory.driveUrl = data.driveUrl || `https://drive.google.com/file/d/${data.driveFileId}/view`;
             newMemory.driveFileId = data.driveFileId;
             newMemory.isLocal = false;
             await saveMemory(newMemory);
-            if (galleryInstance) await galleryInstance.refreshFromDrive();
+            if (galleryInstance) await galleryInstance.refresh();
           }
         }
       } catch (err) {

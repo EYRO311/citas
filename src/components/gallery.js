@@ -1,11 +1,12 @@
 // ==============================================================================
-// COMPONENTE: ÁLBUM DE RECUERDOS DE NUESTRAS SALIDAS (CON GOOGLE DRIVE)
-// Muestra juntos los recuerdos guardados en este navegador y las fotos de la
-// carpeta de Google Drive (subidas desde la app o directo desde Drive).
+// COMPONENTE: ÁLBUM DE RECUERDOS DE NUESTRAS SALIDAS (SUPABASE + GOOGLE DRIVE)
+// Muestra juntos los recuerdos guardados en este navegador, los de Supabase
+// Storage y las fotos de la carpeta de Google Drive.
 // ==============================================================================
 
 import { getMemories, deleteMemory } from '../utils/storage.js';
 import { sounds } from '../utils/audio.js';
+import { icons } from '../utils/icons.js';
 
 const FALLBACK_IMG = '/img/fondo.jpg';
 
@@ -21,22 +22,43 @@ export class DateMemoriesGallery {
     this.container = document.getElementById(containerId);
     this.driveStatus = { connected: false, mode: 'loading', message: '' };
     this.driveMemories = [];
+    this.cloudStatus = { connected: false };
+    this.cloudMemories = [];
     this.memories = [];
     this.init();
   }
 
   async init() {
-    // Primero lo local (instantáneo), luego lo que haya en Drive
+    // Primero lo local (instantáneo), luego lo que haya en la nube
     await this.render();
-    await this.refreshFromDrive();
+    await this.refresh();
 
     // Al volver a la pestaña (p. ej. después de subir fotos desde la app de Drive), refrescar
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') this.refreshFromDrive();
+      if (document.visibilityState === 'visible') this.refresh();
     });
   }
 
-  async refreshFromDrive() {
+  async refresh() {
+    await Promise.all([this.loadFromDrive(), this.loadFromCloud()]);
+    await this.render();
+  }
+
+  async loadFromCloud() {
+    try {
+      const res = await fetch('/api/memories');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      this.cloudStatus = data;
+      this.cloudMemories = data.memories || [];
+    } catch (e) {
+      console.warn('API de recuerdos (Supabase) no disponible:', e);
+      this.cloudStatus = { connected: false };
+      this.cloudMemories = [];
+    }
+  }
+
+  async loadFromDrive() {
     try {
       const webhook = (localStorage.getItem('propuesta_drive_webhook_url') || '').trim();
       const folderId = (localStorage.getItem('propuesta_drive_folder_id') || '').trim();
@@ -55,23 +77,26 @@ export class DateMemoriesGallery {
       this.driveStatus = { connected: false, mode: 'local', message: '' };
       this.driveMemories = [];
     }
-    await this.render();
   }
 
-  // Une recuerdos locales y de Drive sin duplicar los que ya se sincronizaron
+  // Une recuerdos locales, de Supabase y de Drive sin duplicar los que ya se sincronizaron
   async getAllMemories() {
     const local = await getMemories();
-    const remoteById = new Map(this.driveMemories.map(m => [m.driveFileId, m]));
+    const remoteByKey = new Map([
+      ...this.cloudMemories.map(m => [`sb:${m.storageId}`, m]),
+      ...this.driveMemories.map(m => [`drive:${m.driveFileId}`, m])
+    ]);
 
     const merged = local.map(memory => {
-      const remote = memory.driveFileId && remoteById.get(memory.driveFileId);
+      const key = memory.storageId ? `sb:${memory.storageId}` : memory.driveFileId ? `drive:${memory.driveFileId}` : null;
+      const remote = key && remoteByKey.get(key);
       if (!remote) return memory;
-      remoteById.delete(memory.driveFileId);
+      remoteByKey.delete(key);
       // Conservar la copia local para mostrarla al instante en este dispositivo
       return { ...remote, id: memory.id, imageBase64: memory.imageBase64 };
     });
 
-    const all = [...merged, ...remoteById.values()];
+    const all = [...merged, ...remoteByKey.values()];
     all.sort((a, b) =>
       (b.date || '').localeCompare(a.date || '') || (b.timestamp || 0) - (a.timestamp || 0)
     );
@@ -86,19 +111,20 @@ export class DateMemoriesGallery {
       badgeEl.className = 'drive-badge drive-local';
       badgeEl.innerHTML = `
         <span class="status-dot yellow"></span>
-        <span>Sincronizando fotos... ☁️</span>
+        <span>Sincronizando fotos... ${icons.cloud('ui-icon-blue')}</span>
       `;
-    } else if (this.driveStatus.connected) {
+    } else if (this.cloudStatus.connected || this.driveStatus.connected) {
+      const count = this.cloudMemories.length + this.driveMemories.length;
       badgeEl.className = 'drive-badge drive-connected';
       badgeEl.innerHTML = `
         <span class="status-dot green"></span>
-        <span>Google Drive sincronizado · ${this.driveMemories.length} fotos ☁️✨</span>
+        <span>Álbum en la nube · ${count} fotos ${icons.cloud('ui-icon-blue')}</span>
       `;
     } else {
       badgeEl.className = 'drive-badge drive-local';
       badgeEl.innerHTML = `
         <span class="status-dot green"></span>
-        <span>Álbum de Recuerdos 📸💖</span>
+        <span>Álbum de Recuerdos ${icons.camera('ui-icon-rose')}</span>
       `;
     }
     badgeEl.title = this.driveStatus.error || this.driveStatus.message || 'Álbum de recuerdos de nuestras citas';
@@ -112,13 +138,13 @@ export class DateMemoriesGallery {
     this.container.innerHTML = `
       <div class="gallery-header-bar">
         <div>
-          <h2 class="section-title">Álbum de Nuestras Salidas 📸🌻</h2>
+          <h2 class="section-title">Álbum de Nuestras Salidas ${icons.camera('ui-icon-blue')}</h2>
           <p class="section-subtitle">Cada foto guarda una sonrisa, una aventura y un momento especial que atesoro a tu lado.</p>
         </div>
         <div class="gallery-actions-bar">
           <div id="drive-status-badge" class="drive-badge drive-local"></div>
           <button id="btn-add-memory" class="btn-primary">
-            <span>📸 Añadir nuevo recuerdo</span>
+            <span>${icons.plus('ui-icon-white')} Añadir nuevo recuerdo</span>
           </button>
         </div>
       </div>
@@ -126,7 +152,7 @@ export class DateMemoriesGallery {
       <div class="memories-grid" id="memories-grid">
         ${memories.length === 0 ? `
           <div class="empty-gallery-card glass-panel">
-            <span class="empty-icon">🌻</span>
+            <span class="empty-icon">${icons.camera('ui-icon-gold ui-icon-xl')}</span>
             <h3>Aún no hay fotos añadidas</h3>
             <p>Toca "Añadir nuevo recuerdo" o sube fotos directo a nuestra carpeta de Google Drive y aparecerán aquí.</p>
           </div>
@@ -149,14 +175,14 @@ export class DateMemoriesGallery {
             <img src="${escapeHtml(displayImg)}" alt="${title}" loading="lazy"
                  onerror="this.onerror=null;this.src='${FALLBACK_IMG}'" />
             ${memory.driveUrl ? `
-              <span class="drive-sync-indicator" title="Guardada en Google Drive">☁️ Drive</span>
+              <span class="drive-sync-indicator" title="Guardada en la nube">${icons.cloud('ui-icon-blue')} Nube</span>
             ` : ''}
           </div>
           <div class="polaroid-meta">
             <h4 class="polaroid-title">${title}</h4>
             <div class="polaroid-tags">
-              <span class="polaroid-date">📅 ${escapeHtml(memory.date || 'Recuerdo especial')}</span>
-              ${memory.location ? `<span class="polaroid-location">📍 ${escapeHtml(memory.location)}</span>` : ''}
+              <span class="polaroid-date">${icons.calendar('ui-icon-blue')} ${escapeHtml(memory.date || 'Recuerdo especial')}</span>
+              ${memory.location ? `<span class="polaroid-location">${icons.location('ui-icon-rose')} ${escapeHtml(memory.location)}</span>` : ''}
             </div>
             <p class="polaroid-caption">${escapeHtml(memory.caption || '')}</p>
           </div>
@@ -180,7 +206,7 @@ export class DateMemoriesGallery {
     if (badgeEl) {
       badgeEl.addEventListener('click', () => {
         sounds.playPop();
-        this.refreshFromDrive();
+        this.refresh();
       });
     }
 
@@ -242,8 +268,8 @@ export class DateMemoriesGallery {
       img.src = memory.imageBase64 || memory.imageUrl || FALLBACK_IMG;
     }
     if (title) title.textContent = memory.title;
-    if (date) date.textContent = memory.date ? `📅 ${memory.date}` : '';
-    if (loc) loc.textContent = memory.location ? `📍 ${memory.location}` : '';
+    if (date) date.innerHTML = memory.date ? `${icons.calendar('ui-icon-blue')} ${escapeHtml(memory.date)}` : '';
+    if (loc) loc.innerHTML = memory.location ? `${icons.location('ui-icon-rose')} ${escapeHtml(memory.location)}` : '';
     if (caption) caption.textContent = memory.caption || '';
 
     if (driveBtn) {
@@ -255,7 +281,7 @@ export class DateMemoriesGallery {
       }
     }
 
-    // Las fotos de Drive se administran desde la carpeta; aquí solo se borran las locales
+    // Las fotos de Drive se administran desde la carpeta; aquí se borran las locales y las de Supabase
     if (deleteBtn) {
       if (memory.driveFileId) {
         deleteBtn.classList.add('hidden');
@@ -263,11 +289,17 @@ export class DateMemoriesGallery {
       } else {
         deleteBtn.classList.remove('hidden');
         deleteBtn.onclick = async () => {
-          if (confirm('¿Deseas eliminar este recuerdo de la galería?')) {
-            await deleteMemory(memory.id);
-            modal.close();
-            await this.render();
+          if (!confirm('¿Deseas eliminar este recuerdo de la galería?')) return;
+          if (memory.storageId) {
+            const res = await fetch(`/api/memories?id=${encodeURIComponent(memory.storageId)}`, { method: 'DELETE' });
+            if (!res.ok && res.status !== 404) {
+              alert('No se pudo borrar la foto de la nube. Inténtalo de nuevo.');
+              return;
+            }
           }
+          await deleteMemory(memory.id);
+          modal.close();
+          await this.refresh();
         };
       }
     }

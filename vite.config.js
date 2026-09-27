@@ -50,6 +50,10 @@ export default defineConfig({
                 const handler = (await import('./api/upload.js')).default;
                 return handler(req, res);
               }
+              if (req.url.startsWith('/api/memories')) {
+                const handler = (await import('./api/memories.js')).default;
+                return handler(req, res);
+              }
               if (req.url.startsWith('/api/drive')) {
                 const handler = (await import('./api/drive.js')).default;
                 return handler(req, res);
