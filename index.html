@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Para mi hermosa Adi 💌 | Dos Citas Especiales & Recuerdos</title>
+  <meta name="description" content="Una invitación interactiva muy especial para Adi con dos citas inolvidables, cronómetro en tiempo real y álbum de recuerdos." />
+  
+  <!-- Icono de la página: Sobre con sello de amor -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="alternate icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect x='4' y='14' width='56' height='38' rx='5' fill='%23FFFFFF' stroke='%2394A3B8' stroke-width='2'/><path d='M4 52 L32 32 L60 52 Z' fill='%23E2E8F0'/><path d='M4 15 L32 35 L60 15 Z' fill='%23FFFFFF' stroke='%23CBD5E1' stroke-width='1.5'/><circle cx='32' cy='34' r='9' fill='%231D4ED8'/><path d='M32 38 C32 38 27.5 35 27.5 32.5 C27.5 31 28.8 30 30.2 30.8 C31.2 31.4 32 32.4 32 32.4 C32 32.4 32.8 31.4 33.8 30.8 C35.2 30 36.5 31 36.5 32.5 C36.5 35 32 38 32 38 Z' fill='%23FFFFFF'/></svg>" />
+
+  <!-- Google Fonts: Playfair Display (Estilo Pintura al Óleo), Cormorant Garamond (Elegancia Romántica) y Plus Jakarta Sans (Claridad) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Alex+Brush&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+
+  <!-- ==============================================================================
+       1. FONDO RESPONSIVE DE FLORES AL ÓLEO (IMG/FONDO.JPG)
+       ============================================================================== -->
+  <div class="background-wrapper">
+    <div id="bg-painting" class="bg-painting-layer"></div>
+    <div class="bg-overlay"></div>
+  </div>
+
+  <!-- Canvas para lluvia continua de pétalos sutiles y corazones -->
+  <canvas id="petals-canvas" class="petals-canvas" aria-hidden="true"></canvas>
+
+  <!-- ==============================================================================
+       2. CONTENEDOR PRINCIPAL
+       ============================================================================== -->
+  <main class="main-wrapper">
+
+    <!-- HERO SECTION: SOBRE REALISTA Y DEDICATORIA AL ÓLEO (A + E) -->
+    <section class="hero-section">
+      <div class="hero-badge">
+        <span>💌 CARTA CONFIDENCIAL • PARA ADI 💌</span>
+      </div>
+
+      <h1 class="hero-title">
+        Tengo una sorpresa especial para ti, <span class="highlight-name">Adi 🌻</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        Guardé aquí dos invitaciones que soñé para nosotros, un cronómetro para esperar nuestro próximo instante y un lugar donde atesorar cada recuerdo juntos.
+      </p>
+
+      <!-- Sobre Interactivo de Lujo A + E -->
+      <div id="envelope-trigger" class="envelope-interactive-container" title="Toca para abrir la carta de amor">
+        <div class="envelope-widget">
+          <!-- Hoja asomándose con texto caligráfico -->
+          <div class="envelope-letter-peek">
+            <span class="peek-line"></span>
+            <span class="peek-line short"></span>
+          </div>
+          <!-- Pliegues del sobre -->
+          <div class="envelope-folds">
+            <div class="fold-left"></div>
+            <div class="fold-right"></div>
+            <div class="fold-bottom"></div>
+            <div class="envelope-flap-top"></div>
+          </div>
+          <!-- Etiqueta dedicatoria colgante -->
+          <div class="envelope-tag">
+            <span class="tag-string"></span>
+            <span class="tag-text">Para: Adi 💖</span>
+          </div>
+          <!-- Sello de cera en relieve Zafiro y Oro con monograma A+E -->
+          <div class="envelope-seal">
+            <div class="seal-inner-ring">
+              <span class="seal-monogram">A+E</span>
+            </div>
+          </div>
+        </div>
+        <div class="envelope-prompt">
+          <span class="prompt-icon">💌</span>
+          <span>Toca el sobre sellado para leer tu carta</span>
+          <span class="prompt-sparkle">✨</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CRONÓMETRO REGRESIVO PARA LA SIGUIENTE CITA -->
+    <section id="countdown-section" aria-label="Cronómetro para la cita">
+      <!-- Se genera dinámicamente con countdown.js -->
+    </section>
+
+    <!-- DOS INVITACIONES A EVENTOS -->
+    <section id="events-section" aria-label="Dos Invitaciones Especiales">
+      <header class="events-section-header">
+        <h2 class="section-title">Nuestras Dos Próximas Citas 💌✨</h2>
+        <p class="section-subtitle">
+          Elegí dos planes increíbles para nosotros. Elige tu favorito o mejor aún... ¡vayamos a los dos!
+        </p>
+      </header>
+      <div id="events-container">
+        <!-- Se genera dinámicamente con events.js -->
+      </div>
+    </section>
+
+    <!-- ÁLBUM DE NUESTRAS SALIDAS (GOOGLE DRIVE + LOCAL) -->
+    <section id="gallery-section" aria-label="Álbum de recuerdos de nuestras citas">
+      <div id="gallery-container">
+        <!-- Se genera dinámicamente con gallery.js -->
+      </div>
+    </section>
+
+    <!-- MENSAJE ROMÁNTICO FINAL -->
+    <section class="glass-panel" style="text-align: center; max-width: 800px; margin: 0 auto;">
+      <h3 style="font-family: var(--font-display); font-size: 1.8rem; color: #b45309; margin-bottom: 12px;">
+        Gracias por estar en mi vida, Adi 💖
+      </h3>
+      <p style="color: #475569; font-size: 1.05rem; line-height: 1.7; margin-bottom: 18px;">
+        Así como las flores buscan la luz del sol para florecer, cada día a tu lado se llena de alegría y calma. No importa a dónde vayamos, el mejor destino siempre será estar contigo.
+      </p>
+      <button id="btn-burst-celebration" class="btn-primary" style="max-width: 280px; margin: 0 auto;">
+        <span>Lluvia de girasoles 🌻💖</span>
+      </button>
+    </section>
+
+    <!-- PIE DE PÁGINA -->
+    <footer class="romantic-footer">
+      <p>Hecho con todo el corazón por <strong>Eyro</strong> para <strong>Adi</strong> (A + E) 🌻✨</p>
+      <div style="margin-top: 10px;">
+        <a href="/admin" class="creator-admin-link" title="Panel de Creador para planear citas y sorpresas secretas">
+          <span>🔒 Gestionar Citas & Sorpresas (Admin)</span>
+        </a>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- ==============================================================================
+       3. MODALES NATIVOS (<dialog>)
+       ============================================================================== -->
+
+  <!-- MODAL: CARTA SECRETA EN PERGAMINO DE LUJO (A + E) -->
+  <dialog id="modal-letter" class="dialog-parchment">
+    <div class="parchment-card">
+      <button class="parchment-close-btn" data-close-modal="modal-letter" aria-label="Cerrar carta">&times;</button>
+      
+      <!-- Marco filigrana y textura de papel de arte -->
+      <div class="parchment-inner">
+        
+        <!-- Encabezado postal vintage: Estampilla + Matasellos -->
+        <header class="parchment-header">
+          <div class="postal-vintage-group">
+            <div class="vintage-stamp">
+              <span class="stamp-flower">🌻</span>
+              <span class="stamp-value">25¢</span>
+              <span class="stamp-label">AMOR</span>
+            </div>
+            <div class="postal-cancellation">
+              <span class="cancellation-circle">A + E</span>
+              <div class="cancellation-lines">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+          <div class="parchment-date-meta">
+            <span class="meta-label">Correspondencia Privada</span>
+            <span class="meta-date">Septiembre • Con todo mi amor</span>
+          </div>
+        </header>
+
+        <!-- Saludo inicial caligráfico -->
+        <div class="parchment-salutation">
+          <h2 class="salutation-title">Para mi hermosa Adi,</h2>
+          <div class="salutation-divider">
+            <span class="divider-line"></span>
+            <span class="divider-icon">❦</span>
+            <span class="divider-line"></span>
+          </div>
+        </div>
+
+        <!-- Cuerpo de la carta con capitular iluminada -->
+        <div class="parchment-body">
+          <p class="parchment-paragraph">
+            <span class="drop-cap">H</span>oy quise crear un rincón que fuera tan especial y luminoso como tú. Elegí los colores de estas flores al óleo porque tienen esa misma calidez y magia con la que llegas a iluminar mis días. Cada instante a tu lado se convierte en mi recuerdo favorito.
+          </p>
+          <p class="parchment-paragraph">
+            Tengo preparadas dos citas para nosotros dos. Dos momentos pensados para detener el tiempo, mirarte a los ojos, reírnos de todo y seguir escribiendo nuestra historia paso a paso. Quiero que cada una de nuestras salidas quede guardada para siempre en nuestro álbum.
+          </p>
+          <p class="parchment-paragraph parchment-question">
+            ¿Me concederías el honor más bonito de acompañarme a estas dos aventuras? 🥰
+          </p>
+        </div>
+
+        <!-- Despedida, P.D. y Firma Caligráfica -->
+        <footer class="parchment-footer">
+          <p class="parchment-ps">
+            <strong>P.D.:</strong> Cada flor de este lienzo guarda una razón por la que eres y siempre serás mi persona favorita en el universo entero. 🌻✨
+          </p>
+          <div class="signature-block">
+            <span class="signature-intro">Siempre tuyo,</span>
+            <span class="signature-handwritten">Eyro</span>
+            <div class="signature-mini-seal">
+              <span>A+E</span>
+            </div>
+          </div>
+        </footer>
+
+        <!-- Botón para descubrir las citas -->
+        <div class="parchment-cta-container">
+          <button class="btn-primary btn-parchment-action" data-close-modal="modal-letter">
+            <span>Ver nuestras dos citas especiales 💌</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </dialog>
+
+  <!-- MODAL: SUBIR NUEVO RECUERDO DE NUESTRA SALIDA -->
+  <dialog id="modal-upload-memory">
+    <div class="modal-card">
+      <button class="modal-close-btn" data-close-modal="modal-upload-memory" aria-label="Cerrar">&times;</button>
+      <div class="modal-header-styled">
+        <h3 class="modal-title-styled">Guardar Recuerdo de Nuestra Salida 📸</h3>
+        <p style="font-size: 0.9rem; color: #64748b;">La foto se guardará en nuestra carpeta de Google Drive y se verá en el álbum desde cualquier dispositivo.</p>
+      </div>
+
+      <form id="upload-memory-form">
+        <!-- Dropzone de archivo -->
+        <div class="form-group">
+          <label class="form-label">Foto de la cita</label>
+          <div id="dropzone" class="photo-dropzone">
+            <input type="file" id="memory-file-input" accept="image/*" style="display: none;" />
+            <div id="dropzone-prompt">
+              <span class="dropzone-icon">📷</span>
+              <strong>Toca aquí para seleccionar una foto</strong>
+              <p style="font-size: 0.8rem; color: #78716c; margin-top: 4px;">Formatos JPG, PNG, WEBP</p>
+            </div>
+            <div class="preview-container">
+              <img id="image-upload-preview" src="" alt="Vista previa de la foto" class="hidden" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="memory-title">Título del recuerdo</label>
+          <input type="text" id="memory-title" class="form-input" placeholder="Ej: Cena especial, Nuestra risa en el mirador" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="memory-date">Fecha</label>
+            <input type="date" id="memory-date" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="memory-location">Lugar</label>
+            <input type="text" id="memory-location" class="form-input" placeholder="Ej: Mirador, Restaurante" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="memory-caption">Mensaje o recuerdo especial</label>
+          <textarea id="memory-caption" class="form-textarea" rows="3" placeholder="¿Qué fue lo más bonito de esta salida?"></textarea>
+        </div>
+
+        <div id="upload-status-indicator" class="hidden" style="margin-bottom: 14px; text-align: center; font-size: 0.9rem; font-weight: 600;"></div>
+
+        <button type="submit" id="btn-submit-memory" class="btn-primary">
+          <span>💾 Guardar recuerdo</span>
+        </button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- MODAL: AJUSTAR FECHA DEL CRONÓMETRO -->
+  <dialog id="modal-edit-date">
+    <div class="modal-card">
+      <button class="modal-close-btn" data-close-modal="modal-edit-date" aria-label="Cerrar">&times;</button>
+      <div class="modal-header-styled">
+        <h3 class="modal-title-styled">Ajustar Fecha de Nuestra Cita 📅</h3>
+        <p style="font-size: 0.9rem; color: #64748b;">Selecciona el día y la hora para actualizar el cronómetro en vivo.</p>
+      </div>
+
+      <form id="edit-date-form">
+        <div class="form-group">
+          <label class="form-label" for="edit-target-datetime">Fecha y Hora</label>
+          <input type="datetime-local" id="edit-target-datetime" class="form-input" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="edit-date-title">Título del Momento</label>
+          <input type="text" id="edit-date-title" class="form-input" placeholder="Ej: Nuestra Cena Romántica" />
+        </div>
+        <button type="submit" class="btn-primary">
+          <span>Guardar y actualizar cronómetro</span>
+        </button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- MODAL: EDITAR DETALLES DE CITA -->
+  <dialog id="modal-edit-event">
+    <div class="modal-card">
+      <button class="modal-close-btn" data-close-modal="modal-edit-event" aria-label="Cerrar">&times;</button>
+      <div class="modal-header-styled">
+        <h3 class="modal-title-styled">Personalizar Detalles de la Cita ✏️</h3>
+      </div>
+
+      <form id="edit-event-form">
+        <input type="hidden" id="edit-event-id" />
+        <div class="form-group">
+          <label class="form-label" for="edit-event-title">Título</label>
+          <input type="text" id="edit-event-title" class="form-input" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="edit-event-date">Fecha</label>
+            <input type="date" id="edit-event-date" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-event-time">Hora</label>
+            <input type="time" id="edit-event-time" class="form-input" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="edit-event-location">Lugar</label>
+          <input type="text" id="edit-event-location" class="form-input" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="edit-event-dress">Código de vestimenta</label>
+          <input type="text" id="edit-event-dress" class="form-input" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="edit-event-desc">Mensaje de invitación</label>
+          <textarea id="edit-event-desc" class="form-textarea" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="edit-event-hint">Detalle secreto (opcional)</label>
+          <input type="text" id="edit-event-hint" class="form-input" />
+        </div>
+        <button type="submit" class="btn-primary">
+          <span>Actualizar cita</span>
+        </button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- MODAL: LIGHTBOX DE RECUERDO -->
+  <dialog id="modal-lightbox">
+    <div class="modal-card lightbox-card">
+      <button class="modal-close-btn" data-close-modal="modal-lightbox" aria-label="Cerrar">&times;</button>
+      <div class="lightbox-img-wrapper">
+        <img id="lightbox-img" src="" alt="Recuerdo de cita" />
+      </div>
+      <div class="modal-header-styled" style="text-align: left; margin-bottom: 12px;">
+        <h3 id="lightbox-title" class="modal-title-styled" style="font-size: 1.4rem;"></h3>
+        <div style="display: flex; gap: 12px; font-size: 0.85rem; color: #64748b; margin-top: 4px;">
+          <span id="lightbox-date"></span>
+          <span id="lightbox-location"></span>
+        </div>
+      </div>
+      <p id="lightbox-caption" style="color: #334155; line-height: 1.6; font-size: 0.95rem; margin-bottom: 20px;"></p>
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-top: 1px solid #e2e8f0; padding-top: 14px;">
+        <a id="lightbox-drive-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn-calendar">
+          ☁️ Abrir en Google Drive
+        </a>
+        <button id="lightbox-delete-btn" class="btn-ghost-sm" style="color: #ef4444; border-color: #fca5a5;">
+          🗑️ Eliminar foto
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- MODAL: CONFIGURACIÓN DE GOOGLE DRIVE -->
+  <dialog id="modal-drive-info">
+    <div class="modal-card">
+      <button class="modal-close-btn" data-close-modal="modal-drive-info" aria-label="Cerrar">&times;</button>
+      <div class="modal-header-styled">
+        <div style="font-size: 2.2rem; margin-bottom: 6px;">☁️</div>
+        <h3 class="modal-title-styled">Nuestro álbum en Google Drive</h3>
+        <p style="font-size: 0.9rem; color: #64748b;">Todas las fotos de nuestra carpeta de Drive aparecen aquí, junto con los recuerdos.</p>
+      </div>
+      <div style="font-size: 0.95rem; color: #334155; line-height: 1.7; text-align: left;">
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px;">
+          <strong style="color: #166534;">📲 Dos formas de agregar fotos:</strong>
+          <ul style="margin: 4px 0 0 20px; font-size: 0.85rem; color: #15803d; list-style-type: disc;">
+            <li>Con el botón <em>"Añadir nuevo recuerdo"</em> (con título, lugar y mensaje).</li>
+            <li>Subiéndolas directo a la carpeta desde la app de Google Drive o drive.google.com. Aparecen solas al volver a esta página.</li>
+          </ul>
+        </div>
+
+        <h4 style="font-weight: 700; color: #0f172a; margin-bottom: 8px;">Para conectar la carpeta (una sola vez):</h4>
+        <ol style="margin-left: 20px; margin-bottom: 16px; font-size: 0.88rem; color: #475569;">
+          <li style="margin-bottom: 6px;">Crea en Google Drive la carpeta <em>"Nuestras Salidas"</em> y compártela como <em>"Cualquier persona con el enlace · Lector"</em>.</li>
+          <li style="margin-bottom: 6px;">Instala el script <code>google-apps-script/Code.gs</code> del proyecto como App web (los pasos vienen dentro del archivo).</li>
+          <li style="margin-bottom: 6px;">Pega su URL en Vercel como <code>GOOGLE_DRIVE_WEBHOOK_URL</code> y vuelve a desplegar.</li>
+        </ol>
+        <p style="font-size: 0.82rem; color: #64748b; font-style: italic;">
+          Sin Drive conectado, las fotos se guardan solo en este dispositivo. Otras opciones (cuenta de servicio, API key) en <code>.env.example</code>.
+        </p>
+      </div>
+      <div style="margin-top: 20px; text-align: center;">
+        <button class="btn-primary" data-close-modal="modal-drive-info">
+          <span>¡Entendido! ✨</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Script principal -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

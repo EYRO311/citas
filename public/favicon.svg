@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="envBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#F1F5F9"/>
+    </linearGradient>
+    <linearGradient id="envFlap" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#E2E8F0"/>
+    </linearGradient>
+    <linearGradient id="sealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <filter id="envShadow" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="2.5" stdDeviation="2.5" flood-color="#0F2B55" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Sombra y cuerpo del sobre -->
+  <rect x="4" y="14" width="56" height="38" rx="5" fill="url(#envBody)" stroke="#94A3B8" stroke-width="1.5" filter="url(#envShadow)"/>
+
+  <!-- Pliegues interiores traseros -->
+  <path d="M4 52 L28 34 L4 16 Z" fill="#F8FAFC" opacity="0.6"/>
+  <path d="M60 52 L36 34 L60 16 Z" fill="#F8FAFC" opacity="0.6"/>
+  <path d="M4 52 L32 32 L60 52 Z" fill="#E2E8F0" opacity="0.9"/>
+
+  <!-- Pliegue superior abierto/doblado -->
+  <path d="M4 15 L32 35 L60 15 Z" fill="url(#envFlap)" stroke="#CBD5E1" stroke-width="1.2"/>
+
+  <!-- Sello de cera Zafiro -->
+  <circle cx="32" cy="34" r="9.5" fill="url(#sealGrad)" stroke="#60A5FA" stroke-width="0.8"/>
+
+  <!-- Corazón blanco en el sello -->
+  <path d="M32 39 C32 39 26.5 35.5 26.5 32.5 C26.5 30.8 28 29.8 29.6 30.8 C30.8 31.6 32 32.8 32 32.8 C32 32.8 33.2 31.6 34.4 30.8 C36 29.8 37.5 30.8 37.5 32.5 C37.5 35.5 32 39 32 39 Z" fill="#FFFFFF"/>
+</svg>

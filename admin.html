@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0C2340" />
+  <meta name="description" content="Panel de administración de citas públicas y eventos ocultos - Eyro para Adi" />
+  <title>Gestión de Citas & Sorpresas | Eyro & Adi</title>
+
+  <!-- Favicon: Sobre con sello de cera en zafiro -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+  <!-- Tipografías de Estilo Pintura al Óleo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Estilos globales -->
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body class="admin-body">
+
+  <!-- FONDO CON IMG/FONDO.JPG -->
+  <div class="background-wrapper" aria-hidden="true">
+    <div class="bg-painting-layer"></div>
+    <div class="bg-vignette-overlay"></div>
+    <div class="bg-radial-glow"></div>
+  </div>
+
+  <!-- CANVAS DE PÉTALOS FLOTANTES -->
+  <canvas id="petals-canvas" aria-hidden="true"></canvas>
+
+  <!-- ==============================================================================
+       1. PANTALLA DE SEGURIDAD CON PIN (Para proteger las sorpresas de Adi)
+       ============================================================================== -->
+  <div id="admin-pin-lock" class="admin-lock-overlay">
+    <div class="glass-panel admin-lock-card">
+      <div class="lock-icon-badge">🔒✨</div>
+      <h2 class="admin-lock-title">Acceso de Creador</h2>
+      <p class="admin-lock-desc">
+        Ingresa tu PIN personal para gestionar las citas y preparar sorpresas secretas para Adi.
+      </p>
+
+      <form id="admin-pin-form" class="admin-pin-form">
+        <div class="pin-input-group">
+          <input 
+            type="password" 
+            id="admin-pin-input" 
+            class="form-input pin-field" 
+            maxlength="8" 
+            placeholder="••••" 
+            autocomplete="current-password" 
+            autofocus 
+            required 
+          />
+        </div>
+        <div id="pin-error-msg" class="pin-error-msg hidden">
+          PIN incorrecto. Vuelve a intentarlo 🌻
+        </div>
+        <button type="submit" class="btn-primary" style="width: 100%;">
+          <span>Desbloquear panel 🔑</span>
+        </button>
+      </form>
+
+      <div class="admin-lock-footer">
+        <span class="pin-default-hint">PIN predeterminado: <strong>1234</strong></span>
+        <a href="/" class="admin-lock-return-link">← Regresar a la invitación</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================================================
+       2. PANEL PRINCIPAL DE ADMINISTRACIÓN (Se muestra tras ingresar el PIN)
+       ============================================================================== -->
+  <main id="admin-main-content" class="admin-container hidden">
+
+    <!-- BARRA SUPERIOR DE NAVEGACIÓN -->
+    <header class="admin-topbar glass-panel">
+      <div class="topbar-left">
+        <a href="/" class="btn-ghost-sm topbar-back-btn" title="Volver a la vista principal de la propuesta">
+          <span>← Volver a la Invitación</span>
+        </a>
+      </div>
+      <div class="topbar-center">
+        <h1 class="admin-brand-title">Gestión de Citas & Sorpresas</h1>
+        <p class="admin-brand-subtitle">Planifica momentos mágicos y citas secretas para Adi (A + E)</p>
+      </div>
+      <div class="topbar-right">
+        <button id="btn-change-pin" class="btn-ghost-sm" title="Cambiar tu PIN de seguridad">
+          <span>🔑 Cambiar PIN</span>
+        </button>
+        <button id="btn-admin-logout" class="btn-ghost-sm" title="Cerrar sesión de creador">
+          <span>🔒 Bloquear</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ESTADÍSTICAS RÁPIDAS -->
+    <section class="admin-stats-grid" aria-label="Resumen de Citas">
+      <div class="stat-card glass-panel">
+        <div class="stat-icon">📅</div>
+        <div class="stat-data">
+          <span id="stat-total-events" class="stat-number">0</span>
+          <span class="stat-label">Total de Citas</span>
+        </div>
+      </div>
+      <div class="stat-card glass-panel">
+        <div class="stat-icon">💌</div>
+        <div class="stat-data">
+          <span id="stat-public-events" class="stat-number">0</span>
+          <span class="stat-label">Citas Públicas</span>
+        </div>
+      </div>
+      <div class="stat-card glass-panel stat-card-secret">
+        <div class="stat-icon">🔒</div>
+        <div class="stat-data">
+          <span id="stat-secret-events" class="stat-number">0</span>
+          <span class="stat-label">Citas Ocultas (Secretas)</span>
+        </div>
+      </div>
+      <div class="stat-card glass-panel stat-card-accepted">
+        <div class="stat-icon">💖</div>
+        <div class="stat-data">
+          <span id="stat-accepted-events" class="stat-number">0</span>
+          <span class="stat-label">Aceptadas por Adi</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTENEDOR PRINCIPAL: FORMULARIO + LISTA -->
+    <div class="admin-workspace-grid">
+
+      <!-- ==============================================================================
+           COLUMNA IZQUIERDA: FORMULARIO CREAR / EDITAR CITA
+           ============================================================================== -->
+      <section class="admin-form-section">
+        <div class="glass-panel admin-form-card">
+          <div class="admin-form-header">
+            <div class="header-icon" id="form-mode-icon">✨</div>
+            <div>
+              <h2 id="form-mode-title" class="admin-section-title">Crear Nueva Cita</h2>
+              <p id="form-mode-desc" class="admin-section-subtitle">Completa los detalles para preparar la invitación</p>
+            </div>
+          </div>
+
+          <form id="event-editor-form" class="admin-event-form">
+            <!-- ID oculto si es edición -->
+            <input type="hidden" id="event-form-id" value="" />
+
+            <!-- INTERRUPTOR DE CITA OCULTA / SECRETA -->
+            <div class="secret-toggle-card">
+              <div class="toggle-info">
+                <div class="toggle-icon-wrap">
+                  <span id="toggle-state-icon">🔓</span>
+                </div>
+                <div>
+                  <label for="event-is-hidden" class="toggle-title">¿Es una Cita Oculta (Sorpresa Secreta)?</label>
+                  <p class="toggle-desc">
+                    Aparecerá en la página principal con candado y misterio. Adi no sabrá los detalles hasta ingresar la palabra mágica.
+                  </p>
+                </div>
+              </div>
+              <label class="switch-control" for="event-is-hidden">
+                <input type="checkbox" id="event-is-hidden" />
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+
+            <!-- SECCIÓN CONDICIONAL DE CITA OCULTA -->
+            <div id="secret-fields-container" class="secret-config-panel hidden">
+              <div class="secret-panel-glow"></div>
+              <div class="secret-panel-inner">
+                <div class="secret-panel-header">
+                  <span class="secret-badge">🔒 Configuración de Sorpresa Secreta</span>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="event-secret-code">
+                    <span>Palabra mágica de desbloqueo</span>
+                    <span class="label-hint">(Lo que Adi debe escribir para revelarla)</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    id="event-secret-code" 
+                    class="form-input form-input-secret" 
+                    placeholder="Ej: girasol, nuestro cafe, te quiero, 1509" 
+                  />
+                  <p class="field-help-text">
+                    Si lo dejas vacío, se revelará al presionar el botón de descubrir. Si pones una palabra (no distingue mayúsculas), Adi tendrá que adivinarla.
+                  </p>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="event-secret-clue">
+                    <span>Pista misteriosa para Adi</span>
+                    <span class="label-hint">(Visible en la tarjeta bloqueada)</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    id="event-secret-clue" 
+                    class="form-input" 
+                    placeholder="Ej: Nuestra flor favorita cuando cae la tarde... 🌻" 
+                  />
+                  <p class="field-help-text">
+                    Una pista divertida y romántica para que intente adivinar la sorpresa.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- TÍTULO Y BADGE -->
+            <div class="form-group">
+              <label class="form-label" for="event-title">Título de la cita *</label>
+              <input 
+                type="text" 
+                id="event-title" 
+                class="form-input" 
+                placeholder="Ej: Noche de Películas & Postre Especial 🍨✨" 
+                required 
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="event-badge">Etiqueta destacada</label>
+                <input 
+                  type="text" 
+                  id="event-badge" 
+                  class="form-input" 
+                  placeholder="Ej: CITA ESPECIAL #3, SORPRESA" 
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="event-time">Hora aproximada *</label>
+                <input 
+                  type="time" 
+                  id="event-time" 
+                  class="form-input" 
+                  value="19:30" 
+                  required 
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="event-date">Fecha de la cita *</label>
+                <input 
+                  type="date" 
+                  id="event-date" 
+                  class="form-input" 
+                  required 
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="event-dress">Código de vestimenta *</label>
+                <input 
+                  type="text" 
+                  id="event-dress" 
+                  class="form-input" 
+                  placeholder="Ej: Cómodo, Elegante casual" 
+                  required 
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="event-location">Lugar o punto de encuentro *</label>
+              <input 
+                type="text" 
+                id="event-location" 
+                class="form-input" 
+                placeholder="Ej: Un rincón especial con luces cálidas" 
+                required 
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="event-desc">Mensaje de invitación romántico *</label>
+              <textarea 
+                id="event-desc" 
+                class="form-textarea" 
+                rows="3" 
+                placeholder="Escribe lo que sientes y por qué quieres compartir este momento con ella..." 
+                required
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="event-hint">Detalle secreto opcional</label>
+              <input 
+                type="text" 
+                id="event-hint" 
+                class="form-input" 
+                placeholder="Ej: Tengo guardada tu canción favorita para el camino 🎶" 
+              />
+              <p class="field-help-text">Se mostrará en la tarjeta con un icono confidencial (🤫).</p>
+            </div>
+
+            <!-- BOTONES DE ACCIÓN DEL FORMULARIO -->
+            <div class="form-actions-group">
+              <button type="submit" id="btn-save-event" class="btn-primary">
+                <span id="btn-save-text">💾 Guardar Cita</span>
+              </button>
+              <button type="button" id="btn-cancel-edit" class="btn-ghost-sm hidden">
+                <span>Cancelar edición</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ==============================================================================
+           COLUMNA DERECHA: LISTA DE CITAS EXISTENTES
+           ============================================================================== -->
+      <section class="admin-list-section">
+        <div class="glass-panel admin-list-card">
+          <div class="list-header-bar">
+            <div>
+              <h2 class="admin-section-title">Citas Programadas</h2>
+              <p class="admin-section-subtitle">Visualiza, edita o cambia la visibilidad en tiempo real</p>
+            </div>
+            
+            <!-- FILTROS -->
+            <div class="admin-filter-tabs">
+              <button class="filter-tab active" data-filter="all">Todas (<span id="count-all">0</span>)</button>
+              <button class="filter-tab" data-filter="public">Públicas (<span id="count-public">0</span>)</button>
+              <button class="filter-tab" data-filter="hidden">Ocultas 🔒 (<span id="count-hidden">0</span>)</button>
+            </div>
+          </div>
+
+          <!-- CONTENEDOR DINÁMICO DE TARJETAS -->
+          <div id="admin-events-list" class="admin-cards-grid">
+            <!-- Inyectado por admin.js -->
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- PIE DE PÁGINA ADMIN -->
+    <footer class="romantic-footer" style="margin-top: 40px;">
+      <p>Panel secreto de <strong>Eyro</strong> para <strong>Adi</strong> (A + E) 🌻✨</p>
+      <div style="margin-top: 8px;">
+        <a href="/" class="btn-ghost-sm">Ver la invitación como la ve Adi 💌</a>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- ==============================================================================
+       3. MODAL: CAMBIAR PIN DE CREADOR
+       ============================================================================== -->
+  <dialog id="modal-change-pin">
+    <div class="modal-card">
+      <button class="modal-close-btn" data-close-modal="modal-change-pin" aria-label="Cerrar">&times;</button>
+      <div class="modal-header-styled">
+        <div style="font-size: 2.2rem; margin-bottom: 6px;">🔑</div>
+        <h3 class="modal-title-styled">Cambiar PIN de Acceso</h3>
+        <p style="font-size: 0.9rem; color: #64748b;">Elige un nuevo código para mantener en secreto las sorpresas.</p>
+      </div>
+
+      <form id="change-pin-form">
+        <div class="form-group">
+          <label class="form-label" for="pin-current">PIN actual</label>
+          <input type="password" id="pin-current" class="form-input" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pin-new">Nuevo PIN (mínimo 4 caracteres)</label>
+          <input type="password" id="pin-new" class="form-input" minlength="4" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pin-confirm">Confirmar nuevo PIN</label>
+          <input type="password" id="pin-confirm" class="form-input" minlength="4" required />
+        </div>
+        <div id="change-pin-error" class="pin-error-msg hidden" style="margin-bottom: 12px;"></div>
+        <button type="submit" class="btn-primary" style="width: 100%;">
+          <span>Actualizar PIN 🔑</span>
+        </button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Script del Administrador -->
+  <script type="module" src="/src/admin.js"></script>
+</body>
+</html>
