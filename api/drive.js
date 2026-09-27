@@ -11,13 +11,20 @@ import { google } from 'googleapis';
 const LIST_FIELDS = 'nextPageToken, files(id, name, description, createdTime, webViewLink, imageMediaMetadata(time), appProperties)';
 const MAX_PAGES = 5;
 
-function getConfig() {
+function getConfig(req) {
+  let query = {};
+  if (req?.url) {
+    try {
+      const urlObj = new URL(req.url, 'http://localhost');
+      query = Object.fromEntries(urlObj.searchParams);
+    } catch {}
+  }
   return {
     clientEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
     privateKey: (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-    folderId: process.env.GOOGLE_DRIVE_FOLDER_ID,
-    apiKey: process.env.GOOGLE_API_KEY,
-    webhookUrl: process.env.GOOGLE_DRIVE_WEBHOOK_URL
+    folderId: query.folderId || process.env.GOOGLE_DRIVE_FOLDER_ID,
+    apiKey: query.apiKey || process.env.GOOGLE_API_KEY,
+    webhookUrl: query.webhookUrl || process.env.GOOGLE_DRIVE_WEBHOOK_URL
   };
 }
 
@@ -234,7 +241,7 @@ export default async function handler(req, res) {
     return res.end();
   }
 
-  const cfg = getConfig();
+  const cfg = getConfig(req);
   const params = new URL(req.url, 'http://localhost').searchParams;
   const fileId = params.get('id');
 

@@ -1,5 +1,5 @@
 // ==============================================================================
-// PANEL DE ADMINISTRACIÓN: GESTIÓN DE CITAS & SORPRESAS SECRETAS (A + E) 🌻✨
+// PANEL DE ADMINISTRACIÓN: GESTIÓN DE CITAS, EVENTOS OCULTOS & GOOGLE DRIVE 🌻✨
 // ==============================================================================
 
 import { PetalsCanvas } from './components/petals.js';
@@ -14,11 +14,78 @@ import {
   setAdminPIN
 } from './utils/storage.js';
 
+// Código fuente de Google Apps Script para copiarlo al portapapeles
+const CODE_GS_CONTENT = `// ==============================================================================
+// ÁLBUM DE NUESTRAS SALIDAS — Puente con Google Drive (Google Apps Script)
+// ==============================================================================
+
+const FOLDER_ID = 'PEGA_AQUI_EL_ID_DE_TU_CARPETA';
+
+function json(data) {
+  return ContentService
+    .createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// GET ?action=list → fotos de la carpeta
+function doGet() {
+  try {
+    const files = DriveApp.getFolderById(FOLDER_ID).getFiles();
+    const out = [];
+
+    while (files.hasNext()) {
+      const file = files.next();
+      if (file.isTrashed() || file.getMimeType().indexOf('image/') !== 0) continue;
+      out.push({
+        id: file.getId(),
+        name: file.getName(),
+        description: file.getDescription() || '',
+        createdTime: file.getDateCreated().toISOString(),
+        webViewLink: file.getUrl()
+      });
+    }
+
+    return json({ files: out });
+  } catch (err) {
+    return json({ error: String(err) });
+  }
+}
+
+// POST { name, title, date, location, caption, mimeType, base64 } → sube la foto
+function doPost(e) {
+  try {
+    const body = JSON.parse(e.postData.contents);
+    const blob = Utilities.newBlob(
+      Utilities.base64Decode(body.base64),
+      body.mimeType || 'image/jpeg',
+      body.name || ('recuerdo_' + Date.now() + '.jpg')
+    );
+
+    const file = DriveApp.getFolderById(FOLDER_ID).createFile(blob);
+    file.setDescription(JSON.stringify({
+      title: body.title || '',
+      date: body.date || '',
+      location: body.location || '',
+      caption: body.caption || ''
+    }));
+
+    try {
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    } catch (shareErr) {}
+
+    return json({ fileId: file.getId(), fileUrl: file.getUrl() });
+  } catch (err) {
+    return json({ error: String(err) });
+  }
+}`;
+
 class AdminDashboard {
   constructor() {
+    this.currentTab = 'events';
     this.currentFilter = 'all';
     this.editingEventId = null;
     this.petals = null;
+    this.driveStatus = { connected: false, mode: 'local', memories: [] };
     this.init();
   }
 
@@ -32,9 +99,12 @@ class AdminDashboard {
 
     // Enlazar eventos de la interfaz
     this.bindAuthEvents();
+    this.bindNavEvents();
     this.bindFormEvents();
     this.bindFilterEvents();
+    this.bindDriveEvents();
     this.bindModalEvents();
+    this.initCodeGsPreview();
 
     // Fecha predeterminada para el formulario (hoy)
     const today = new Date().toISOString().split('T')[0];
@@ -59,6 +129,7 @@ class AdminDashboard {
       if (lockScreen) lockScreen.classList.add('hidden');
       if (mainContent) mainContent.classList.remove('hidden');
       this.refreshData();
+      this.checkDriveStatus(false);
     } else {
       if (lockScreen) lockScreen.classList.remove('hidden');
       if (mainContent) mainContent.classList.add('hidden');
@@ -110,7 +181,41 @@ class AdminDashboard {
   }
 
   // ------------------------------------------------------------------------------
-  // 2. FORMULARIO: CREAR Y EDITAR CITAS
+  // 2. NAVEGACIÓN ENTRE PESTAÑAS (CITAS VS GOOGLE DRIVE)
+  // ------------------------------------------------------------------------------
+  bindNavEvents() {
+    const btnTabEvents = document.getElementById('tab-btn-events');
+    const btnTabDrive = document.getElementById('tab-btn-drive');
+    const statCardDrive = document.getElementById('stat-card-drive-click');
+
+    const switchTab = (tabName) => {
+      sounds.playPop();
+      this.currentTab = tabName;
+
+      const eventsSec = document.getElementById('section-events-container');
+      const driveSec = document.getElementById('section-drive-container');
+
+      if (tabName === 'events') {
+        if (btnTabEvents) btnTabEvents.classList.add('active');
+        if (btnTabDrive) btnTabDrive.classList.remove('active');
+        if (eventsSec) eventsSec.classList.remove('hidden');
+        if (driveSec) driveSec.classList.add('hidden');
+      } else {
+        if (btnTabDrive) btnTabDrive.classList.add('active');
+        if (btnTabEvents) btnTabEvents.classList.remove('active');
+        if (driveSec) driveSec.classList.remove('hidden');
+        if (eventsSec) eventsSec.classList.add('hidden');
+        this.checkDriveStatus(false);
+      }
+    };
+
+    if (btnTabEvents) btnTabEvents.addEventListener('click', () => switchTab('events'));
+    if (btnTabDrive) btnTabDrive.addEventListener('click', () => switchTab('drive'));
+    if (statCardDrive) statCardDrive.addEventListener('click', () => switchTab('drive'));
+  }
+
+  // ------------------------------------------------------------------------------
+  // 3. FORMULARIO: CREAR Y EDITAR CITAS
   // ------------------------------------------------------------------------------
   bindFormEvents() {
     const isHiddenToggle = document.getElementById('event-is-hidden');
@@ -119,7 +224,6 @@ class AdminDashboard {
     const form = document.getElementById('event-editor-form');
     const cancelEditBtn = document.getElementById('btn-cancel-edit');
 
-    // Cambiar campos de cita oculta al activar el interruptor
     if (isHiddenToggle) {
       isHiddenToggle.addEventListener('change', () => {
         sounds.playPop();
@@ -129,14 +233,12 @@ class AdminDashboard {
       });
     }
 
-    // Cancelar edición
     if (cancelEditBtn) {
       cancelEditBtn.addEventListener('click', () => {
         this.resetForm();
       });
     }
 
-    // Guardar / Actualizar cita
     if (form) {
       form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -156,7 +258,6 @@ class AdminDashboard {
     const description = document.getElementById('event-desc').value.trim();
     const secretHint = document.getElementById('event-hint').value.trim();
 
-    // Campos de cita secreta / oculta
     const isHidden = document.getElementById('event-is-hidden').checked;
     const secretCode = document.getElementById('event-secret-code').value.trim();
     const secretClue = document.getElementById('event-secret-clue').value.trim();
@@ -176,13 +277,11 @@ class AdminDashboard {
     };
 
     if (idField.value && idField.value !== '') {
-      // Modo Edición
       const eventId = parseInt(idField.value);
       updateEvent(eventId, eventPayload);
       sounds.playCelebration();
       this.showToast('¡Cita actualizada exitosamente! ✨');
     } else {
-      // Modo Creación
       addEvent(eventPayload);
       sounds.playCelebration();
       if (this.petals) {
@@ -237,7 +336,6 @@ class AdminDashboard {
     document.getElementById('event-desc').value = event.description || '';
     document.getElementById('event-hint').value = event.secretHint || '';
 
-    // Cita oculta
     const isHidden = !!event.isHidden;
     const isHiddenToggle = document.getElementById('event-is-hidden');
     const secretFields = document.getElementById('secret-fields-container');
@@ -250,14 +348,12 @@ class AdminDashboard {
     document.getElementById('event-secret-code').value = event.secretCode || '';
     document.getElementById('event-secret-clue').value = event.secretClue || '';
 
-    // Encabezado de modo edición
     document.getElementById('form-mode-icon').textContent = '✏️';
     document.getElementById('form-mode-title').textContent = `Editar Cita #${event.id}`;
     document.getElementById('form-mode-desc').textContent = `Modificando: "${event.title}"`;
     document.getElementById('btn-save-text').textContent = 'Actualizar Cita';
     document.getElementById('btn-cancel-edit').classList.remove('hidden');
 
-    // Desplazar suavemente hacia el formulario
     const formSection = document.querySelector('.admin-form-section');
     if (formSection) {
       formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -265,7 +361,7 @@ class AdminDashboard {
   }
 
   // ------------------------------------------------------------------------------
-  // 3. RENDERIZADO Y ACTUALIZACIÓN DE DATOS
+  // 4. RENDERIZADO Y ACTUALIZACIÓN DE CITAS
   // ------------------------------------------------------------------------------
   refreshData() {
     const events = getEvents();
@@ -274,7 +370,6 @@ class AdminDashboard {
     const publicCount = total - hiddenCount;
     const acceptedCount = events.filter(e => e.accepted).length;
 
-    // Actualizar contadores
     const elTotal = document.getElementById('stat-total-events');
     const elPublic = document.getElementById('stat-public-events');
     const elSecret = document.getElementById('stat-secret-events');
@@ -293,7 +388,6 @@ class AdminDashboard {
     if (elCountPublic) elCountPublic.textContent = publicCount;
     if (elCountHidden) elCountHidden.textContent = hiddenCount;
 
-    // Filtrar según pestaña activa
     let filteredEvents = events;
     if (this.currentFilter === 'public') {
       filteredEvents = events.filter(e => !e.isHidden);
@@ -386,22 +480,18 @@ class AdminDashboard {
 
           <!-- BARRA DE ACCIONES RÁPIDAS -->
           <div class="admin-card-actions">
-            <!-- Alternar Visibilidad -->
             <button class="btn-action-icon btn-toggle-visibility" data-id="${event.id}" title="${isHidden ? 'Hacer pública esta cita' : 'Ocultar esta cita (Hacer secreta)'}">
               <span>${isHidden ? '🔓 Hacer Pública' : '🔒 Hacer Oculta'}</span>
             </button>
 
-            <!-- Editar -->
             <button class="btn-action-icon btn-edit-event" data-id="${event.id}" title="Editar contenido">
               <span>✏️ Editar</span>
             </button>
 
-            <!-- Alternar RSVP (Simular Aceptación) -->
             <button class="btn-action-icon btn-toggle-rsvp" data-id="${event.id}" title="${isAccepted ? 'Marcar como pendiente' : 'Marcar como aceptada'}">
               <span>${isAccepted ? '↩️ Marcar Pendiente' : '💖 Marcar Aceptada'}</span>
             </button>
 
-            <!-- Eliminar -->
             <button class="btn-action-icon btn-action-delete btn-delete-event" data-id="${event.id}" title="Eliminar cita">
               <span>🗑️ Eliminar</span>
             </button>
@@ -414,7 +504,6 @@ class AdminDashboard {
   }
 
   attachCardEventListeners(container) {
-    // Alternar visibilidad
     container.querySelectorAll('.btn-toggle-visibility').forEach(btn => {
       btn.addEventListener('click', () => {
         sounds.playPop();
@@ -429,7 +518,6 @@ class AdminDashboard {
       });
     });
 
-    // Editar
     container.querySelectorAll('.btn-edit-event').forEach(btn => {
       btn.addEventListener('click', () => {
         const eventId = parseInt(btn.dataset.id);
@@ -437,7 +525,6 @@ class AdminDashboard {
       });
     });
 
-    // Alternar RSVP
     container.querySelectorAll('.btn-toggle-rsvp').forEach(btn => {
       btn.addEventListener('click', () => {
         sounds.playPop();
@@ -454,7 +541,6 @@ class AdminDashboard {
       });
     });
 
-    // Eliminar
     container.querySelectorAll('.btn-delete-event').forEach(btn => {
       btn.addEventListener('click', () => {
         const eventId = parseInt(btn.dataset.id);
@@ -474,9 +560,6 @@ class AdminDashboard {
     });
   }
 
-  // ------------------------------------------------------------------------------
-  // 4. FILTROS
-  // ------------------------------------------------------------------------------
   bindFilterEvents() {
     const filterTabs = document.querySelectorAll('.filter-tab');
     filterTabs.forEach(tab => {
@@ -491,7 +574,287 @@ class AdminDashboard {
   }
 
   // ------------------------------------------------------------------------------
-  // 5. MODAL CAMBIAR PIN
+  // 5. GESTIÓN Y CONEXIÓN DE GOOGLE DRIVE EN ADMIN
+  // ------------------------------------------------------------------------------
+  bindDriveEvents() {
+    const webhookInput = document.getElementById('drive-webhook-input');
+    const folderInput = document.getElementById('drive-folder-input');
+    const driveForm = document.getElementById('drive-settings-form');
+    const btnTestDrive = document.getElementById('btn-test-drive');
+    const btnClearDrive = document.getElementById('btn-clear-drive');
+    const btnCopyCodeGs = document.getElementById('btn-copy-code-gs');
+
+    // Cargar valores guardados en localStorage
+    if (webhookInput) {
+      webhookInput.value = localStorage.getItem('propuesta_drive_webhook_url') || '';
+    }
+    if (folderInput) {
+      folderInput.value = localStorage.getItem('propuesta_drive_folder_id') || '';
+    }
+
+    // Botón probar conexión
+    if (btnTestDrive) {
+      btnTestDrive.addEventListener('click', () => {
+        sounds.playPop();
+        this.checkDriveStatus(true);
+      });
+    }
+
+    // Guardar configuración de Drive
+    if (driveForm) {
+      driveForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const webhookUrl = (webhookInput?.value || '').trim();
+        let folderVal = (folderInput?.value || '').trim();
+
+        // Extraer ID si pegó la URL completa de Drive
+        const folderMatch = folderVal.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+        if (folderMatch) folderVal = folderMatch[1];
+
+        if (webhookUrl) {
+          localStorage.setItem('propuesta_drive_webhook_url', webhookUrl);
+        } else {
+          localStorage.removeItem('propuesta_drive_webhook_url');
+        }
+
+        if (folderVal) {
+          localStorage.setItem('propuesta_drive_folder_id', folderVal);
+        } else {
+          localStorage.removeItem('propuesta_drive_folder_id');
+        }
+
+        sounds.playCelebration();
+        this.showToast('Configuración de Google Drive guardada 💾');
+        this.checkDriveStatus(true);
+      });
+    }
+
+    // Desconectar Drive
+    if (btnClearDrive) {
+      btnClearDrive.addEventListener('click', () => {
+        if (confirm('¿Deseas desconectar Google Drive? La app volverá al modo de álbum local.')) {
+          sounds.playPop();
+          localStorage.removeItem('propuesta_drive_webhook_url');
+          localStorage.removeItem('propuesta_drive_folder_id');
+          if (webhookInput) webhookInput.value = '';
+          if (folderInput) folderInput.value = '';
+          this.showToast('Google Drive desconectado. Modo local activo.');
+          this.checkDriveStatus(true);
+        }
+      });
+    }
+
+    // Copiar código de Code.gs
+    if (btnCopyCodeGs) {
+      btnCopyCodeGs.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(CODE_GS_CONTENT);
+          sounds.playCelebration();
+          const feedback = document.getElementById('copy-code-feedback');
+          if (feedback) {
+            feedback.classList.remove('hidden');
+            setTimeout(() => feedback.classList.add('hidden'), 3500);
+          }
+          this.showToast('¡Código copiado al portapapeles! 📋✨');
+        } catch {
+          alert('No se pudo copiar automáticamente. Por favor selecciónalo desde la vista previa de abajo.');
+        }
+      });
+    }
+
+    // Prueba de subida de imagen a Drive
+    this.setupTestDriveUpload();
+  }
+
+  initCodeGsPreview() {
+    const previewEl = document.getElementById('preview-code-gs');
+    if (previewEl) {
+      previewEl.textContent = CODE_GS_CONTENT;
+    }
+  }
+
+  async checkDriveStatus(showToastFeedback = false) {
+    const banner = document.getElementById('drive-status-banner');
+    const headline = document.getElementById('drive-status-headline');
+    const detail = document.getElementById('drive-status-detail');
+    const dot = document.getElementById('drive-status-indicator-dot');
+    const modeTag = document.getElementById('drive-status-mode-tag');
+    const navDot = document.getElementById('drive-nav-dot');
+    const statDrive = document.getElementById('stat-drive-status');
+    const countBadge = document.getElementById('drive-photos-count-badge');
+    const openFolderBtn = document.getElementById('btn-open-drive-folder');
+
+    // Obtener parámetros de localStorage
+    const webhook = (localStorage.getItem('propuesta_drive_webhook_url') || '').trim();
+    const folderId = (localStorage.getItem('propuesta_drive_folder_id') || '').trim();
+
+    const params = new URLSearchParams();
+    if (webhook) params.set('webhookUrl', webhook);
+    if (folderId) params.set('folderId', folderId);
+    const queryStr = params.toString() ? `?${params.toString()}` : '';
+
+    if (headline) headline.textContent = 'Verificando conexión con Google Drive...';
+    if (dot) dot.className = 'status-dot yellow';
+
+    try {
+      const res = await fetch(`/api/drive${queryStr}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      this.driveStatus = data;
+
+      if (data.connected) {
+        if (banner) {
+          banner.className = 'drive-status-box drive-status-connected';
+        }
+        if (headline) headline.textContent = '¡Google Drive Conectado y Sincronizado! ☁️✨';
+        if (dot) dot.className = 'status-dot green';
+        if (navDot) navDot.className = 'status-dot-sm green';
+        if (statDrive) statDrive.textContent = '🟢 Conectado';
+        if (modeTag) modeTag.textContent = `Modo ${data.mode || 'Webhook'}`;
+        if (detail) {
+          detail.textContent = `Conexión exitosa. Se detectaron ${data.memories.length} fotos en tu carpeta de Drive listas para el álbum.`;
+        }
+        if (countBadge) countBadge.textContent = `${data.memories.length} fotos en Drive`;
+
+        // Botón abrir carpeta
+        if (openFolderBtn) {
+          if (folderId) {
+            openFolderBtn.href = `https://drive.google.com/drive/folders/${folderId}`;
+            openFolderBtn.classList.remove('hidden');
+          } else {
+            openFolderBtn.classList.add('hidden');
+          }
+        }
+
+        this.renderDrivePhotos(data.memories || []);
+        if (showToastFeedback) this.showToast(`¡Conexión verificada! ${data.memories.length} fotos encontradas.`);
+      } else {
+        if (banner) {
+          banner.className = 'drive-status-box drive-status-local';
+        }
+        if (headline) headline.textContent = 'Álbum en Modo Local (Sin Drive)';
+        if (dot) dot.className = 'status-dot yellow';
+        if (navDot) navDot.className = 'status-dot-sm yellow';
+        if (statDrive) statDrive.textContent = '🟡 Local';
+        if (modeTag) modeTag.textContent = 'Modo Local';
+        if (detail) {
+          detail.textContent = data.message || 'Las fotos se guardan en el navegador. Sigue los pasos de la derecha para conectar tu carpeta de Google Drive.';
+        }
+        if (countBadge) countBadge.textContent = '0 fotos en Drive';
+        if (openFolderBtn) openFolderBtn.classList.add('hidden');
+        this.renderDrivePhotos([]);
+        if (showToastFeedback) this.showToast('Operando en modo local (sin Drive conectado).');
+      }
+    } catch (err) {
+      if (banner) banner.className = 'drive-status-box drive-status-error';
+      if (headline) headline.textContent = 'Error al consultar Google Drive';
+      if (dot) dot.className = 'status-dot red';
+      if (navDot) navDot.className = 'status-dot-sm red';
+      if (statDrive) statDrive.textContent = '🔴 Error';
+      if (detail) detail.textContent = `No se pudo conectar: ${err.message}. Verifica que la URL del Webhook sea correcta.`;
+      if (showToastFeedback) this.showToast('Error al conectar con Google Drive ⚠️');
+    }
+  }
+
+  renderDrivePhotos(memories) {
+    const grid = document.getElementById('admin-drive-photos-grid');
+    if (!grid) return;
+
+    if (!memories || memories.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 24px 16px; color: #64748b;">
+          <span style="font-size: 2rem; display: block; margin-bottom: 8px;">📷</span>
+          <p style="font-weight: 600;">No hay fotos sincronizadas de Google Drive por el momento</p>
+          <p style="font-size: 0.85rem; margin-top: 4px;">Las fotos que subas a la carpeta de Drive o mediante el formulario aparecerán aquí.</p>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = memories.map(m => `
+      <div class="admin-drive-photo-item">
+        <img 
+          src="${m.thumbUrl || m.imageUrl || '/img/fondo.jpg'}" 
+          alt="${m.title || 'Foto de recuerdo'}" 
+          class="admin-drive-photo-thumb" 
+          loading="lazy" 
+          onerror="this.src='/img/fondo.jpg';"
+        />
+        <div class="admin-drive-photo-info">
+          <div class="admin-drive-photo-title" title="${m.title}">${m.title}</div>
+          <div class="admin-drive-photo-meta">
+            <span>${m.date || 'Sin fecha'}</span>
+            ${m.driveUrl ? `<a href="${m.driveUrl}" target="_blank" rel="noopener" class="admin-drive-photo-link">Ver en Drive ↗</a>` : ''}
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  setupTestDriveUpload() {
+    const btn = document.getElementById('btn-trigger-test-upload');
+    const input = document.getElementById('drive-test-file-input');
+    const status = document.getElementById('drive-test-upload-status');
+
+    if (btn && input) {
+      btn.addEventListener('click', () => input.click());
+
+      input.addEventListener('change', async () => {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+
+        if (status) {
+          status.style.color = '#2563eb';
+          status.textContent = '⏳ Subiendo foto de prueba a Drive...';
+        }
+
+        try {
+          const reader = new FileReader();
+          reader.onload = async () => {
+            const base64 = reader.result;
+            const webhookUrl = localStorage.getItem('propuesta_drive_webhook_url') || undefined;
+            const folderId = localStorage.getItem('propuesta_drive_folder_id') || undefined;
+
+            const res = await fetch('/api/upload', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: file.name,
+                title: 'Foto de prueba admin',
+                date: new Date().toISOString().split('T')[0],
+                location: 'Panel Admin',
+                caption: 'Prueba de sincronización desde el panel de creador',
+                mimeType: file.type || 'image/jpeg',
+                imageBase64: base64,
+                webhookUrl,
+                folderId
+              })
+            });
+
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+
+            if (status) {
+              status.style.color = '#16a34a';
+              status.textContent = '✅ ¡Foto subida exitosamente a Google Drive!';
+            }
+            sounds.playCelebration();
+            this.showToast('¡Foto de prueba subida a Google Drive! ✨');
+            setTimeout(() => this.checkDriveStatus(false), 800);
+          };
+          reader.readAsDataURL(file);
+        } catch (err) {
+          if (status) {
+            status.style.color = '#dc2626';
+            status.textContent = `❌ Error: ${err.message}`;
+          }
+        }
+      });
+    }
+  }
+
+  // ------------------------------------------------------------------------------
+  // 6. MODAL CAMBIAR PIN
   // ------------------------------------------------------------------------------
   bindModalEvents() {
     const btnChangePin = document.getElementById('btn-change-pin');
@@ -499,7 +862,6 @@ class AdminDashboard {
     const formChangePin = document.getElementById('change-pin-form');
     const errorMsg = document.getElementById('change-pin-error');
 
-    // Cierre de modales nativos
     document.querySelectorAll('[data-close-modal]').forEach(btn => {
       btn.addEventListener('click', () => {
         const modalId = btn.getAttribute('data-close-modal');

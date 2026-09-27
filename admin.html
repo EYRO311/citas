@@ -95,40 +95,61 @@
       </div>
     </header>
 
+    <!-- NAVEGACIÓN PRINCIPAL DE ADMIN: CITAS VS GOOGLE DRIVE -->
+    <nav class="admin-nav-tabs glass-panel" aria-label="Secciones del panel de administración">
+      <button id="tab-btn-events" class="admin-nav-btn active" data-tab="events">
+        <span>📅 Citas & Eventos Ocultos</span>
+      </button>
+      <button id="tab-btn-drive" class="admin-nav-btn" data-tab="drive">
+        <span>☁️ Conectar Google Drive</span>
+        <span id="drive-nav-dot" class="status-dot-sm yellow"></span>
+      </button>
+    </nav>
+
     <!-- ESTADÍSTICAS RÁPIDAS -->
-    <section class="admin-stats-grid" aria-label="Resumen de Citas">
+    <section class="admin-stats-grid" aria-label="Resumen de Citas y Álbum">
       <div class="stat-card glass-panel">
         <div class="stat-icon">📅</div>
         <div class="stat-data">
           <span id="stat-total-events" class="stat-number">0</span>
-          <span class="stat-label">Total de Citas</span>
+          <span class="stat-label">Total Citas</span>
         </div>
       </div>
       <div class="stat-card glass-panel">
         <div class="stat-icon">💌</div>
         <div class="stat-data">
           <span id="stat-public-events" class="stat-number">0</span>
-          <span class="stat-label">Citas Públicas</span>
+          <span class="stat-label">Públicas</span>
         </div>
       </div>
       <div class="stat-card glass-panel stat-card-secret">
         <div class="stat-icon">🔒</div>
         <div class="stat-data">
           <span id="stat-secret-events" class="stat-number">0</span>
-          <span class="stat-label">Citas Ocultas (Secretas)</span>
+          <span class="stat-label">Ocultas (Secretas)</span>
         </div>
       </div>
       <div class="stat-card glass-panel stat-card-accepted">
         <div class="stat-icon">💖</div>
         <div class="stat-data">
           <span id="stat-accepted-events" class="stat-number">0</span>
-          <span class="stat-label">Aceptadas por Adi</span>
+          <span class="stat-label">Aceptadas</span>
+        </div>
+      </div>
+      <div class="stat-card glass-panel stat-card-drive" id="stat-card-drive-click" style="cursor: pointer;" title="Ver estado de conexión con Google Drive">
+        <div class="stat-icon">☁️</div>
+        <div class="stat-data">
+          <span id="stat-drive-status" class="stat-number" style="font-size: 1.1rem; line-height: 1.2;">Modo Local</span>
+          <span class="stat-label">Google Drive</span>
         </div>
       </div>
     </section>
 
-    <!-- CONTENEDOR PRINCIPAL: FORMULARIO + LISTA -->
-    <div class="admin-workspace-grid">
+    <!-- ==============================================================================
+         SECCIÓN 1: CITAS Y EVENTOS OCULTOS
+         ============================================================================== -->
+    <div id="section-events-container" class="admin-tab-section">
+      <div class="admin-workspace-grid">
 
       <!-- ==============================================================================
            COLUMNA IZQUIERDA: FORMULARIO CREAR / EDITAR CITA
@@ -336,9 +357,201 @@
         </div>
       </section>
 
+      </div>
     </div>
 
-    <!-- PIE DE PÁGINA ADMIN -->
+    <!-- ==============================================================================
+         SECCIÓN 2: CONECTAR GOOGLE DRIVE
+         ============================================================================== -->
+    <div id="section-drive-container" class="admin-tab-section hidden">
+      <div class="admin-drive-grid">
+        
+        <!-- COLUMNA IZQUIERDA: CONFIGURACIÓN Y ESTADO -->
+        <div class="glass-panel admin-drive-card">
+          <div class="admin-form-header">
+            <div class="header-icon">☁️</div>
+            <div>
+              <h2 class="admin-section-title">Conexión con Google Drive</h2>
+              <p class="admin-section-subtitle">Sincroniza las fotos de sus salidas en una carpeta compartida</p>
+            </div>
+          </div>
+
+          <!-- TARJETA DE ESTADO ACTUAL -->
+          <div id="drive-status-banner" class="drive-status-box drive-status-local">
+            <div class="status-header-row">
+              <div class="status-indicator-wrap">
+                <span id="drive-status-indicator-dot" class="status-dot yellow"></span>
+                <strong id="drive-status-headline">Álbum en Modo Local</strong>
+              </div>
+              <span id="drive-status-mode-tag" class="status-badge-public">Sin Drive conectado</span>
+            </div>
+            <p id="drive-status-detail" class="status-detail-text">
+              Las fotos se están guardando en la memoria del navegador. Para que aparezcan desde cualquier teléfono o dispositivo, conecta tu carpeta de Drive abajo.
+            </p>
+            <div class="status-actions-row">
+              <button type="button" id="btn-test-drive" class="btn-primary" style="padding: 8px 16px; font-size: 0.88rem;">
+                <span>🔄 Probar Conexión Ahora</span>
+              </button>
+              <a id="btn-open-drive-folder" href="#" target="_blank" rel="noopener noreferrer" class="btn-ghost-sm hidden">
+                <span>📁 Abrir Carpeta en Drive</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- FORMULARIO DE CONEXIÓN CON WEBHOOK -->
+          <form id="drive-settings-form" class="drive-settings-form" style="margin-top: 20px;">
+            <div class="form-group">
+              <label class="form-label" for="drive-webhook-input">
+                <span>URL de la App Web (Webhook de Google Apps Script)</span>
+                <span class="label-hint">(Recomendado)</span>
+              </label>
+              <input 
+                type="url" 
+                id="drive-webhook-input" 
+                class="form-input" 
+                placeholder="https://script.google.com/macros/s/.../exec" 
+                autocomplete="off"
+              />
+              <p class="field-help-text">
+                Pega la URL terminada en <code>/exec</code> generada al desplegar el script de la derecha.
+              </p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="drive-folder-input">
+                <span>ID o Enlace de la Carpeta de Google Drive (Opcional)</span>
+              </label>
+              <input 
+                type="text" 
+                id="drive-folder-input" 
+                class="form-input" 
+                placeholder="Ej: 1A2b3C4d5E... o el enlace completo de la carpeta" 
+                autocomplete="off"
+              />
+              <p class="field-help-text">
+                Sirve para abrir la carpeta directamente desde el panel o como respaldo de lectura pública.
+              </p>
+            </div>
+
+            <div class="form-actions-group">
+              <button type="submit" id="btn-save-drive" class="btn-primary">
+                <span>💾 Guardar y Conectar</span>
+              </button>
+              <button type="button" id="btn-clear-drive" class="btn-ghost-sm" style="color: #ef4444; border-color: #fca5a5;">
+                <span>🗑️ Desconectar</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- FOTO DE PRUEBA -->
+          <div class="drive-test-upload-card" style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+            <h3 style="font-size: 1rem; color: #1e3a8a; margin-bottom: 6px;">📸 Probar subida a Google Drive</h3>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 12px;">
+              Sube una foto de prueba para verificar que se guarde en tu carpeta de Drive.
+            </p>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <input type="file" id="drive-test-file-input" accept="image/*" style="display: none;" />
+              <button type="button" id="btn-trigger-test-upload" class="btn-ghost-sm">
+                <span>Seleccionar foto de prueba</span>
+              </button>
+              <span id="drive-test-upload-status" style="font-size: 0.85rem; color: #64748b;"></span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- COLUMNA DERECHA: GUÍA PASO A PASO + CÓDIGO COPIABLE -->
+        <div class="glass-panel admin-drive-card">
+          <div class="admin-form-header">
+            <div class="header-icon">📖</div>
+            <div>
+              <h2 class="admin-section-title">Instrucciones de Conexión (5 minutos)</h2>
+              <p class="admin-section-subtitle">Sin configuraciones difíciles de Google Cloud</p>
+            </div>
+          </div>
+
+          <div class="drive-guide-steps">
+            <div class="guide-step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <strong>Crea la carpeta en Google Drive</strong>
+                <p>Crea una carpeta llamada <em>"Nuestras Salidas"</em> en <a href="https://drive.google.com" target="_blank" rel="noopener">drive.google.com</a>. Clic derecho en ella → <em>Compartir</em> → cambia el acceso general a <strong>"Cualquier persona con el enlace · Lector"</strong>.</p>
+              </div>
+            </div>
+
+            <div class="guide-step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <strong>Crea el proyecto en Google Apps Script</strong>
+                <p>Entra a <a href="https://script.google.com/home/start" target="_blank" rel="noopener">script.google.com</a> y haz clic en <em>"Nuevo proyecto"</em>. Borra lo que tenga y pega el código de abajo.</p>
+              </div>
+            </div>
+
+            <div class="guide-step">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <strong>Coloca el ID de tu carpeta en el código</strong>
+                <p>En la línea <code>const FOLDER_ID = '...';</code>, pega el ID de tu carpeta de Drive (lo que va después de <code>/folders/</code> en la URL).</p>
+              </div>
+            </div>
+
+            <div class="guide-step">
+              <div class="step-num">4</div>
+              <div class="step-content">
+                <strong>Implementa como App Web</strong>
+                <p>Arriba a la derecha pulsa <em>Implementar → Nueva implementación</em>. Selecciona <strong>App web</strong> (ícono engranaje) con estos ajustes:</p>
+                <ul class="guide-sublist">
+                  <li><strong>Ejecutar como:</strong> Yo (tu cuenta)</li>
+                  <li><strong>Quién tiene acceso:</strong> Cualquier persona</li>
+                </ul>
+                <p style="margin-top: 4px;">Pulsa <em>Implementar</em>, autoriza los permisos y copia la URL terminada en <code>/exec</code>.</p>
+              </div>
+            </div>
+
+            <div class="guide-step">
+              <div class="step-num">5</div>
+              <div class="step-content">
+                <strong>Pégala en el campo de la izquierda</strong>
+                <p>Pega la URL en el formulario de la izquierda y haz clic en <strong>Guardar y Conectar</strong>. ¡Listo! Cualquier foto que se suba aparecerá en el álbum.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTÓN PARA COPIAR CÓDIGO -->
+          <div class="code-action-box" style="margin-top: 20px;">
+            <button type="button" id="btn-copy-code-gs" class="btn-primary" style="width: 100%;">
+              <span>📋 Copiar Código de Code.gs al Portapapeles</span>
+            </button>
+            <p id="copy-code-feedback" class="copy-feedback-msg hidden" style="color: #16a34a; font-weight: 600; text-align: center; margin-top: 8px;">
+              ¡Código copiado con éxito! Ahora pégalo en script.google.com ✨
+            </p>
+          </div>
+
+          <!-- ACORDEÓN CON EL CÓDIGO VISIBLE -->
+          <details class="code-details-fold" style="margin-top: 16px;">
+            <summary style="cursor: pointer; font-weight: 600; color: #1e40af; font-size: 0.9rem;">
+              👁️ Ver código completo de Google Apps Script (Code.gs)
+            </summary>
+            <pre class="code-block-preview" id="preview-code-gs"></pre>
+          </details>
+        </div>
+
+      </div>
+
+      <!-- FOTOS SINCRONIZADAS ACTUALMENTE EN DRIVE -->
+      <div class="glass-panel admin-drive-photos-card" style="margin-top: 24px; padding: 24px; border-radius: var(--radius-lg);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h3 class="admin-section-title" style="font-size: 1.2rem;">Fotos Detectadas en Google Drive</h3>
+            <p class="admin-section-subtitle">Estas son las fotos que Adi y tú pueden ver actualmente en el álbum</p>
+          </div>
+          <span id="drive-photos-count-badge" class="badge-event">0 fotos encontradas</span>
+        </div>
+        <div id="admin-drive-photos-grid" class="admin-drive-gallery-grid">
+          <!-- Inyectado dinámicamente -->
+        </div>
+      </div>
+    </div>
     <footer class="romantic-footer" style="margin-top: 40px;">
       <p>Panel secreto de <strong>Eyro</strong> para <strong>Adi</strong> (A + E) 🌻✨</p>
       <div style="margin-top: 8px;">

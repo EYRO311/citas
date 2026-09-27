@@ -208,7 +208,9 @@ function setupUploadMemoryForm() {
             location: newMemory.location,
             caption: newMemory.caption,
             mimeType: currentMimeType,
-            imageBase64: currentBase64
+            imageBase64: currentBase64,
+            webhookUrl: (localStorage.getItem('propuesta_drive_webhook_url') || '').trim() || undefined,
+            folderId: (localStorage.getItem('propuesta_drive_folder_id') || '').trim() || undefined
           })
         });
 

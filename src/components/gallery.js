@@ -38,7 +38,14 @@ export class DateMemoriesGallery {
 
   async refreshFromDrive() {
     try {
-      const res = await fetch('/api/drive');
+      const webhook = (localStorage.getItem('propuesta_drive_webhook_url') || '').trim();
+      const folderId = (localStorage.getItem('propuesta_drive_folder_id') || '').trim();
+      const params = new URLSearchParams();
+      if (webhook) params.set('webhookUrl', webhook);
+      if (folderId) params.set('folderId', folderId);
+      const url = '/api/drive' + (params.toString() ? `?${params.toString()}` : '');
+
+      const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       this.driveStatus = data;
@@ -79,22 +86,22 @@ export class DateMemoriesGallery {
       badgeEl.className = 'drive-badge drive-local';
       badgeEl.innerHTML = `
         <span class="status-dot yellow"></span>
-        <span>Buscando fotos en Drive... ☁️</span>
+        <span>Sincronizando fotos... ☁️</span>
       `;
     } else if (this.driveStatus.connected) {
       badgeEl.className = 'drive-badge drive-connected';
       badgeEl.innerHTML = `
         <span class="status-dot green"></span>
-        <span>Google Drive conectado · ${this.driveMemories.length} fotos ☁️✨</span>
+        <span>Google Drive sincronizado · ${this.driveMemories.length} fotos ☁️✨</span>
       `;
     } else {
       badgeEl.className = 'drive-badge drive-local';
       badgeEl.innerHTML = `
-        <span class="status-dot yellow"></span>
-        <span>Álbum Local Activo (Clic para conectar Drive) 💾</span>
+        <span class="status-dot green"></span>
+        <span>Álbum de Recuerdos 📸💖</span>
       `;
     }
-    badgeEl.title = this.driveStatus.error || this.driveStatus.message || 'Estado de la conexión con Google Drive';
+    badgeEl.title = this.driveStatus.error || this.driveStatus.message || 'Álbum de recuerdos de nuestras citas';
   }
 
   async render() {
@@ -168,13 +175,12 @@ export class DateMemoriesGallery {
       });
     }
 
-    // Clic en badge de Google Drive: refrescar y abrir modal de información
+    // Clic en badge de Google Drive: refrescar fotos
     const badgeEl = document.getElementById('drive-status-badge');
     if (badgeEl) {
       badgeEl.addEventListener('click', () => {
         sounds.playPop();
         this.refreshFromDrive();
-        this.openDriveModal();
       });
     }
 
@@ -266,16 +272,6 @@ export class DateMemoriesGallery {
       }
     }
 
-    if (typeof modal.showModal === 'function') {
-      modal.showModal();
-    } else {
-      modal.setAttribute('open', '');
-    }
-  }
-
-  openDriveModal() {
-    const modal = document.getElementById('modal-drive-info');
-    if (!modal) return;
     if (typeof modal.showModal === 'function') {
       modal.showModal();
     } else {

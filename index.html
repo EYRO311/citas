@@ -371,42 +371,6 @@
     </div>
   </dialog>
 
-  <!-- MODAL: CONFIGURACIÓN DE GOOGLE DRIVE -->
-  <dialog id="modal-drive-info">
-    <div class="modal-card">
-      <button class="modal-close-btn" data-close-modal="modal-drive-info" aria-label="Cerrar">&times;</button>
-      <div class="modal-header-styled">
-        <div style="font-size: 2.2rem; margin-bottom: 6px;">☁️</div>
-        <h3 class="modal-title-styled">Nuestro álbum en Google Drive</h3>
-        <p style="font-size: 0.9rem; color: #64748b;">Todas las fotos de nuestra carpeta de Drive aparecen aquí, junto con los recuerdos.</p>
-      </div>
-      <div style="font-size: 0.95rem; color: #334155; line-height: 1.7; text-align: left;">
-        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px;">
-          <strong style="color: #166534;">📲 Dos formas de agregar fotos:</strong>
-          <ul style="margin: 4px 0 0 20px; font-size: 0.85rem; color: #15803d; list-style-type: disc;">
-            <li>Con el botón <em>"Añadir nuevo recuerdo"</em> (con título, lugar y mensaje).</li>
-            <li>Subiéndolas directo a la carpeta desde la app de Google Drive o drive.google.com. Aparecen solas al volver a esta página.</li>
-          </ul>
-        </div>
-
-        <h4 style="font-weight: 700; color: #0f172a; margin-bottom: 8px;">Para conectar la carpeta (una sola vez):</h4>
-        <ol style="margin-left: 20px; margin-bottom: 16px; font-size: 0.88rem; color: #475569;">
-          <li style="margin-bottom: 6px;">Crea en Google Drive la carpeta <em>"Nuestras Salidas"</em> y compártela como <em>"Cualquier persona con el enlace · Lector"</em>.</li>
-          <li style="margin-bottom: 6px;">Instala el script <code>google-apps-script/Code.gs</code> del proyecto como App web (los pasos vienen dentro del archivo).</li>
-          <li style="margin-bottom: 6px;">Pega su URL en Vercel como <code>GOOGLE_DRIVE_WEBHOOK_URL</code> y vuelve a desplegar.</li>
-        </ol>
-        <p style="font-size: 0.82rem; color: #64748b; font-style: italic;">
-          Sin Drive conectado, las fotos se guardan solo en este dispositivo. Otras opciones (cuenta de servicio, API key) en <code>.env.example</code>.
-        </p>
-      </div>
-      <div style="margin-top: 20px; text-align: center;">
-        <button class="btn-primary" data-close-modal="modal-drive-info">
-          <span>¡Entendido! ✨</span>
-        </button>
-      </div>
-    </div>
-  </dialog>
-
   <!-- Script principal -->
   <script type="module" src="/src/main.js"></script>
 </body>

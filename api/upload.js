@@ -47,7 +47,7 @@ export default async function handler(req, res) {
     };
 
     // 1. Verificar si hay Webhook de Google Apps Script configurado
-    const webhookUrl = process.env.GOOGLE_DRIVE_WEBHOOK_URL;
+    const webhookUrl = (req.body?.webhookUrl || process.env.GOOGLE_DRIVE_WEBHOOK_URL || '').trim();
     if (webhookUrl) {
       try {
         const webhookRes = await fetch(webhookUrl, {
@@ -79,7 +79,7 @@ export default async function handler(req, res) {
     // 2. Verificar si hay Cuenta de Servicio (Service Account) configurada
     const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
     const privateKeyRaw = process.env.GOOGLE_PRIVATE_KEY;
-    const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+    const folderId = (req.body?.folderId || process.env.GOOGLE_DRIVE_FOLDER_ID || '').trim();
 
     if (clientEmail && privateKeyRaw && folderId) {
       const privateKey = privateKeyRaw.replace(/\\n/g, '\n');
