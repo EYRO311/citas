@@ -49,37 +49,159 @@
         Guardé aquí dos invitaciones que soñé para nosotros, un cronómetro para esperar nuestro próximo instante y un lugar donde atesorar cada recuerdo juntos.
       </p>
 
-      <!-- Sobre Interactivo de Lujo A + E -->
-      <div id="envelope-trigger" class="envelope-interactive-container" title="Toca para abrir la carta de amor">
-        <div class="envelope-widget">
-          <!-- Hoja asomándose con texto caligráfico -->
-          <div class="envelope-letter-peek">
-            <span class="peek-line"></span>
-            <span class="peek-line short"></span>
-          </div>
-          <!-- Pliegues del sobre -->
-          <div class="envelope-folds">
-            <div class="fold-left"></div>
-            <div class="fold-right"></div>
-            <div class="fold-bottom"></div>
-            <div class="envelope-flap-top"></div>
-          </div>
-          <!-- Etiqueta dedicatoria colgante -->
-          <div class="envelope-tag">
-            <span class="tag-string"></span>
-            <span class="tag-text">Para: Adi <svg class="ui-icon ui-icon-rose" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></span>
-          </div>
-          <!-- Sello de cera en relieve Zafiro y Oro con monograma A+E -->
-          <div class="envelope-seal">
-            <div class="seal-inner-ring">
-              <span class="seal-monogram">A+E</span>
+      <!-- Sobre Interactivo de Papelería de Lujo A + E -->
+      <div id="envelope-trigger" class="envelope-interactive-container" role="button" tabindex="0" aria-label="Abrir carta de amor para Adi" title="Toca para abrir la carta de amor">
+        <div class="envelope-stage">
+          
+          <!-- Sombra proyectada realista sobre el fondo de óleo -->
+          <div class="envelope-ambient-shadow"></div>
+
+          <div class="envelope-widget">
+
+            <!-- 1. Forro interior de lujo (visible al abrirse la solapa) -->
+            <div class="envelope-interior-lining" aria-hidden="true">
+              <div class="lining-pattern"></div>
             </div>
+
+            <!-- 2. Tarjeta / Hoja de carta que se asoma elegantemente -->
+            <div class="envelope-letter-peek" aria-hidden="true">
+              <div class="peek-card-sheet">
+                <div class="peek-gold-filigree"></div>
+                <div class="peek-header">
+                  <span class="peek-salutation">Para mi niña hermosa, Adi</span>
+                </div>
+                <div class="peek-lines">
+                  <div class="peek-line"></div>
+                  <div class="peek-line short"></div>
+                </div>
+                <div class="peek-callout">
+                  <svg class="ui-icon ui-icon-rose peek-heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                  <span>Toca para desplegar la carta</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Pliegues Frontales del Bolsillo (Geometría SVG con luces y sombras físicas reales) -->
+            <div class="envelope-pocket-front" aria-hidden="true">
+              <svg class="envelope-folds-svg" viewBox="0 0 380 230" preserveAspectRatio="none">
+                <defs>
+                  <!-- Degradado pliegue izquierdo -->
+                  <linearGradient id="foldLeftGrad" x1="0%" y1="0%" x2="100%" y2="80%">
+                    <stop offset="0%" stop-color="#FFFFFF"/>
+                    <stop offset="60%" stop-color="#FAF5EC"/>
+                    <stop offset="100%" stop-color="#EDE2CF"/>
+                  </linearGradient>
+
+                  <!-- Degradado pliegue derecho -->
+                  <linearGradient id="foldRightGrad" x1="100%" y1="0%" x2="0%" y2="80%">
+                    <stop offset="0%" stop-color="#FBF7F0"/>
+                    <stop offset="60%" stop-color="#F4ECE0"/>
+                    <stop offset="100%" stop-color="#E8DCB7"/>
+                  </linearGradient>
+
+                  <!-- Degradado pliegue inferior -->
+                  <linearGradient id="foldBottomGrad" x1="50%" y1="100%" x2="50%" y2="0%">
+                    <stop offset="0%" stop-color="#F5EFE3"/>
+                    <stop offset="35%" stop-color="#FAF7F1"/>
+                    <stop offset="85%" stop-color="#FFFFFF"/>
+                    <stop offset="100%" stop-color="#FCFAF5"/>
+                  </linearGradient>
+
+                  <!-- Filete dorado del pliegue inferior -->
+                  <linearGradient id="bottomGoldFoil" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="rgba(197, 160, 89, 0.2)"/>
+                    <stop offset="30%" stop-color="rgba(212, 175, 55, 0.75)"/>
+                    <stop offset="50%" stop-color="rgba(255, 235, 160, 0.95)"/>
+                    <stop offset="70%" stop-color="rgba(212, 175, 55, 0.75)"/>
+                    <stop offset="100%" stop-color="rgba(197, 160, 89, 0.2)"/>
+                  </linearGradient>
+
+                  <!-- Sombras de los pliegues -->
+                  <filter id="bottomFoldDropShadow" x="-10%" y="-15%" width="120%" height="135%">
+                    <feDropShadow dx="0" dy="-4" stdDeviation="4.5" flood-color="#0C2340" flood-opacity="0.14"/>
+                  </filter>
+                  <filter id="sideFoldsDropShadow" x="-10%" y="-10%" width="120%" height="120%">
+                    <feDropShadow dx="0" dy="2" stdDeviation="3.5" flood-color="#0C2340" flood-opacity="0.08"/>
+                  </filter>
+                </defs>
+
+                <!-- Pliegue Izquierdo -->
+                <polygon points="0,0 190,135 0,230" fill="url(#foldLeftGrad)" stroke="#E5D9C4" stroke-width="0.8" filter="url(#sideFoldsDropShadow)" />
+                
+                <!-- Pliegue Derecho -->
+                <polygon points="380,0 190,135 380,230" fill="url(#foldRightGrad)" stroke="#E2D4BD" stroke-width="0.8" filter="url(#sideFoldsDropShadow)" />
+                
+                <!-- Pliegue Inferior (sobrepuesto con sombra superior) -->
+                <polygon points="0,230 190,110 380,230" fill="url(#foldBottomGrad)" stroke="#D8C8AF" stroke-width="1" filter="url(#bottomFoldDropShadow)" />
+                
+                <!-- Filete dorado sutil en la V inferior -->
+                <polyline points="0,230 190,110 380,230" fill="none" stroke="url(#bottomGoldFoil)" stroke-width="1.6" />
+              </svg>
+            </div>
+
+            <!-- 4. Solapa Superior Triangular con Borde Dorado Foil -->
+            <div class="envelope-flap-top" aria-hidden="true">
+              <svg class="flap-svg" viewBox="0 0 380 145" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="flapGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+                    <stop offset="0%" stop-color="#FFFFFF"/>
+                    <stop offset="50%" stop-color="#FAF6EE"/>
+                    <stop offset="100%" stop-color="#F1E7D5"/>
+                  </linearGradient>
+                  <linearGradient id="flapGoldTrim" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="rgba(197, 160, 89, 0.4)"/>
+                    <stop offset="35%" stop-color="rgba(245, 208, 115, 0.95)"/>
+                    <stop offset="50%" stop-color="rgba(255, 245, 200, 1)"/>
+                    <stop offset="65%" stop-color="rgba(245, 208, 115, 0.95)"/>
+                    <stop offset="100%" stop-color="rgba(197, 160, 89, 0.4)"/>
+                  </linearGradient>
+                  <filter id="flapShadow" x="-10%" y="0%" width="120%" height="150%">
+                    <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#0C2340" flood-opacity="0.24"/>
+                  </filter>
+                </defs>
+                <!-- Triángulo de la solapa -->
+                <polygon points="0,0 380,0 190,140" fill="url(#flapGrad)" filter="url(#flapShadow)" />
+                <!-- Filigrana dorada de borde -->
+                <polyline points="0,0 190,140 380,0" fill="none" stroke="url(#flapGoldTrim)" stroke-width="2.5" />
+              </svg>
+            </div>
+
+            <!-- 5. Cinta / Dedicatoria Caligráfica de Seda ("Para: Adi") -->
+            <div class="envelope-dedication-tag" aria-hidden="true">
+              <div class="tag-pin"></div>
+              <div class="tag-body">
+                <span class="tag-label">Para:</span>
+                <span class="tag-recipient">Adi</span>
+                <svg class="ui-icon ui-icon-rose tag-heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              </div>
+            </div>
+
+            <!-- 6. Sello de Lacre Realista Zafiro y Oro (Monograma A + E en relieve 3D) -->
+            <div class="envelope-wax-seal" aria-hidden="true">
+              <div class="wax-seal-outer-rim">
+                <div class="wax-seal-depression">
+                  <div class="wax-beaded-border"></div>
+                  <div class="wax-stamp-core">
+                    <span class="seal-initials">A &amp; E</span>
+                    <span class="seal-heart-mark">
+                      <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </span>
+                  </div>
+                </div>
+                <div class="wax-gloss-sheen"></div>
+              </div>
+            </div>
+
           </div>
         </div>
+
+        <!-- Indicador de acción romántico -->
         <div class="envelope-prompt">
-          <svg class="ui-icon ui-icon-rose" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-          <span>Toca el sobre sellado para leer tu carta</span>
-          <svg class="ui-icon ui-icon-gold" viewBox="0 0 24 24"><path d="M12 2L9.5 8.5 3 11l6.5 2.5L12 20l2.5-6.5L21 11l-6.5-2.5L12 2zm7 13l-1.25 3.25L14.5 19.5l3.25 1.25L19 24l1.25-3.25L23.5 19.5l-3.25-1.25L19 15z"/></svg>
+          <span class="prompt-pill">
+            <svg class="ui-icon ui-icon-gold prompt-icon-left" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            <span class="prompt-text">Toca el sobre sellado para leer tu carta</span>
+            <svg class="ui-icon ui-icon-rose prompt-icon-right" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          </span>
         </div>
       </div>
     </section>

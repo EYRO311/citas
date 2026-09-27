@@ -31,6 +31,7 @@
   --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --font-serif: 'Cormorant Garamond', Georgia, serif;
   --font-ui: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-script: 'Alex Brush', cursive;
 
   --radius-sm: 8px;
   --radius-md: 16px;
@@ -248,216 +249,517 @@ body {
   overflow-wrap: break-word;
 }
 
-/* Sobre Interactivo de Lujo en Lienzo Blanco con Sello Zafiro A + E */
+/* ==============================================================================
+   SOBRE INTERACTIVO DE PAPELERÍA DE ALTA GAMA (A + E) 💌
+   ============================================================================== */
 .envelope-interactive-container {
-  margin: 8px 0 16px 0;
+  margin: 14px auto 22px auto;
   cursor: pointer;
   perspective: 1200px;
   width: 100%;
+  max-width: 440px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.envelope-widget {
+.envelope-stage {
   position: relative;
-  width: clamp(230px, 86vw, 360px);
-  height: clamp(145px, 56vw, 225px);
-  max-width: 100%;
-  background: #FCFAF6;
-  border-radius: var(--radius-md);
-  box-shadow: 0 18px 45px rgba(12, 35, 64, 0.28), 0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 1.5px solid #E2E8F0;
+  width: clamp(260px, 88vw, 380px);
+  height: clamp(168px, 56vw, 235px);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+}
+
+/* Sombra ambiental proyectada con profundidad realista sobre el fondo */
+.envelope-ambient-shadow {
+  position: absolute;
+  bottom: -16px;
+  left: 6%;
+  right: 6%;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(10, 25, 47, 0.42) 0%, rgba(10, 25, 47, 0.14) 55%, transparent 75%);
+  filter: blur(8px);
+  transform: scale(0.95);
+  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.45s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.envelope-interactive-container:hover .envelope-ambient-shadow,
+.envelope-interactive-container:focus-visible .envelope-ambient-shadow {
+  transform: scale(1.05) translateY(4px);
+  opacity: 0.7;
+}
+
+/* Cuerpo principal del sobre (Papelería marfil con textura y bisel fino) */
+.envelope-widget {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(145deg, #FFFDFB 0%, #FAF6EE 50%, #F3EBDD 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(212, 175, 55, 0.38);
+  box-shadow: 
+    0 16px 36px -8px rgba(10, 25, 47, 0.32),
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+    inset 0 0 16px rgba(212, 175, 55, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.45s ease;
   overflow: visible;
+  z-index: 1;
 }
 
-.envelope-widget:hover {
+.envelope-interactive-container:hover .envelope-widget,
+.envelope-interactive-container:focus-visible .envelope-widget {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 26px 55px rgba(12, 35, 64, 0.36), 0 0 22px rgba(186, 230, 253, 0.6);
+  box-shadow: 
+    0 26px 52px -10px rgba(10, 25, 47, 0.42),
+    0 8px 20px rgba(0, 0, 0, 0.12),
+    0 0 24px rgba(212, 175, 55, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.95);
 }
 
-/* Hoja de carta asomándose */
+/* 1. Forro interior de lujo (Zafiro Noche con destellos dorados finos) */
+.envelope-interior-lining {
+  position: absolute;
+  inset: 0;
+  border-radius: 11px;
+  background: radial-gradient(circle at 50% 30%, #173873 0%, #0E244D 65%, #08162E 100%);
+  overflow: hidden;
+  z-index: 1;
+}
+
+.lining-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+  background-image: radial-gradient(#F5D073 1px, transparent 1px), radial-gradient(#FFFFFF 0.8px, transparent 0.8px);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+}
+
+/* 2. Tarjeta / Hoja de carta que se asoma con caligrafía real */
 .envelope-letter-peek {
   position: absolute;
-  top: 10px;
+  top: 12px;
   left: 14px;
   right: 14px;
-  height: 60%;
-  background: #FFFFFF;
-  border-radius: 6px 6px 0 0;
-  border: 1px solid #E2E8F0;
-  border-bottom: none;
-  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 14px 16px;
-  z-index: 1;
-  transition: transform 0.4s ease;
+  height: 72%;
+  z-index: 2;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
 }
 
-.envelope-widget:hover .envelope-letter-peek {
-  transform: translateY(-16px);
+.envelope-interactive-container:hover .envelope-letter-peek,
+.envelope-interactive-container:focus-visible .envelope-letter-peek {
+  transform: translateY(-28px);
+}
+
+.peek-card-sheet {
+  width: 100%;
+  height: 100%;
+  background: #FFFDF9;
+  border-radius: 8px 8px 4px 4px;
+  border: 1px solid #E6D8BF;
+  box-shadow: 
+    0 -6px 14px rgba(10, 25, 47, 0.12),
+    inset 0 0 0 1px #FFFFFF;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.peek-gold-filigree {
+  position: absolute;
+  top: 3px;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #D4AF37, #FFF2A8, #D4AF37, transparent);
+  border-radius: 2px;
+}
+
+.peek-header {
+  margin-top: 4px;
+}
+
+.peek-salutation {
+  font-family: var(--font-script, 'Alex Brush', cursive);
+  font-size: clamp(1.18rem, 4.2vw, 1.48rem);
+  font-weight: 500;
+  color: #1E3A8A;
+  display: block;
+  line-height: 1.1;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+
+.peek-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 2px;
 }
 
 .peek-line {
-  height: 3px;
-  background: #E2E8F0;
+  height: 2.5px;
+  background: linear-gradient(90deg, #E8DFD0, #F3EDE3);
   border-radius: 2px;
-  width: 85%;
+  width: 90%;
 }
 
 .peek-line.short {
-  width: 55%;
+  width: 60%;
 }
 
-/* Pliegues del sobre */
-.envelope-folds {
+.peek-callout {
+  margin-top: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  background: rgba(245, 240, 230, 0.88);
+  border: 1px solid #E2D2B8;
+  border-radius: var(--radius-full);
+  font-family: var(--font-ui);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #8C6A2E;
+}
+
+.peek-heart {
+  width: 0.85em;
+  height: 0.85em;
+}
+
+/* 3. Pliegues Frontales del Bolsillo (SVG de precisión) */
+.envelope-pocket-front {
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-md);
+  border-radius: 12px;
   overflow: hidden;
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
 }
 
-.fold-left {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 50%;
-  background: linear-gradient(90deg, #F8FAFC 0%, #FFFFFF 100%);
-  clip-path: polygon(0 0, 100% 50%, 0 100%);
-  border-left: 1px solid #E2E8F0;
-  opacity: 0.95;
+.envelope-folds-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
-.fold-right {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 50%;
-  background: linear-gradient(-90deg, #F8FAFC 0%, #FFFFFF 100%);
-  clip-path: polygon(100% 0, 0 50%, 100% 100%);
-  border-right: 1px solid #E2E8F0;
-  opacity: 0.95;
-}
-
-.fold-bottom {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 60%;
-  background: linear-gradient(0deg, #F1F5F9 0%, #FFFFFF 100%);
-  clip-path: polygon(0 100%, 50% 25%, 100% 100%);
-  border-bottom: 1.5px solid #CBD5E1;
-  box-shadow: 0 -4px 12px rgba(12, 35, 64, 0.06);
-}
-
+/* 4. Solapa Superior Plegable (Flap) con Borde Dorado */
 .envelope-flap-top {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 55%;
-  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
-  border-top: 1.5px solid #E2E8F0;
+  height: 60%;
   transform-origin: top center;
-  transition: transform 0.4s ease;
-  z-index: 3;
+  transition: transform 0.52s cubic-bezier(0.34, 1.4, 0.64, 1);
+  z-index: 4;
+  pointer-events: none;
 }
 
-.envelope-widget:hover .envelope-flap-top {
-  transform: rotateX(25deg);
+.flap-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
 }
 
-/* Etiqueta dedicatoria colgante */
-.envelope-tag {
+.envelope-interactive-container:hover .envelope-flap-top,
+.envelope-interactive-container:focus-visible .envelope-flap-top {
+  transform: rotateX(44deg) translateY(-2px);
+}
+
+.envelope-interactive-container.envelope-opened .envelope-flap-top {
+  transform: rotateX(170deg) translateY(-4px);
+  z-index: 1;
+}
+
+.envelope-interactive-container.envelope-opened .envelope-letter-peek {
+  transform: translateY(-46px);
+}
+
+/* 5. Dedicatoria de Cinta Caligráfica de Seda ("Para: Adi") */
+.envelope-dedication-tag {
   position: absolute;
   top: -8px;
-  right: 14px;
+  right: 18px;
   z-index: 10;
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: #FFFBEB;
-  border: 1px solid #FDE68A;
-  padding: 3px 10px;
-  border-radius: var(--radius-full);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
   transform: rotate(3deg);
-  transition: transform 0.3s ease;
+  transition: transform 0.35s ease;
+  pointer-events: none;
 }
 
-.envelope-widget:hover .envelope-tag {
-  transform: rotate(0deg) scale(1.05);
+.envelope-interactive-container:hover .envelope-dedication-tag,
+.envelope-interactive-container:focus-visible .envelope-dedication-tag {
+  transform: rotate(-1deg) scale(1.06);
 }
 
-.tag-text {
-  font-family: var(--font-ui);
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #B45309;
+.tag-pin {
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle at 35% 35%, #FFEBA3 0%, #D4AF37 60%, #8A6D1C 100%);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  margin-right: 3px;
 }
 
-/* Sello de cera en relieve Zafiro y Oro con monograma A+E */
-.envelope-seal {
+.tag-body {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(135deg, #FFFDF6 0%, #FEF9EB 100%);
+  border: 1px solid #ECC97B;
+  padding: 3px 12px 3px 10px;
+  border-radius: 4px;
+  box-shadow: 0 4px 10px rgba(10, 25, 47, 0.16), 0 1px 3px rgba(0, 0, 0, 0.08);
   position: relative;
-  z-index: 6;
-  width: clamp(58px, 18vw, 84px);
-  height: clamp(58px, 18vw, 84px);
-  background: radial-gradient(circle at 35% 35%, #2563EB 0%, #1D4ED8 65%, #0B254E 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 22px rgba(11, 37, 78, 0.45), inset 0 2px 4px rgba(255, 255, 255, 0.5);
-  border: 2px solid rgba(255, 255, 255, 0.7);
-  animation: heartPulse 2.8s infinite ease-in-out;
 }
 
-.seal-inner-ring {
-  width: 82%;
-  height: 82%;
-  border-radius: 50%;
-  border: 1.5px dashed rgba(212, 175, 55, 0.85);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.tag-body::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #D4AF37;
+  border-radius: 4px 0 0 4px;
 }
 
-.seal-monogram {
-  font-family: var(--font-display);
-  font-size: clamp(1.05rem, 4vw, 1.4rem);
-  font-weight: 700;
-  font-style: italic;
-  color: #FFFFFF;
-  letter-spacing: 1.5px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-}
-
-.envelope-prompt {
-  margin-top: 14px;
+.tag-label {
   font-family: var(--font-serif);
-  font-size: clamp(0.95rem, 3.5vw, 1.15rem);
+  font-size: 0.72rem;
   font-style: italic;
   font-weight: 600;
-  color: #FFFFFF;
+  color: #8C6A2E;
+}
+
+.tag-recipient {
+  font-family: var(--font-script, 'Alex Brush', cursive);
+  font-size: 1.18rem;
+  font-weight: 600;
+  color: #1E3A8A;
+  line-height: 1;
+}
+
+.tag-heart {
+  width: 0.85em;
+  height: 0.85em;
+}
+
+/* 6. Sello de Lacre Realista Zafiro y Oro (Monograma A + E en relieve 3D) */
+.envelope-wax-seal {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 6;
+  width: clamp(66px, 19vw, 84px);
+  height: clamp(66px, 19vw, 84px);
+  pointer-events: none;
+}
+
+.wax-seal-outer-rim {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 48% 52% 49% 51% / 52% 48% 52% 48%;
+  background: radial-gradient(circle at 35% 30%, #295FBE 0%, #1D4494 45%, #102B66 80%, #09193D 100%);
+  box-shadow: 
+    0 8px 24px rgba(9, 25, 61, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.45),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  text-shadow: 0 2px 6px rgba(10, 26, 48, 0.85);
-  animation: bounceSlow 2.2s infinite;
-  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  animation: sealPulseGlow 3.2s infinite ease-in-out;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.envelope-interactive-container:hover .wax-seal-outer-rim,
+.envelope-interactive-container:focus-visible .wax-seal-outer-rim {
+  transform: scale(1.08) rotate(3deg);
+  box-shadow: 
+    0 12px 28px rgba(9, 25, 61, 0.65),
+    0 0 20px rgba(212, 175, 55, 0.5),
+    inset 0 2px 5px rgba(255, 255, 255, 0.6);
+}
+
+/* Depresión del sello metálico en el centro de la cera */
+.wax-seal-depression {
+  width: 78%;
+  height: 78%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 45% 45%, #163C82 0%, #0F2C63 70%, #091D42 100%);
+  box-shadow: 
+    inset 0 3px 6px rgba(0, 0, 0, 0.65),
+    inset 0 -2px 4px rgba(255, 255, 255, 0.25),
+    0 1px 2px rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.wax-beaded-border {
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 1px dashed rgba(245, 208, 115, 0.7);
+  opacity: 0.85;
+}
+
+.wax-stamp-core {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  gap: 1px;
+}
+
+.seal-initials {
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 3.8vw, 1.28rem);
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: 1.5px;
+  color: #F8E5A7;
+  text-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 8px rgba(245, 208, 115, 0.7);
+  display: block;
+  line-height: 1;
+}
+
+.seal-heart-mark {
+  display: inline-flex;
+  width: 11px;
+  height: 11px;
+  fill: #F8E5A7;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
+}
+
+.seal-heart-mark svg {
+  width: 100%;
+  height: 100%;
+}
+
+.wax-gloss-sheen {
+  position: absolute;
+  top: 8%;
+  left: 14%;
+  width: 38%;
+  height: 25%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+  transform: rotate(-30deg);
+}
+
+@keyframes sealPulseGlow {
+  0%, 100% {
+    box-shadow: 
+      0 8px 24px rgba(9, 25, 61, 0.55),
+      0 2px 6px rgba(0, 0, 0, 0.3),
+      inset 0 2px 4px rgba(255, 255, 255, 0.45),
+      inset 0 -3px 6px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 
+      0 10px 28px rgba(9, 25, 61, 0.65),
+      0 0 16px rgba(245, 208, 115, 0.4),
+      inset 0 2px 5px rgba(255, 255, 255, 0.55),
+      inset 0 -3px 6px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Indicador de Acción (Prompt) */
+.envelope-prompt {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.prompt-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 18px;
+  border-radius: var(--radius-full);
+  background: rgba(12, 35, 64, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(245, 208, 115, 0.4);
+  box-shadow: 0 6px 18px rgba(10, 25, 47, 0.3);
+  transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+  animation: promptFloat 2.4s infinite ease-in-out;
+}
+
+.envelope-interactive-container:hover .prompt-pill,
+.envelope-interactive-container:focus-visible .prompt-pill {
+  transform: translateY(-2px);
+  background: rgba(12, 35, 64, 0.88);
+  border-color: rgba(245, 208, 115, 0.8);
+  box-shadow: 0 8px 22px rgba(10, 25, 47, 0.4), 0 0 16px rgba(245, 208, 115, 0.3);
+}
+
+.prompt-text {
+  font-family: var(--font-serif);
+  font-size: clamp(0.92rem, 3.2vw, 1.08rem);
+  font-weight: 600;
+  font-style: italic;
+  color: #FFFFFF;
+  letter-spacing: 0.2px;
+}
+
+.prompt-icon-left,
+.prompt-icon-right {
+  font-size: 1.15rem;
+}
+
+@keyframes promptFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@media (max-width: 340px) {
+  .envelope-stage {
+    width: 250px;
+    height: 162px;
+  }
+  .prompt-pill {
+    padding: 6px 12px;
+    gap: 6px;
+  }
+  .prompt-text {
+    font-size: 0.85rem;
+  }
 }
 
 /* ==============================================================================

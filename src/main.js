@@ -48,16 +48,39 @@ function setupHeroEnvelope() {
   const letterModal = document.getElementById('modal-letter');
 
   if (envelope && letterModal) {
-    envelope.addEventListener('click', (e) => {
+    const openLetter = (e) => {
       sounds.playSparkle();
+      envelope.classList.add('envelope-opened');
+
+      // Centro del sobre para la explosión romántica de pétalos/globos
+      const rect = envelope.getBoundingClientRect();
+      const burstX = e && e.clientX ? e.clientX : rect.left + rect.width / 2;
+      const burstY = e && e.clientY ? e.clientY : rect.top + rect.height / 2;
+
       if (window.petalsInstance) {
-        window.petalsInstance.triggerBurst(e.clientX, e.clientY, 40);
+        window.petalsInstance.triggerBurst(burstX, burstY, 45);
       }
-      if (typeof letterModal.showModal === 'function') {
-        letterModal.showModal();
-      } else {
-        letterModal.setAttribute('open', '');
+
+      setTimeout(() => {
+        if (typeof letterModal.showModal === 'function') {
+          letterModal.showModal();
+        } else {
+          letterModal.setAttribute('open', '');
+        }
+      }, 180);
+    };
+
+    envelope.addEventListener('click', openLetter);
+    envelope.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openLetter(e);
       }
+    });
+
+    // Al cerrar la carta, desvanecer estado abierto del sobre suavemente
+    letterModal.addEventListener('close', () => {
+      envelope.classList.remove('envelope-opened');
     });
   }
 }
