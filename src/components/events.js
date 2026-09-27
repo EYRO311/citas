@@ -8,7 +8,8 @@ import {
   saveEvents,
   isEventSecretUnlocked,
   unlockSecretEvent,
-  lockSecretEvent
+  lockSecretEvent,
+  isEventReadyToDisplay
 } from '../utils/storage.js';
 import { sounds } from '../utils/audio.js';
 
@@ -17,6 +18,7 @@ export class EventsInvitations {
     this.container = document.getElementById(containerId);
     this.onRSVPChange = onRSVPChange;
     this.shyButtonCount = 0;
+    this.lastVisibleCount = 0;
     this.shyPhrases = [
       '¿Segura? 🥺',
       '¡Habrá tu postre favorito! 🍰',
@@ -35,13 +37,36 @@ export class EventsInvitations {
     window.addEventListener('events_updated', () => this.render());
     window.addEventListener('secret_unlocked', () => this.render());
     window.addEventListener('secret_locked', () => this.render());
+
+    // Verificador periódico: revela citas ocultas automáticamente en el momento exacto
+    this.startTimeRevealWatcher();
+  }
+
+  startTimeRevealWatcher() {
+    if (this.timeWatcherInterval) clearInterval(this.timeWatcherInterval);
+    this.timeWatcherInterval = setInterval(() => {
+      const events = getEvents();
+      const currentReadyCount = events.filter(e => isEventReadyToDisplay(e)).length;
+      if (currentReadyCount !== this.lastVisibleCount) {
+        sounds.playCelebration();
+        if (window.petalsInstance) {
+          window.petalsInstance.triggerBurst(window.innerWidth / 2, window.innerHeight * 0.4, 55);
+        }
+        this.render();
+        if (this.onRSVPChange) this.onRSVPChange();
+      }
+    }, 15000);
   }
 
   render() {
     if (!this.container) return;
     const events = getEvents();
 
-    if (events.length === 0) {
+    // FILTRADO ESTRICTO: Citas ocultas permanecen sin mostrarse hasta que se llegue a esa hora
+    const visibleEvents = events.filter(event => isEventReadyToDisplay(event));
+    this.lastVisibleCount = visibleEvents.length;
+
+    if (visibleEvents.length === 0) {
       this.container.innerHTML = `
         <div class="glass-panel" style="text-align: center; padding: 40px 20px; border-radius: var(--radius-lg);">
           <span style="font-size: 2.5rem; display: block; margin-bottom: 10px;">🌻</span>
@@ -58,7 +83,7 @@ export class EventsInvitations {
 
     this.container.innerHTML = `
       <div class="events-grid">
-        ${events.map(event => this.renderEventCard(event)).join('')}
+        ${visibleEvents.map(event => this.renderEventCard(event)).join('')}
       </div>
     `;
 

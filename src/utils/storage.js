@@ -165,6 +165,9 @@ const DEFAULT_EVENTS = [
     isHidden: true,
     secretCode: 'girasol',
     secretClue: 'Nuestra flor amarilla favorita que siempre sonríe al sol 🌻',
+    revealDate: '2026-10-18',
+    revealTime: '20:00',
+    forceReveal: false,
     accepted: false,
     acceptedAt: null
   }
@@ -202,6 +205,9 @@ export function addEvent(eventData) {
     isHidden: isHidden,
     secretCode: (eventData.secretCode || '').trim(),
     secretClue: (eventData.secretClue || '').trim(),
+    revealDate: (eventData.revealDate || eventData.date || '').trim(),
+    revealTime: (eventData.revealTime || eventData.time || '19:30').trim(),
+    forceReveal: !!eventData.forceReveal,
     accepted: false,
     acceptedAt: null,
     createdAt: new Date().toISOString()
@@ -209,6 +215,30 @@ export function addEvent(eventData) {
   events.push(newEvent);
   saveEvents(events);
   return newEvent;
+}
+
+// ------------------------------------------------------------------------------
+// CONTROL DE VISIBILIDAD TEMPORAL: CITAS OCULTAS HASTA LA HORA INDICADA
+// ------------------------------------------------------------------------------
+export function getEventRevealTimestamp(event) {
+  if (!event) return 0;
+  const dateStr = (event.revealDate || event.date || '').trim();
+  const timeStr = (event.revealTime || event.time || '19:30').trim();
+  if (!dateStr) return 0;
+  const parsed = new Date(`${dateStr}T${timeStr}:00`).getTime();
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+export function isEventReadyToDisplay(event) {
+  if (!event) return false;
+  // Citas públicas siempre se muestran
+  if (!event.isHidden) return true;
+  // Si el creador forzó la revelación inmediata desde admin
+  if (event.forceReveal) return true;
+  // Si es cita oculta, NO debe mostrarse hasta que se llegue a esa hora
+  const revealTime = getEventRevealTimestamp(event);
+  if (!revealTime) return false;
+  return Date.now() >= revealTime;
 }
 
 export function updateEvent(eventId, partialData) {

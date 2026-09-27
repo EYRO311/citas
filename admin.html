@@ -177,7 +177,7 @@
                 <div>
                   <label for="event-is-hidden" class="toggle-title">¿Es una Cita Oculta (Sorpresa Secreta)?</label>
                   <p class="toggle-desc">
-                    Aparecerá en la página principal con candado y misterio. Adi no sabrá los detalles hasta ingresar la palabra mágica.
+                    Permanecerá sin mostrarse a Adi hasta que el reloj alcance la fecha y hora programada. Al llegar esa hora, aparecerá automáticamente.
                   </p>
                 </div>
               </div>
@@ -192,22 +192,57 @@
               <div class="secret-panel-glow"></div>
               <div class="secret-panel-inner">
                 <div class="secret-panel-header">
-                  <span class="secret-badge">🔒 Configuración de Sorpresa Secreta</span>
+                  <span class="secret-badge">🔒 Revelación Programada por Hora</span>
                 </div>
 
-                <div class="form-group">
+                <!-- FECHA Y HORA EXACTA DE REVELACIÓN -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="event-reveal-date">
+                      <span>Fecha en que se mostrará *</span>
+                    </label>
+                    <input 
+                      type="date" 
+                      id="event-reveal-date" 
+                      class="form-input form-input-secret" 
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="event-reveal-time">
+                      <span>Hora en que se revelará *</span>
+                    </label>
+                    <input 
+                      type="time" 
+                      id="event-reveal-time" 
+                      class="form-input form-input-secret" 
+                      value="19:30" 
+                    />
+                  </div>
+                </div>
+                <p class="field-help-text" style="color: #4338ca; font-weight: 600; margin-bottom: 10px;">
+                  ⏰ <strong>Sin mostrarse:</strong> Esta cita no aparecerá en la página hasta que llegue este momento exacto.
+                </p>
+
+                <div class="form-group" style="background: rgba(255,255,255,0.7); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid #c7d2fe;">
+                  <label for="event-force-reveal" style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; color: #1e3a8a; margin: 0;">
+                    <input type="checkbox" id="event-force-reveal" />
+                    <span>👁️ <strong>Forzar revelación inmediata</strong> (mostrar desde ya a Adi, ignorando la hora)</span>
+                  </label>
+                </div>
+
+                <div class="form-group" style="margin-top: 10px;">
                   <label class="form-label" for="event-secret-code">
-                    <span>Palabra mágica de desbloqueo</span>
-                    <span class="label-hint">(Lo que Adi debe escribir para revelarla)</span>
+                    <span>Palabra mágica de desbloqueo (Opcional)</span>
+                    <span class="label-hint">(Lo que Adi debe escribir al revelarse)</span>
                   </label>
                   <input 
                     type="text" 
                     id="event-secret-code" 
-                    class="form-input form-input-secret" 
-                    placeholder="Ej: girasol, nuestro cafe, te quiero, 1509" 
+                    class="form-input" 
+                    placeholder="Ej: girasol, nuestro cafe (o dejar vacío para revelación directa)" 
                   />
                   <p class="field-help-text">
-                    Si lo dejas vacío, se revelará al presionar el botón de descubrir. Si pones una palabra (no distingue mayúsculas), Adi tendrá que adivinarla.
+                    Si lo dejas vacío, al llegar la hora se revelará directamente. Si pones una palabra, le pedirá adivinarla.
                   </p>
                 </div>
 

@@ -2,7 +2,7 @@
 // COMPONENTE: CRONÓMETRO REGRESIVO PARA LA SIGUIENTE CITA
 // ==============================================================================
 
-import { getEvents } from '../utils/storage.js';
+import { getEvents, isEventReadyToDisplay } from '../utils/storage.js';
 import { sounds } from '../utils/audio.js';
 
 export class CountdownTimer {
@@ -33,8 +33,11 @@ export class CountdownTimer {
     const events = getEvents();
     const now = new Date().getTime();
 
+    // Solo considerar citas visibles (las citas ocultas no se cuentan hasta llegar a su hora)
+    const visibleEvents = events.filter(e => isEventReadyToDisplay(e));
+
     // Buscar el evento futuro más cercano
-    const futureEvents = events
+    const futureEvents = visibleEvents
       .map(e => {
         const dateTimeStr = `${e.date}T${e.time || '19:00'}:00`;
         const time = new Date(dateTimeStr).getTime();

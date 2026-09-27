@@ -11,7 +11,9 @@ import {
   deleteEvent,
   updateEventRSVP,
   getAdminPIN,
-  setAdminPIN
+  setAdminPIN,
+  getEventRevealTimestamp,
+  isEventReadyToDisplay
 } from './utils/storage.js';
 
 // Código fuente de Google Apps Script para copiarlo al portapapeles
@@ -109,7 +111,27 @@ class AdminDashboard {
     // Fecha predeterminada para el formulario (hoy)
     const today = new Date().toISOString().split('T')[0];
     const dateInput = document.getElementById('event-date');
+    const revealDateInput = document.getElementById('event-reveal-date');
     if (dateInput) dateInput.value = today;
+    if (revealDateInput && !revealDateInput.value) revealDateInput.value = today;
+
+    // Sincronizar fecha y hora con la fecha y hora de revelación si no se ha personalizado
+    if (dateInput && revealDateInput) {
+      dateInput.addEventListener('change', () => {
+        if (this.editingEventId === null) {
+          revealDateInput.value = dateInput.value;
+        }
+      });
+    }
+    const timeInput = document.getElementById('event-time');
+    const revealTimeInput = document.getElementById('event-reveal-time');
+    if (timeInput && revealTimeInput) {
+      timeInput.addEventListener('change', () => {
+        if (this.editingEventId === null) {
+          revealTimeInput.value = timeInput.value;
+        }
+      });
+    }
 
     // Escuchar actualizaciones de eventos externas
     window.addEventListener('events_updated', () => {
@@ -261,6 +283,9 @@ class AdminDashboard {
     const isHidden = document.getElementById('event-is-hidden').checked;
     const secretCode = document.getElementById('event-secret-code').value.trim();
     const secretClue = document.getElementById('event-secret-clue').value.trim();
+    const revealDate = (document.getElementById('event-reveal-date')?.value || date || '').trim();
+    const revealTime = (document.getElementById('event-reveal-time')?.value || time || '19:30').trim();
+    const forceReveal = !!document.getElementById('event-force-reveal')?.checked;
 
     const eventPayload = {
       title,
@@ -273,7 +298,10 @@ class AdminDashboard {
       secretHint,
       isHidden,
       secretCode,
-      secretClue
+      secretClue,
+      revealDate,
+      revealTime,
+      forceReveal
     };
 
     if (idField.value && idField.value !== '') {
@@ -317,6 +345,13 @@ class AdminDashboard {
     const today = new Date().toISOString().split('T')[0];
     const dateInput = document.getElementById('event-date');
     if (dateInput) dateInput.value = today;
+
+    const revealDateInput = document.getElementById('event-reveal-date');
+    const revealTimeInput = document.getElementById('event-reveal-time');
+    const forceRevealInput = document.getElementById('event-force-reveal');
+    if (revealDateInput) revealDateInput.value = today;
+    if (revealTimeInput) revealTimeInput.value = '19:30';
+    if (forceRevealInput) forceRevealInput.checked = false;
   }
 
   editEvent(eventId) {
@@ -347,6 +382,13 @@ class AdminDashboard {
 
     document.getElementById('event-secret-code').value = event.secretCode || '';
     document.getElementById('event-secret-clue').value = event.secretClue || '';
+
+    const revealDateInput = document.getElementById('event-reveal-date');
+    const revealTimeInput = document.getElementById('event-reveal-time');
+    const forceRevealInput = document.getElementById('event-force-reveal');
+    if (revealDateInput) revealDateInput.value = event.revealDate || event.date || '';
+    if (revealTimeInput) revealTimeInput.value = event.revealTime || event.time || '19:30';
+    if (forceRevealInput) forceRevealInput.checked = !!event.forceReveal;
 
     document.getElementById('form-mode-icon').textContent = '✏️';
     document.getElementById('form-mode-title').textContent = `Editar Cita #${event.id}`;
@@ -416,16 +458,27 @@ class AdminDashboard {
     container.innerHTML = events.map(event => {
       const isAccepted = event.accepted;
       const isHidden = event.isHidden;
+      const isReady = isEventReadyToDisplay(event);
+      const revealTs = getEventRevealTimestamp(event);
       const dateFormatted = this.formatDate(event.date);
+      const timeRemaining = isHidden ? this.formatTimeRemaining(revealTs) : '';
 
       return `
         <div class="admin-event-card ${isHidden ? 'admin-card-secret' : ''} ${isAccepted ? 'admin-card-accepted' : ''}" data-id="${event.id}">
           <div class="admin-card-top">
             <div class="admin-badge-group">
               <span class="badge-event ${isHidden ? 'badge-secret' : ''}">${event.badge || `CITA #${event.id}`}</span>
-              ${isHidden ? `
-                <span class="status-badge-secret">🔒 Oculta / Secreta</span>
-              ` : `
+              ${isHidden ? (
+                isReady ? `
+                  <span class="status-badge-secret" style="background: rgba(16, 185, 129, 0.15); color: #047857; border-color: #6ee7b7;">
+                    🎉 Ya visible para Adi
+                  </span>
+                ` : `
+                  <span class="status-badge-secret" style="background: rgba(239, 68, 68, 0.15); color: #b91c1c; border-color: #fca5a5;">
+                    ⏳ Oculta (Sin mostrarse a Adi)
+                  </span>
+                `
+              ) : `
                 <span class="status-badge-public">💌 Pública</span>
               `}
             </div>
@@ -475,11 +528,35 @@ class AdminDashboard {
                   <em>"${event.secretClue}"</em>
                 </div>
               ` : ''}
+
+              <!-- ESTADO EXACTO DE REVELACIÓN PARA ADI -->
+              <div class="secret-info-row" style="margin-top: 8px; padding: 10px 12px; background: ${!isReady ? 'rgba(239, 68, 68, 0.08)' : 'rgba(16, 185, 129, 0.1)'}; border-radius: 8px; border-left: 4px solid ${!isReady ? '#ef4444' : '#10b981'};">
+                <div style="font-weight: 700; color: ${!isReady ? '#b91c1c' : '#047857'}; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
+                  <span>${!isReady ? '⛔ SIN MOSTRARSE A ADI HASTA LA HORA' : '👁️ YA MOSTRADA A ADI'}</span>
+                  <span style="font-size: 0.8rem; font-weight: normal; color: #4b5563;">
+                    ${!isReady ? timeRemaining : (event.forceReveal ? '(Revelación forzada)' : '(Hora alcanzada)')}
+                  </span>
+                </div>
+                <div style="font-size: 0.82rem; color: #374151; margin-top: 4px;">
+                  ${!isReady ? `
+                    Programada para aparecer en la página el <strong>${this.formatDate(event.revealDate || event.date)} a las ${event.revealTime || event.time || '19:30'} hrs</strong>.
+                    Hasta ese momento exacto, la tarjeta y el contador están <strong>completamente invisibles</strong> para ella.
+                  ` : `
+                    La tarjeta ya está desbloqueada y visible en la página principal para Adi.
+                  `}
+                </div>
+              </div>
             </div>
           ` : ''}
 
           <!-- BARRA DE ACCIONES RÁPIDAS -->
           <div class="admin-card-actions">
+            ${isHidden ? `
+              <button class="btn-action-icon btn-toggle-force-reveal" data-id="${event.id}" title="${event.forceReveal ? 'Volver a bloquear hasta la hora exacta' : 'Forzar que se muestre a Adi inmediatamente'}">
+                <span>${event.forceReveal ? '⏳ Bloquear hasta la hora' : '👁️ Mostrar a Adi ahora'}</span>
+              </button>
+            ` : ''}
+
             <button class="btn-action-icon btn-toggle-visibility" data-id="${event.id}" title="${isHidden ? 'Hacer pública esta cita' : 'Ocultar esta cita (Hacer secreta)'}">
               <span>${isHidden ? '🔓 Hacer Pública' : '🔒 Hacer Oculta'}</span>
             </button>
@@ -504,6 +581,26 @@ class AdminDashboard {
   }
 
   attachCardEventListeners(container) {
+    container.querySelectorAll('.btn-toggle-force-reveal').forEach(btn => {
+      btn.addEventListener('click', () => {
+        sounds.playPop();
+        const eventId = parseInt(btn.dataset.id);
+        const events = getEvents();
+        const event = events.find(e => e.id === eventId);
+        if (event) {
+          const willForce = !event.forceReveal;
+          updateEvent(eventId, { forceReveal: willForce });
+          if (willForce) {
+            sounds.playCelebration();
+            this.showToast('¡Cita revelada inmediatamente para Adi! 👁️✨');
+          } else {
+            this.showToast('Cita bloqueada: no se mostrará hasta su hora programada ⏳');
+          }
+          this.refreshData();
+        }
+      });
+    });
+
     container.querySelectorAll('.btn-toggle-visibility').forEach(btn => {
       btn.addEventListener('click', () => {
         sounds.playPop();
@@ -925,6 +1022,20 @@ class AdminDashboard {
       }
     } catch (e) {}
     return dateStr;
+  }
+
+  formatTimeRemaining(targetTimestamp) {
+    if (!targetTimestamp) return '';
+    const diff = targetTimestamp - Date.now();
+    if (diff <= 0) return 'Hora cumplida';
+    const totalMinutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    const days = Math.floor(hours / 24);
+    if (days > 0) {
+      return `(Faltan ${days}d ${hours % 24}h)`;
+    }
+    return `(Faltan ${hours}h ${mins}m)`;
   }
 
   showToast(message) {
