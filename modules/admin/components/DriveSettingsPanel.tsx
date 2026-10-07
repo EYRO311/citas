@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { fetchDriveStatus, uploadMemoryToCloud } from '@/modules/gallery/data/memoriesApiClient';
+import { fetchCloudMemories, fetchDriveStatus, uploadMemoryToCloud } from '@/modules/gallery/data/memoriesApiClient';
 import type { DriveStatusResponse } from '@/types/drive';
 import { CODE_GS_CONTENT } from '../codeGs';
 import { Icon } from '@/shared/icons/Icon';
@@ -10,6 +10,7 @@ const FALLBACK_IMG = '/img/fondo.jpg';
 
 export default function DriveSettingsPanel({ onShowToast }: { onShowToast: (msg: string) => void }) {
   const [status, setStatus] = useState<DriveStatusResponse>({ connected: false, mode: 'local', memories: [] });
+  const [supabaseConnected, setSupabaseConnected] = useState(false);
   const [checking, setChecking] = useState(true);
   const [webhookUrl, setWebhookUrl] = useState('');
   const [folderId, setFolderId] = useState('');
@@ -25,14 +26,17 @@ export default function DriveSettingsPanel({ onShowToast }: { onShowToast: (msg:
 
   async function checkStatus(showToast = false) {
     setChecking(true);
-    const data = await fetchDriveStatus();
-    setStatus(data);
+    const [driveData, memoriesData] = await Promise.all([fetchDriveStatus(), fetchCloudMemories()]);
+    setStatus(driveData);
+    setSupabaseConnected(memoriesData.connected);
     setChecking(false);
     if (showToast) {
       onShowToast(
-        data.connected
-          ? `¡Conexión verificada! ${data.memories.length} fotos encontradas.`
-          : 'Operando en modo local (sin Drive conectado).'
+        memoriesData.connected
+          ? `¡Fotos guardándose en la nube (Supabase)! ${memoriesData.memories.length} recuerdos encontrados.`
+          : driveData.connected
+            ? `¡Conexión con Drive verificada! ${driveData.memories.length} fotos encontradas.`
+            : 'Operando en modo local (sin nube conectada).'
       );
     }
   }
@@ -110,9 +114,10 @@ export default function DriveSettingsPanel({ onShowToast }: { onShowToast: (msg:
     }
   }
 
+  const cloudConnected = supabaseConnected || status.connected;
   const bannerClass = checking
     ? 'drive-status-box'
-    : status.connected
+    : cloudConnected
       ? 'drive-status-box drive-status-connected'
       : 'drive-status-box drive-status-local';
 
@@ -133,24 +138,30 @@ export default function DriveSettingsPanel({ onShowToast }: { onShowToast: (msg:
           <div className={bannerClass}>
             <div className="status-header-row">
               <div className="status-indicator-wrap">
-                <span className={`status-dot ${checking ? 'yellow' : status.connected ? 'green' : 'yellow'}`}></span>
+                <span className={`status-dot ${checking ? 'yellow' : cloudConnected ? 'green' : 'yellow'}`}></span>
                 <strong>
                   {checking
-                    ? 'Verificando conexión con Google Drive...'
-                    : status.connected
-                      ? '¡Google Drive Conectado y Sincronizado! ☁️✨'
-                      : 'Álbum en Modo Local (Sin Drive)'}
+                    ? 'Verificando conexión con la nube...'
+                    : supabaseConnected
+                      ? '¡Fotos Guardándose en la Nube (Supabase)! ☁️✨'
+                      : status.connected
+                        ? '¡Google Drive Conectado y Sincronizado! ☁️✨'
+                        : 'Álbum en Modo Local (Sin Nube)'}
                 </strong>
               </div>
-              <span className="status-badge-public">{checking ? '...' : status.connected ? `Modo ${status.mode}` : 'Sin Drive conectado'}</span>
+              <span className="status-badge-public">
+                {checking ? '...' : supabaseConnected ? 'Modo supabase' : status.connected ? `Modo ${status.mode}` : 'Sin nube conectada'}
+              </span>
             </div>
             <p className="status-detail-text">
-              {status.connected
-                ? `Conexión exitosa. Se detectaron ${status.memories.length} fotos en tu carpeta de Drive listas para el álbum.`
-                : status.message ||
-                  'Las fotos se guardan en el navegador. Sigue los pasos de la derecha para conectar tu carpeta de Google Drive.'}
+              {supabaseConnected
+                ? 'Las fotos que suban se guardan automáticamente en Supabase, sin necesidad de configurar Google Drive. Lo de abajo es opcional, solo si además quieres respaldarlas en una carpeta de Drive.'
+                : status.connected
+                  ? `Conexión exitosa. Se detectaron ${status.memories.length} fotos en tu carpeta de Drive listas para el álbum.`
+                  : status.message ||
+                    'Las fotos se guardan en el navegador. Sigue los pasos de la derecha para conectar tu carpeta de Google Drive.'}
             </p>
-            {!checking && !status.connected && status.error && (
+            {!checking && !cloudConnected && status.error && (
               <p className="status-detail-text" style={{ color: '#b91c1c', fontWeight: 600, marginTop: 6 }}>
                 Detalle del error: {status.error}
               </p>
