@@ -4,10 +4,13 @@ import { useRef } from 'react';
 import { triggerGlobalBurst } from '@/modules/petals/registry';
 import { sounds } from '@/shared/sounds';
 import { Icon } from '@/shared/icons/Icon';
+import { useLetter } from '../hooks/useLetter';
 
 export default function EnvelopeHero() {
   const envelopeRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const { letter } = useLetter();
+  const bodyParagraphs = letter.body.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
 
   function openLetter(e: React.MouseEvent | React.KeyboardEvent) {
     sounds.playSparkle();
@@ -71,7 +74,7 @@ export default function EnvelopeHero() {
                 <div className="peek-card-sheet">
                   <div className="peek-gold-filigree"></div>
                   <div className="peek-header">
-                    <span className="peek-salutation">Para mi niña hermosa, Adi</span>
+                    <span className="peek-salutation">{letter.peekSalutation}</span>
                   </div>
                   <div className="peek-lines">
                     <div className="peek-line"></div>
@@ -276,7 +279,7 @@ export default function EnvelopeHero() {
             </header>
 
             <h2 id="letter-greeting" className="letter-greeting">
-              Para mi hermosa Adi,
+              {letter.greeting}
             </h2>
             <div className="letter-ornament" aria-hidden="true">
               <span className="letter-ornament-line"></span>
@@ -293,29 +296,23 @@ export default function EnvelopeHero() {
             </div>
 
             <div className="letter-body">
-              <p className="letter-lead">
-                Hoy quise crear un rincón que fuera tan especial y luminoso como tú. Elegí los colores de estas
-                flores al óleo porque tienen esa misma calidez y magia con la que llegas a iluminar mis días. Cada
-                instante a tu lado se convierte en mi recuerdo favorito.
-              </p>
-              <p>
-                Tengo preparadas dos citas para nosotros dos. Dos momentos pensados para detener el tiempo, mirarte a
-                los ojos, reírnos de todo y seguir escribiendo nuestra historia paso a paso. Quiero que cada una de
-                nuestras salidas quede guardada para siempre en nuestro álbum.
-              </p>
+              {bodyParagraphs.map((paragraph, index) => (
+                <p key={index} className={index === 0 ? 'letter-lead' : undefined}>
+                  {paragraph}
+                </p>
+              ))}
             </div>
 
-            <p className="letter-question">¿Me concederías el honor más bonito de acompañarme a estas dos aventuras?</p>
+            <p className="letter-question">{letter.question}</p>
 
             <p className="letter-ps">
-              <span className="letter-ps-label">P.D.</span> Cada flor de este lienzo guarda una razón por la que eres
-              y siempre serás mi persona favorita en el universo entero. 🌻
+              <span className="letter-ps-label">{letter.psLabel}</span> {letter.psText}
             </p>
 
             <footer className="letter-sign">
               <div className="letter-sign-text">
-                <span className="letter-sign-intro">Siempre tuyo,</span>
-                <span className="letter-sign-name">Eyro</span>
+                <span className="letter-sign-intro">{letter.signIntro}</span>
+                <span className="letter-sign-name">{letter.signName}</span>
               </div>
               <span className="letter-seal" aria-hidden="true">
                 <span>A+E</span>

@@ -8,9 +8,10 @@ import PinLock from './PinLock';
 import EventEditorForm from './EventEditorForm';
 import EventsAdminList from './EventsAdminList';
 import DriveSettingsPanel from './DriveSettingsPanel';
+import LetterEditorForm from './LetterEditorForm';
 import ChangePinModal, { ChangePinModalHandle } from './ChangePinModal';
 
-type Tab = 'events' | 'drive';
+type Tab = 'events' | 'letter' | 'drive';
 
 export default function AdminDashboard() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -86,6 +87,11 @@ export default function AdminDashboard() {
                 <Icon name="calendar" className="ui-icon-blue" /> Citas & Eventos Ocultos
               </span>
             </button>
+            <button type="button" className={`admin-nav-btn ${tab === 'letter' ? 'active' : ''}`} onClick={() => setTab('letter')}>
+              <span>
+                <Icon name="envelope" className="ui-icon-blue" /> Carta para Adi
+              </span>
+            </button>
             <button type="button" className={`admin-nav-btn ${tab === 'drive' ? 'active' : ''}`} onClick={() => setTab('drive')}>
               <span>
                 <Icon name="cloud" className="ui-icon-blue" /> Conectar Google Drive
@@ -93,7 +99,7 @@ export default function AdminDashboard() {
             </button>
           </nav>
 
-          {tab === 'events' ? (
+          {tab === 'events' && (
             <div className="admin-tab-section">
               <div className="admin-workspace-grid">
                 <EventEditorForm editingEvent={editingEvent} onCancelEdit={() => setEditingEventId(null)} onSaved={showToast} />
@@ -107,9 +113,15 @@ export default function AdminDashboard() {
                 />
               </div>
             </div>
-          ) : (
-            <DriveSettingsPanel onShowToast={showToast} />
           )}
+
+          {tab === 'letter' && (
+            <div className="admin-tab-section">
+              <LetterEditorForm onShowToast={showToast} />
+            </div>
+          )}
+
+          {tab === 'drive' && <DriveSettingsPanel onShowToast={showToast} />}
 
           <footer className="romantic-footer" style={{ marginTop: 40 }}>
             <p>
