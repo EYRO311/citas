@@ -55,6 +55,10 @@ export default function Home() {
           <Gallery />
         </section>
 
+        <section id="ideas-section" aria-label="Lista de planes futuros">
+          <IdeasList />
+        </section>
+
         <section className="glass-panel" style={{ textAlign: 'center', maxWidth: 800, margin: '0 auto' }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', color: '#b45309', marginBottom: 12 }}>
             Gracias por estar en mi vida, Adi <Icon name="heart" className="ui-icon-rose" />
@@ -73,10 +77,6 @@ export default function Home() {
               <Icon name="balloon" className="ui-icon-blue" /> Lluvia de globos
             </span>
           </button>
-        </section>
-
-        <section id="ideas-section" aria-label="Lista de planes futuros">
-          <IdeasList />
         </section>
 
         <footer className="romantic-footer">
