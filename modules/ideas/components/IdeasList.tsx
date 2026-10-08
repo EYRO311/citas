@@ -11,7 +11,7 @@ function platformLabel(link: string): string {
 }
 
 export default function IdeasList() {
-  const { ideas } = useIdeas();
+  const { ideas, connected, loading, refresh } = useIdeas();
 
   return (
     <div id="ideas-container">
@@ -21,6 +21,29 @@ export default function IdeasList() {
       <p className="section-subtitle">
         Ideas que quiero que hagamos juntos, inspiradas en cosas que vi por ahí y me recordaron a ti.
       </p>
+
+      {ideas.length > 0 && (
+        <div className={`drive-badge ${connected ? 'drive-connected' : 'drive-local'}`} onClick={refresh} style={{ margin: '0 auto 20px' }}>
+          {loading ? (
+            <>
+              <span className="status-dot yellow"></span>
+              <span>Sincronizando...</span>
+            </>
+          ) : connected ? (
+            <>
+              <span className="status-dot green"></span>
+              <span>
+                Lista en la nube <Icon name="cloud" className="ui-icon-blue" />
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="status-dot green"></span>
+              <span>Lista guardada en este dispositivo</span>
+            </>
+          )}
+        </div>
+      )}
 
       {ideas.length === 0 ? (
         <div className="empty-gallery-card glass-panel">

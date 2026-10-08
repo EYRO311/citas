@@ -12,12 +12,22 @@ export function getIdeas(): IdeaItem[] {
   return [];
 }
 
-export function saveIdeas(ideas: IdeaItem[]): void {
+// Escribe en localStorage sin avisar a la UI; se usa para mantener el cache
+// de respaldo al dia cuando los datos reales vienen de Supabase.
+export function cacheIdeas(ideas: IdeaItem[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(ideas));
+  } catch {
+    // storage unavailable (private mode, quota, etc.) — silently ignore
+  }
+}
+
+export function saveIdeas(ideas: IdeaItem[]): void {
+  cacheIdeas(ideas);
+  try {
     window.dispatchEvent(new CustomEvent('ideas_updated', { detail: ideas }));
   } catch {
-    // storage unavailable (private mode, quota, etc.) — silently ignore like events repo
+    // ignore
   }
 }
 

@@ -2,16 +2,17 @@
 
 import { useState } from 'react';
 import type { IdeaItem } from '@/types/ideas';
-import { addIdea, deleteIdea, updateIdea } from '@/modules/ideas/data/ideasRepository';
+import { createIdea, editIdea, removeIdea } from '@/modules/ideas/data/ideasService';
 import { useIdeas } from '@/modules/ideas/hooks/useIdeas';
 import { Icon } from '@/shared/icons/Icon';
 
 const emptyForm = { title: '', link: '' };
 
 export default function IdeasAdminPanel({ onShowToast }: { onShowToast: (msg: string) => void }) {
-  const { ideas, refresh } = useIdeas();
+  const { ideas, connected, refresh } = useIdeas();
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [submitting, setSubmitting] = useState(false);
 
   function startEdit(idea: IdeaItem) {
     setEditingId(idea.id);
@@ -23,24 +24,26 @@ export default function IdeasAdminPanel({ onShowToast }: { onShowToast: (msg: st
     setForm(emptyForm);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.title.trim()) return;
+    if (!form.title.trim() || submitting) return;
 
+    setSubmitting(true);
     if (editingId !== null) {
-      updateIdea(editingId, form);
+      await editIdea(editingId, form);
       onShowToast('¡Plan actualizado! ✨');
     } else {
-      addIdea(form);
+      await createIdea(form);
       onShowToast('¡Nuevo plan añadido a la lista! 💡');
     }
+    setSubmitting(false);
     cancelEdit();
     refresh();
   }
 
-  function handleDelete(idea: IdeaItem) {
+  async function handleDelete(idea: IdeaItem) {
     if (!confirm(`¿Eliminar "${idea.title}" de la lista?`)) return;
-    deleteIdea(idea.id);
+    await removeIdea(idea.id);
     onShowToast('Plan eliminado de la lista 🗑️');
     refresh();
   }
@@ -88,9 +91,9 @@ export default function IdeasAdminPanel({ onShowToast }: { onShowToast: (msg: st
             </div>
 
             <div className="form-actions-group">
-              <button type="submit" className="btn-primary">
+              <button type="submit" className="btn-primary" disabled={submitting}>
                 <span>
-                  <Icon name="save" className="ui-icon-white" /> {editingId !== null ? 'Actualizar' : 'Añadir a la lista'}
+                  <Icon name="save" className="ui-icon-white" /> {submitting ? 'Guardando...' : editingId !== null ? 'Actualizar' : 'Añadir a la lista'}
                 </span>
               </button>
               {editingId !== null && (
@@ -110,6 +113,8 @@ export default function IdeasAdminPanel({ onShowToast }: { onShowToast: (msg: st
               <h2 className="admin-section-title">Lista de Planes</h2>
               <p className="admin-section-subtitle">
                 {ideas.length} {ideas.length === 1 ? 'plan guardado' : 'planes guardados'}
+                {' · '}
+                {connected ? 'Sincronizado en la nube ☁️' : 'Guardado solo en este navegador'}
               </p>
             </div>
           </div>
