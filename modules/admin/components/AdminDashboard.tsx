@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useEvents } from '@/modules/events/hooks/useEvents';
 import PetalsCanvas from '@/modules/petals/components/PetalsCanvas';
+import Gallery from '@/modules/gallery/components/Gallery';
 import { Icon } from '@/shared/icons/Icon';
 import PinLock from './PinLock';
 import EventEditorForm from './EventEditorForm';
@@ -11,7 +12,7 @@ import DriveSettingsPanel from './DriveSettingsPanel';
 import LetterEditorForm from './LetterEditorForm';
 import ChangePinModal, { ChangePinModalHandle } from './ChangePinModal';
 
-type Tab = 'events' | 'letter' | 'drive';
+type Tab = 'events' | 'letter' | 'gallery' | 'drive';
 
 export default function AdminDashboard() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -92,6 +93,11 @@ export default function AdminDashboard() {
                 <Icon name="envelope" className="ui-icon-blue" /> Carta para Adi
               </span>
             </button>
+            <button type="button" className={`admin-nav-btn ${tab === 'gallery' ? 'active' : ''}`} onClick={() => setTab('gallery')}>
+              <span>
+                <Icon name="camera" className="ui-icon-blue" /> Álbum de Fotos
+              </span>
+            </button>
             <button type="button" className={`admin-nav-btn ${tab === 'drive' ? 'active' : ''}`} onClick={() => setTab('drive')}>
               <span>
                 <Icon name="cloud" className="ui-icon-blue" /> Conectar Google Drive
@@ -118,6 +124,12 @@ export default function AdminDashboard() {
           {tab === 'letter' && (
             <div className="admin-tab-section">
               <LetterEditorForm onShowToast={showToast} />
+            </div>
+          )}
+
+          {tab === 'gallery' && (
+            <div className="admin-tab-section">
+              <Gallery />
             </div>
           )}
 
