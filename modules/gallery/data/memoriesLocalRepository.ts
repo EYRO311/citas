@@ -20,32 +20,7 @@ function openDB(): Promise<IDBDatabase> {
   });
 }
 
-const INITIAL_MEMORIES: LocalMemory[] = [
-  {
-    id: 'mem_1',
-    title: 'Nuestra primera salida mágica ✨',
-    date: '2026-09-15',
-    location: 'Café & Paseo',
-    caption: 'El día en que el tiempo pasó volando y no quería que se terminara.',
-    imageUrl: '/img/fondo.jpg',
-    driveUrl: null,
-    driveFileId: null,
-    isLocal: true,
-    timestamp: Date.now() - 86400000 * 10,
-  },
-  {
-    id: 'mem_2',
-    title: 'Flores, risas y miradas cómplices 🌻',
-    date: '2026-09-21',
-    location: 'Tarde de flores amarillas',
-    caption: 'Cada flor me recuerda la luz tan hermosa que tienes en tu sonrisa.',
-    imageUrl: '/img/horizontal.jpg',
-    driveUrl: null,
-    driveFileId: null,
-    isLocal: true,
-    timestamp: Date.now() - 86400000 * 4,
-  },
-];
+const INITIAL_MEMORIES: LocalMemory[] = [];
 
 export async function getMemories(): Promise<LocalMemory[]> {
   try {
