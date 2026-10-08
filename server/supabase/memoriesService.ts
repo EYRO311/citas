@@ -171,6 +171,33 @@ export async function listMemories(supabase: SupabaseClient): Promise<RemoteMemo
   return [...byId.values()].map((record) => toMemory(supabase, record));
 }
 
+// Actualiza solo el texto (title/date/location/caption) del .json de un recuerdo; no toca las fotos.
+export async function updateMemoryMeta(
+  supabase: SupabaseClient,
+  id: string,
+  meta: Partial<MemoryMeta>
+): Promise<RemoteMemory | null> {
+  const bucket = supabase.storage.from(BUCKET);
+  const { data: blob, error: dlError } = await bucket.download(`${PREFIX}/${id}.json`);
+  if (dlError) return null;
+
+  let record: MemoryRecord;
+  try {
+    record = JSON.parse(await blob.text()) as MemoryRecord;
+  } catch {
+    return null;
+  }
+
+  record = { ...record, ...meta, id };
+  const { error } = await bucket.upload(`${PREFIX}/${id}.json`, JSON.stringify(record), {
+    contentType: 'application/json',
+    upsert: true,
+  });
+  if (error) throw error;
+
+  return toMemory(supabase, record);
+}
+
 // Borra todas las fotos del recuerdo (propuesta/<id>_*.* y el <id>.json antiguo de una sola foto)
 export async function deleteMemory(supabase: SupabaseClient, id: string): Promise<number> {
   const bucket = supabase.storage.from(BUCKET);

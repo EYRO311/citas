@@ -97,7 +97,7 @@ export default function Gallery() {
       </div>
 
       <UploadMemoryModal ref={uploadRef} onSaved={refresh} />
-      <Lightbox memory={selected} onClose={() => setSelected(null)} onDeleted={refresh} />
+      <Lightbox memory={selected} onClose={() => setSelected(null)} onDeleted={refresh} onUpdated={refresh} />
     </div>
   );
 }

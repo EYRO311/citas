@@ -1,5 +1,5 @@
 import type { DriveStatusResponse } from '@/types/drive';
-import type { MemoriesListResponse, UploadRequestBody, UploadResponse } from '@/types/memories';
+import type { MemoriesListResponse, MemoryMeta, RemoteMemory, UploadRequestBody, UploadResponse } from '@/types/memories';
 
 export async function fetchCloudMemories(): Promise<MemoriesListResponse> {
   try {
@@ -15,6 +15,21 @@ export async function deleteCloudMemory(storageId: string): Promise<boolean> {
   const res = await fetch(`/api/memories?id=${encodeURIComponent(storageId)}`, { method: 'DELETE' });
   if (!res.ok && res.status !== 404) return false;
   return true;
+}
+
+export async function updateCloudMemory(storageId: string, meta: Partial<MemoryMeta>): Promise<RemoteMemory | null> {
+  try {
+    const res = await fetch('/api/memories', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: storageId, ...meta }),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { memory?: RemoteMemory };
+    return data.memory ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchDriveStatus(): Promise<DriveStatusResponse> {
