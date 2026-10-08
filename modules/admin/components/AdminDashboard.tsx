@@ -10,9 +10,10 @@ import EventEditorForm from './EventEditorForm';
 import EventsAdminList from './EventsAdminList';
 import DriveSettingsPanel from './DriveSettingsPanel';
 import LetterEditorForm from './LetterEditorForm';
+import IdeasAdminPanel from './IdeasAdminPanel';
 import ChangePinModal, { ChangePinModalHandle } from './ChangePinModal';
 
-type Tab = 'events' | 'letter' | 'gallery' | 'drive';
+type Tab = 'events' | 'letter' | 'gallery' | 'ideas' | 'drive';
 
 export default function AdminDashboard() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -98,6 +99,11 @@ export default function AdminDashboard() {
                 <Icon name="camera" className="ui-icon-blue" /> Álbum de Fotos
               </span>
             </button>
+            <button type="button" className={`admin-nav-btn ${tab === 'ideas' ? 'active' : ''}`} onClick={() => setTab('ideas')}>
+              <span>
+                <Icon name="sparkle" className="ui-icon-blue" /> Lista de Planes
+              </span>
+            </button>
             <button type="button" className={`admin-nav-btn ${tab === 'drive' ? 'active' : ''}`} onClick={() => setTab('drive')}>
               <span>
                 <Icon name="cloud" className="ui-icon-blue" /> Conectar Google Drive
@@ -130,6 +136,12 @@ export default function AdminDashboard() {
           {tab === 'gallery' && (
             <div className="admin-tab-section">
               <Gallery />
+            </div>
+          )}
+
+          {tab === 'ideas' && (
+            <div className="admin-tab-section">
+              <IdeasAdminPanel onShowToast={showToast} />
             </div>
           )}
 

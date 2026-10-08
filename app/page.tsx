@@ -3,6 +3,7 @@
 import { useEvents } from '@/modules/events/hooks/useEvents';
 import CountdownTimer from '@/modules/events/components/CountdownTimer';
 import EventsInvitations from '@/modules/events/components/EventsInvitations';
+import IdeasList from '@/modules/ideas/components/IdeasList';
 import Gallery from '@/modules/gallery/components/Gallery';
 import PetalsCanvas from '@/modules/petals/components/PetalsCanvas';
 import EnvelopeHero from '@/modules/hero/components/EnvelopeHero';
@@ -48,6 +49,10 @@ export default function Home() {
             </p>
           </header>
           <EventsInvitations events={events} refresh={refresh} />
+        </section>
+
+        <section id="ideas-section" aria-label="Lista de planes futuros">
+          <IdeasList />
         </section>
 
         <section id="gallery-section" aria-label="Álbum de recuerdos de nuestras citas">
