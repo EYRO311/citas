@@ -21,6 +21,7 @@ function openDB(): Promise<IDBDatabase> {
 }
 
 const INITIAL_MEMORIES: LocalMemory[] = [];
+const SAMPLE_IDS = ['mem_1', 'mem_2'];
 
 export async function getMemories(): Promise<LocalMemory[]> {
   try {
@@ -36,15 +37,20 @@ export async function getMemories(): Promise<LocalMemory[]> {
           INITIAL_MEMORIES.forEach((m) => saveMemory(m));
           resolve(INITIAL_MEMORIES);
         } else {
-          results.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-          resolve(results);
+          const sampleLeftovers = results.filter((m) => SAMPLE_IDS.includes(m.id));
+          sampleLeftovers.forEach((m) => deleteMemory(m.id));
+          const cleaned = results.filter((m) => !SAMPLE_IDS.includes(m.id));
+          cleaned.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+          resolve(cleaned);
         }
       };
       req.onerror = () => resolve(INITIAL_MEMORIES);
     });
   } catch {
     const local = localStorage.getItem('propuesta_memories');
-    return local ? (JSON.parse(local) as LocalMemory[]) : INITIAL_MEMORIES;
+    if (!local) return INITIAL_MEMORIES;
+    const parsed = JSON.parse(local) as LocalMemory[];
+    return parsed.filter((m) => !SAMPLE_IDS.includes(m.id));
   }
 }
 
