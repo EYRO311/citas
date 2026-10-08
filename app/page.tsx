@@ -51,10 +51,6 @@ export default function Home() {
           <EventsInvitations events={events} refresh={refresh} />
         </section>
 
-        <section id="ideas-section" aria-label="Lista de planes futuros">
-          <IdeasList />
-        </section>
-
         <section id="gallery-section" aria-label="Álbum de recuerdos de nuestras citas">
           <Gallery />
         </section>
@@ -77,6 +73,10 @@ export default function Home() {
               <Icon name="balloon" className="ui-icon-blue" /> Lluvia de globos
             </span>
           </button>
+        </section>
+
+        <section id="ideas-section" aria-label="Lista de planes futuros">
+          <IdeasList />
         </section>
 
         <footer className="romantic-footer">
