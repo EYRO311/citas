@@ -15,7 +15,7 @@ Tengo preparadas dos citas para nosotros dos. Dos momentos pensados para detener
   signName: 'Eyro',
 };
 
-export function getLetter(): LetterContent {
+export function getLocalLetter(): LetterContent {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) return { ...DEFAULT_LETTER, ...JSON.parse(saved) } as LetterContent;
@@ -25,16 +25,26 @@ export function getLetter(): LetterContent {
   return DEFAULT_LETTER;
 }
 
-export function saveLetter(letter: LetterContent): void {
+// Escribe en localStorage sin avisar a la UI; se usa para mantener el cache
+// de respaldo al dia cuando los datos reales vienen de Supabase.
+export function cacheLetter(letter: LetterContent): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(letter));
-    window.dispatchEvent(new CustomEvent('letter_updated', { detail: letter }));
   } catch {
-    // storage unavailable (private mode, quota, etc.) — silently ignore like events repo
+    // storage unavailable (private mode, quota, etc.) — silently ignore
   }
 }
 
-export function resetLetter(): LetterContent {
+export function saveLocalLetter(letter: LetterContent): void {
+  cacheLetter(letter);
+  try {
+    window.dispatchEvent(new CustomEvent('letter_updated', { detail: letter }));
+  } catch {
+    // ignore
+  }
+}
+
+export function resetLocalLetter(): LetterContent {
   try {
     localStorage.removeItem(STORAGE_KEY);
     window.dispatchEvent(new CustomEvent('letter_updated', { detail: DEFAULT_LETTER }));

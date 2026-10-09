@@ -2,28 +2,30 @@
 
 import { useEffect, useState } from 'react';
 import type { LetterContent } from '@/types/letter';
-import { DEFAULT_LETTER, getLetter, resetLetter, saveLetter } from '@/modules/hero/data/letterRepository';
+import { DEFAULT_LETTER } from '@/modules/hero/data/letterRepository';
+import { loadLetter, persistLetter, resetLetterEverywhere } from '@/modules/hero/data/letterService';
 import { Icon } from '@/shared/icons/Icon';
 
 export default function LetterEditorForm({ onShowToast }: { onShowToast: (message: string) => void }) {
   const [form, setForm] = useState<LetterContent>(DEFAULT_LETTER);
 
   useEffect(() => {
-    setForm(getLetter());
+    loadLetter().then((result) => setForm(result.letter));
   }, []);
 
   function set<K extends keyof LetterContent>(key: K, value: LetterContent[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    saveLetter(form);
+    await persistLetter(form);
     onShowToast('¡Carta actualizada exitosamente! 💌');
   }
 
-  function handleReset() {
-    setForm(resetLetter());
+  async function handleReset() {
+    const letter = await resetLetterEverywhere();
+    setForm(letter);
     onShowToast('Carta restaurada al texto original 🌻');
   }
 
