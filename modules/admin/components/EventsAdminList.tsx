@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { EventItem } from '@/types/events';
-import { deleteEvent, updateEvent, updateEventRSVP } from '@/modules/events/data/eventsRepository';
+import { modifyEvent, removeEvent, setEventRSVP } from '@/modules/events/data/eventsService';
 import { getEventRevealTimestamp, isEventReadyToDisplay } from '@/modules/events/domain/eventRules';
 import { Icon } from '@/shared/icons/Icon';
 
@@ -59,27 +59,27 @@ export default function EventsAdminList({
   const filtered =
     filter === 'public' ? events.filter((e) => !e.isHidden) : filter === 'hidden' ? events.filter((e) => e.isHidden) : events;
 
-  function toggleForceReveal(event: EventItem) {
+  async function toggleForceReveal(event: EventItem) {
     const willForce = !event.forceReveal;
-    updateEvent(event.id, { forceReveal: willForce });
+    await modifyEvent(event.id, { forceReveal: willForce });
     onShowToast(willForce ? '¡Cita revelada inmediatamente para Adi! 👁️✨' : 'Cita bloqueada: no se mostrará hasta su hora programada ⏳');
     refresh();
   }
 
-  function toggleVisibility(event: EventItem) {
-    const updated = updateEvent(event.id, { isHidden: !event.isHidden });
+  async function toggleVisibility(event: EventItem) {
+    const updated = await modifyEvent(event.id, { isHidden: !event.isHidden });
     onShowToast(updated?.isHidden ? 'La cita ahora es secreta / oculta 🔒' : 'La cita ahora es visible públicamente 💌');
     refresh();
   }
 
-  function toggleRsvp(event: EventItem) {
-    updateEventRSVP(event.id, !event.accepted);
+  async function toggleRsvp(event: EventItem) {
+    await setEventRSVP(event.id, !event.accepted);
     refresh();
   }
 
-  function handleDelete(event: EventItem) {
+  async function handleDelete(event: EventItem) {
     if (!confirm(`¿Estás seguro de que deseas eliminar "${event.title}"? Esta acción no se puede deshacer.`)) return;
-    deleteEvent(event.id);
+    await removeEvent(event.id);
     onShowToast('Cita eliminada correctamente 🗑️');
     refresh();
   }

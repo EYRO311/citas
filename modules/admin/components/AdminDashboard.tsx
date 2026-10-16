@@ -114,7 +114,14 @@ export default function AdminDashboard() {
           {tab === 'events' && (
             <div className="admin-tab-section">
               <div className="admin-workspace-grid">
-                <EventEditorForm editingEvent={editingEvent} onCancelEdit={() => setEditingEventId(null)} onSaved={showToast} />
+                <EventEditorForm
+                  editingEvent={editingEvent}
+                  onCancelEdit={() => setEditingEventId(null)}
+                  onSaved={(msg) => {
+                    showToast(msg);
+                    refresh();
+                  }}
+                />
                 <EventsAdminList
                   events={events}
                   onEdit={setEditingEventId}

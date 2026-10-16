@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { EventItem } from '@/types/events';
 import { isEventReadyToDisplay } from '../domain/eventRules';
-import { updateEvent, updateEventRSVP } from '../data/eventsRepository';
+import { modifyEvent, setEventRSVP } from '../data/eventsService';
 import { isEventSecretUnlocked, lockSecretEvent, unlockSecretEvent } from '../data/secretsRepository';
 import { triggerGlobalBurst } from '@/modules/petals/registry';
 import { Icon } from '@/shared/icons/Icon';
@@ -30,7 +30,7 @@ export default function EventsInvitations({ events, refresh }: { events: EventIt
   }, [events, refresh]);
 
   function handleAccept(eventId: number, point: { x: number; y: number }) {
-    updateEventRSVP(eventId, true);
+    setEventRSVP(eventId, true);
     triggerGlobalBurst(point.x, point.y, 50);
     setTimeout(() => {
       triggerGlobalBurst(window.innerWidth * 0.3, window.innerHeight * 0.4, 30);
@@ -40,7 +40,7 @@ export default function EventsInvitations({ events, refresh }: { events: EventIt
   }
 
   function handleUndo(eventId: number) {
-    updateEventRSVP(eventId, false);
+    setEventRSVP(eventId, false);
     refresh();
   }
 
@@ -68,13 +68,13 @@ export default function EventsInvitations({ events, refresh }: { events: EventIt
     dialogRef.current?.showModal();
   }
 
-  function handleEditSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleEditSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!editingEvent) return;
     const form = e.currentTarget;
     const get = (name: string) => (form.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement)?.value.trim() || '';
 
-    updateEvent(editingEvent.id, {
+    await modifyEvent(editingEvent.id, {
       title: get('title'),
       date: get('date'),
       time: get('time'),

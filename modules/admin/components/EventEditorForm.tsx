@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { EventItem } from '@/types/events';
-import { addEvent, updateEvent } from '@/modules/events/data/eventsRepository';
+import { createEvent, modifyEvent } from '@/modules/events/data/eventsService';
 import { triggerGlobalBurst } from '@/modules/petals/registry';
 import { Icon } from '@/shared/icons/Icon';
 
@@ -37,6 +37,7 @@ export default function EventEditorForm({
   onSaved: (message: string) => void;
 }) {
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (editingEvent) {
@@ -65,9 +66,11 @@ export default function EventEditorForm({
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (saving) return;
 
+    setSaving(true);
     const payload = {
       title: form.title,
       badge: form.badge || (form.isHidden ? '🔒 CITA SECRETA' : undefined),
@@ -85,17 +88,23 @@ export default function EventEditorForm({
       forceReveal: form.forceReveal,
     };
 
-    if (editingEvent) {
-      updateEvent(editingEvent.id, payload);
-      onSaved('¡Cita actualizada exitosamente! ✨');
-    } else {
-      addEvent(payload);
-      triggerGlobalBurst(window.innerWidth / 2, window.innerHeight * 0.4, 50);
-      onSaved(form.isHidden ? '¡Sorpresa secreta creada con éxito! 🔒💖' : '¡Nueva cita creada con éxito! 💌');
+    try {
+      if (editingEvent) {
+        await modifyEvent(editingEvent.id, payload);
+        onSaved('¡Cita actualizada exitosamente! ✨');
+      } else {
+        await createEvent(payload);
+        triggerGlobalBurst(window.innerWidth / 2, window.innerHeight * 0.4, 50);
+        onSaved(form.isHidden ? '¡Sorpresa secreta guardada con éxito! 🔒💖' : '¡Nueva cita guardada con éxito! 💌');
+      }
+      setForm(emptyForm);
+      onCancelEdit();
+    } catch (err) {
+      console.error('Error guardando cita:', err);
+      onSaved('Error al guardar la cita en Supabase.');
+    } finally {
+      setSaving(false);
     }
-
-    setForm(emptyForm);
-    onCancelEdit();
   }
 
   function handleCancel() {
