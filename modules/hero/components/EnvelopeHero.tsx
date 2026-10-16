@@ -10,7 +10,8 @@ export default function EnvelopeHero() {
   const envelopeRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const { letter } = useLetter();
-  const bodyParagraphs = letter.body.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
+  const isPoem = letter.mode === 'poem';
+  const stanzas = letter.body.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
 
   function openLetter(e: React.MouseEvent | React.KeyboardEvent) {
     sounds.playSparkle();
@@ -52,8 +53,8 @@ export default function EnvelopeHero() {
           className="envelope-interactive-container"
           role="button"
           tabIndex={0}
-          aria-label="Abrir carta de amor para Adi"
-          title="Toca para abrir la carta de amor"
+          aria-label={isPoem ? 'Abrir poema de amor para Adi' : 'Abrir carta de amor para Adi'}
+          title={isPoem ? 'Toca para abrir el poema de amor' : 'Toca para abrir la carta de amor'}
           onClick={openLetter}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -82,7 +83,7 @@ export default function EnvelopeHero() {
                   </div>
                   <div className="peek-callout">
                     <Icon name="heart" className="ui-icon-rose peek-heart" />
-                    <span>Toca para desplegar la carta</span>
+                    <span>{isPoem ? 'Toca para desplegar el poema' : 'Toca para desplegar la carta'}</span>
                   </div>
                 </div>
               </div>
@@ -201,7 +202,9 @@ export default function EnvelopeHero() {
           <div className="envelope-prompt">
             <span className="prompt-pill">
               <Icon name="envelope" className="ui-icon-gold prompt-icon-left" />
-              <span className="prompt-text">Toca el sobre sellado para leer tu carta</span>
+              <span className="prompt-text">
+                {isPoem ? 'Toca el sobre sellado para leer tu poema' : 'Toca el sobre sellado para leer tu carta'}
+              </span>
               <Icon name="heart" className="ui-icon-rose prompt-icon-right" />
             </span>
           </div>
@@ -273,12 +276,16 @@ export default function EnvelopeHero() {
               </div>
 
               <div className="letter-meta">
-                <span className="letter-meta-label">Correspondencia privada</span>
-                <span className="letter-meta-date">Septiembre · con todo mi amor</span>
+                <span className="letter-meta-label">
+                  {isPoem ? 'Versos del corazón' : 'Correspondencia privada'}
+                </span>
+                <span className="letter-meta-date">
+                  {isPoem ? 'Poema de amor · Para Adi' : 'Septiembre · con todo mi amor'}
+                </span>
               </div>
             </header>
 
-            <h2 id="letter-greeting" className="letter-greeting">
+            <h2 id="letter-greeting" className={`letter-greeting ${isPoem ? 'letter-poem-title' : ''}`}>
               {letter.greeting}
             </h2>
             <div className="letter-ornament" aria-hidden="true">
@@ -295,15 +302,37 @@ export default function EnvelopeHero() {
               <span className="letter-ornament-line"></span>
             </div>
 
-            <div className="letter-body">
-              {bodyParagraphs.map((paragraph, index) => (
-                <p key={index} className={index === 0 ? 'letter-lead' : undefined}>
-                  {paragraph}
-                </p>
-              ))}
-            </div>
+            {isPoem ? (
+              <div className="letter-poem-body">
+                {stanzas.map((stanza, sIdx) => {
+                  const verses = stanza.split('\n').filter((v) => v.trim().length > 0);
+                  return (
+                    <div key={sIdx} className="letter-poem-stanza">
+                      {verses.map((verse, vIdx) => (
+                        <p key={vIdx} className="letter-poem-verse">
+                          {verse.trim()}
+                        </p>
+                      ))}
+                      {sIdx < stanzas.length - 1 && (
+                        <div className="poem-stanza-divider" aria-hidden="true">
+                          <span className="poem-divider-flourish">❦</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="letter-body">
+                {stanzas.map((paragraph, index) => (
+                  <p key={index} className={index === 0 ? 'letter-lead' : undefined}>
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+            )}
 
-            <p className="letter-question">{letter.question}</p>
+            <p className={`letter-question ${isPoem ? 'letter-poem-closing' : ''}`}>{letter.question}</p>
 
             <p className="letter-ps">
               <span className="letter-ps-label">{letter.psLabel}</span> {letter.psText}

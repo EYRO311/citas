@@ -91,7 +91,7 @@ export default function AdminDashboard() {
             </button>
             <button type="button" className={`admin-nav-btn ${tab === 'letter' ? 'active' : ''}`} onClick={() => setTab('letter')}>
               <span>
-                <Icon name="envelope" className="ui-icon-blue" /> Carta para Adi
+                <Icon name="envelope" className="ui-icon-blue" /> Carta / Poema para Adi
               </span>
             </button>
             <button type="button" className={`admin-nav-btn ${tab === 'gallery' ? 'active' : ''}`} onClick={() => setTab('gallery')}>

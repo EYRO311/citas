@@ -3,6 +3,7 @@ import type { LetterContent } from '@/types/letter';
 const STORAGE_KEY = 'propuesta_letter';
 
 export const DEFAULT_LETTER: LetterContent = {
+  mode: 'letter',
   peekSalutation: 'Para mi niña hermosa, Adi',
   greeting: 'Para mi hermosa Adi,',
   body: `Hoy quise crear un rincón que fuera tan especial y luminoso como tú. Elegí los colores de estas flores al óleo porque tienen esa misma calidez y magia con la que llegas a iluminar mis días. Cada instante a tu lado se convierte en mi recuerdo favorito.
@@ -15,23 +16,54 @@ Tengo preparadas dos citas para nosotros dos. Dos momentos pensados para detener
   signName: 'Eyro',
 };
 
+export const DEFAULT_POEM: LetterContent = {
+  mode: 'poem',
+  poemTitle: 'Donde florece tu sonrisa',
+  peekSalutation: 'Un poema para mi niña hermosa, Adi',
+  greeting: 'Donde florece tu sonrisa',
+  body: `Entre millones de caminos y miradas,
+hallé en tu risa mi refugio preferido;
+un rincón de calma en las mañanas
+y el sol más cálido que he conocido.
+
+Eres el girasol que siempre busca el día,
+la melodía dulce que calma la tormenta,
+ser dos contra el mundo en armonía,
+donde cada instante a tu lado cuenta.
+
+Si el tiempo se detuviera en un abrazo,
+elegiría quedarme en tu mirar sincero,
+caminar contigo paso a paso,
+porque es contigo donde florecer quiero.`,
+  question: '¿Me regalas tu tiempo y tu risa para escribir juntos nuestras próximas dos historias?',
+  psLabel: 'P.D.',
+  psText: 'Cada verso nació pensando en la magia que llevas dentro. 🌻',
+  signIntro: 'Con todo mi amor,',
+  signName: 'Eyro',
+};
+
 export function getLocalLetter(): LetterContent {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return { ...DEFAULT_LETTER, ...JSON.parse(saved) } as LetterContent;
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return {
+        ...DEFAULT_LETTER,
+        ...parsed,
+        mode: parsed.mode || 'letter',
+      } as LetterContent;
+    }
   } catch {
     // ignore parse/storage errors, fall back to defaults
   }
   return DEFAULT_LETTER;
 }
 
-// Escribe en localStorage sin avisar a la UI; se usa para mantener el cache
-// de respaldo al dia cuando los datos reales vienen de Supabase.
 export function cacheLetter(letter: LetterContent): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(letter));
   } catch {
-    // storage unavailable (private mode, quota, etc.) — silently ignore
+    // storage unavailable
   }
 }
 
