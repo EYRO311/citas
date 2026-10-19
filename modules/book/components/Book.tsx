@@ -324,6 +324,55 @@ export default function Book({
     return () => window.removeEventListener('keydown', onKey);
   }, [goNext, goPrev]);
 
+  /* -------------------------- pantalla completa ------------------------- */
+  // Usa la API de pantalla completa del navegador; donde no existe (Safari de iPhone)
+  // el libro se fija sobre toda la ventana con CSS.
+  const viewRef = useRef<HTMLDivElement>(null);
+  const [fullscreen, setFullscreen] = useState(false);
+
+  useEffect(() => {
+    const onChange = () => {
+      const doc = document as Document & { webkitFullscreenElement?: Element | null };
+      const active = document.fullscreenElement ?? doc.webkitFullscreenElement ?? null;
+      setFullscreen(active === viewRef.current);
+    };
+    document.addEventListener('fullscreenchange', onChange);
+    document.addEventListener('webkitfullscreenchange', onChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onChange);
+      document.removeEventListener('webkitfullscreenchange', onChange);
+    };
+  }, []);
+
+  // Salir con Escape también en el modo de respaldo (el nativo ya lo hace solo)
+  useEffect(() => {
+    if (!fullscreen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !document.fullscreenElement && !document.querySelector('dialog[open]')) setFullscreen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [fullscreen]);
+
+  async function toggleFullscreen() {
+    const el = viewRef.current as (HTMLDivElement & { webkitRequestFullscreen?: () => Promise<void> | void }) | null;
+    const doc = document as Document & { webkitFullscreenElement?: Element | null; webkitExitFullscreen?: () => Promise<void> | void };
+    const nativeActive = document.fullscreenElement ?? doc.webkitFullscreenElement;
+
+    if (fullscreen) {
+      if (nativeActive) await (document.exitFullscreen?.() ?? doc.webkitExitFullscreen?.());
+      setFullscreen(false);
+      return;
+    }
+    try {
+      if (el?.requestFullscreen) await el.requestFullscreen();
+      else if (el?.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+      else throw new Error('sin API');
+    } catch {
+      setFullscreen(true);
+    }
+  }
+
   /* ------------------------- páginas visibles -------------------------- */
   const leftIndex = spread ? (current > 0 ? current * 2 - 1 : -1) : -1;
   const rightIndex = spread ? (current < sheetCount ? current * 2 : -1) : current;
@@ -386,7 +435,7 @@ export default function Book({
   }
 
   return (
-    <div className={`book-view ${spread ? 'is-spread' : 'is-single'}`}>
+    <div ref={viewRef} className={`book-view ${spread ? 'is-spread' : 'is-single'} ${fullscreen ? 'is-fullscreen' : ''}`}>
       <h1 className="bk-sr-only">Nuestro libro de aventuras</h1>
 
       <div
@@ -448,6 +497,16 @@ export default function Book({
         </span>
         <button type="button" className="book-nav" onClick={goNext} disabled={current >= maxFlipped} aria-label="Página siguiente">
           <Icon name="arrowRight" />
+        </button>
+        <button
+          type="button"
+          className="book-nav book-fullscreen-btn"
+          onClick={toggleFullscreen}
+          aria-pressed={fullscreen}
+          aria-label={fullscreen ? 'Salir de pantalla completa' : 'Ver en pantalla completa'}
+          title={fullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
+        >
+          <Icon name={fullscreen ? 'fullscreenExit' : 'fullscreen'} />
         </button>
       </div>
 

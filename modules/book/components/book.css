@@ -1847,6 +1847,31 @@
   display: block;
 }
 
+/* ------------------------------------------------------------------------------
+   PANTALLA COMPLETA: el libro usa toda la pantalla (sin el espacio del interruptor)
+   ------------------------------------------------------------------------------ */
+.book-fullscreen-btn {
+  margin-left: 8px;
+}
+.book-view.is-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 4000; /* por encima del interruptor "Modo libro" */
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
+  padding: 8px 6px 10px;
+  background:
+    radial-gradient(ellipse at 50% 45%, #3a2414 0%, #1c0f06 80%);
+}
+.book-view.is-fullscreen .book-stage {
+  padding-bottom: 10px;
+}
+.book-view.is-fullscreen:fullscreen {
+  background:
+    radial-gradient(ellipse at 50% 45%, #3a2414 0%, #1c0f06 80%);
+}
+
 /* Mesa oscura detrás del libro para que resalte sobre el fondo de flores */
 .book-desk {
   position: fixed;
