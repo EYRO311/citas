@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { LetterContent } from '@/types/letter';
 import type { EventItem } from '@/types/events';
 import type { IdeaItem } from '@/types/ideas';
@@ -8,7 +8,9 @@ import type { Memory } from '@/types/memories';
 import { Icon } from '@/shared/icons/Icon';
 import { formatDate, generateGoogleCalendarLink } from '@/modules/events/components/EventCard';
 import { Balloon, BalloonBunch, BALLOON_COLORS, HeartMark, Sunflower, Tape } from './BookDecor';
-import { formatShortDate, getDateParts, memoryPhotosCoverFirst } from '../domain/bookHelpers';
+import { calculateNextDate } from '@/modules/events/components/CountdownTimer';
+import { isImageUrl, isSafeUrl, linkLabel } from '@/modules/ideas/domain/links';
+import { formatShortDate, getDateParts } from '../domain/bookHelpers';
 
 const FALLBACK_IMG = '/img/fondo.jpg';
 const LETTER_COLORS = ['#e9953b', '#8d5fa8', '#3bb0c1', '#e4572e', '#f2c14e', '#6aa84f'];
@@ -228,15 +230,31 @@ export function ChapterOpener({
 /* Recuerdos                                                           */
 /* ------------------------------------------------------------------ */
 
-export function MemoryPage({ memory, number, onOpen }: { memory: Memory; number: number; onOpen: (memory: Memory) => void }) {
-  const photos = memoryPhotosCoverFirst(memory).slice(0, 3);
+/** Fotos por página de recuerdo: un recuerdo con más fotos sigue en páginas de continuación. */
+export const MEMORY_PHOTOS_PER_PAGE = 3;
+
+export function MemoryPage({
+  memory,
+  number,
+  photos,
+  part = 0,
+  onOpen,
+}: {
+  memory: Memory;
+  number: number;
+  /** Fotos que van en esta página (portada primero en la primera página). */
+  photos: string[];
+  /** 0 = primera página del recuerdo; >0 = continuación. */
+  part?: number;
+  onOpen: (memory: Memory) => void;
+}) {
   const shown = photos.length > 0 ? photos : [FALLBACK_IMG];
-  const extra = memoryPhotosCoverFirst(memory).length - shown.length;
-  const tilt = number % 2 === 0 ? 1 : -1;
+  const tilt = (number + part) % 2 === 0 ? 1 : -1;
+  const isContinuation = part > 0;
 
   return (
-    <div className="bp bp-memory">
-      <span className="bp-tag">Recuerdo #{number}</span>
+    <div className={`bp bp-memory ${isContinuation ? 'is-continuation' : ''}`}>
+      <span className="bp-tag">{isContinuation ? `Recuerdo #${number} · continúa` : `Recuerdo #${number}`}</span>
       <h3 className="mem-title">{memory.title || 'Recuerdo de nuestra salida'}</h3>
 
       <div className={`mem-photos mem-photos-${shown.length}`} style={{ ['--tilt' as string]: tilt }}>
@@ -261,10 +279,11 @@ export function MemoryPage({ memory, number, onOpen }: { memory: Memory; number:
             />
           </button>
         ))}
-        {extra > 0 && <span className="mem-more">+{extra} fotos</span>}
       </div>
 
-      <div className="mem-meta">
+      {!isContinuation && (
+        <>
+          <div className="mem-meta">
         {memory.date && (
           <span className="mem-ticket">
             <Icon name="calendar" /> {formatShortDate(memory.date)}
@@ -276,7 +295,9 @@ export function MemoryPage({ memory, number, onOpen }: { memory: Memory; number:
           </span>
         )}
       </div>
-      {memory.caption && <p className="mem-caption">{memory.caption}</p>}
+          {memory.caption && <p className="mem-caption">{memory.caption}</p>}
+        </>
+      )}
     </div>
   );
 }
@@ -489,6 +510,52 @@ export function LockedEventPage({ event, onUnlock }: { event: EventItem; onUnloc
   );
 }
 
+const COUNTDOWN_QUOTES = [
+  'Contando cada segundo para volver a verte sonreír',
+  'El tiempo se hace eterno cuando no estás, y vuela cuando estamos juntos',
+  'Cada segundo que pasa es un segundo más cerca de nuestro momento',
+];
+
+// Misma cuenta regresiva que la vista normal, hacia la próxima cita visible.
+export function CountdownPage({ events }: { events: EventItem[] }) {
+  const [now, setNow] = useState<number | null>(null);
+
+  useEffect(() => {
+    setNow(Date.now());
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const { targetDate, title } = calculateNextDate(events);
+  const diff = now === null ? 0 : Math.max(0, targetDate - now);
+  const units = [
+    { label: 'días', value: Math.floor(diff / 86400000) },
+    { label: 'horas', value: Math.floor((diff / 3600000) % 24) },
+    { label: 'min', value: Math.floor((diff / 60000) % 60) },
+    { label: 'seg', value: Math.floor((diff / 1000) % 60) },
+  ];
+  const quote = COUNTDOWN_QUOTES[new Date(targetDate).getDate() % COUNTDOWN_QUOTES.length];
+
+  return (
+    <div className="bp bp-countdown">
+      <Tape className="tape-tr" />
+      <span className="bp-tag">Cuenta regresiva</span>
+      <h3 className="cd-title">Falta poquito para…</h3>
+      <p className="cd-event">{title}</p>
+      <div className="cd-grid" aria-live="off">
+        {units.map((u) => (
+          <div key={u.label} className="cd-cell">
+            <span className="cd-value">{now === null ? '–' : String(u.value).padStart(2, '0')}</span>
+            <span className="cd-label">{u.label}</span>
+          </div>
+        ))}
+      </div>
+      <p className="cd-quote">«{quote}»</p>
+      <Sunflower className="cd-flower" />
+    </div>
+  );
+}
+
 export function EmptyAgendaPage() {
   return (
     <div className="bp bp-empty">
@@ -503,11 +570,10 @@ export function EmptyAgendaPage() {
 /* Metas / planes juntos                                               */
 /* ------------------------------------------------------------------ */
 
-function platformLabel(link: string): string {
-  const l = link.toLowerCase();
-  if (l.includes('tiktok.com')) return 'Ver en TikTok';
-  if (l.includes('instagram.com') || l.includes('instagr.am')) return 'Ver en Instagram';
-  return 'Ver enlace';
+/** Imagen que se muestra para un plan: la suya, o el link si apunta directo a una imagen. */
+export function ideaImage(idea: IdeaItem): string {
+  if (isSafeUrl(idea.image)) return idea.image as string;
+  return isImageUrl(idea.link) ? idea.link : '';
 }
 
 export function GoalsPage({
@@ -527,6 +593,8 @@ export function GoalsPage({
       <ul className="gl-list">
         {ideas.map((idea, i) => {
           const isDone = done.includes(idea.id);
+          const image = ideaImage(idea);
+          const showLink = isSafeUrl(idea.link) && idea.link !== image;
           return (
             <li key={idea.id} className={isDone ? 'is-done' : ''}>
               <button
@@ -544,12 +612,26 @@ export function GoalsPage({
               <div className="gl-text">
                 <span className="gl-num">{startNumber + i}.</span>
                 <span className="gl-title">{idea.title}</span>
-                {idea.link && (
+                {showLink && (
                   <a className="gl-link" href={idea.link} target="_blank" rel="noopener noreferrer">
-                    <Icon name="arrowRight" /> {platformLabel(idea.link)}
+                    <Icon name="arrowRight" /> {linkLabel(idea.link)}
                   </a>
                 )}
               </div>
+              {image && (
+                <span className="gl-photo">
+                  <Tape className="tape-top-left" />
+                  <img
+                    src={image}
+                    alt=""
+                    loading="lazy"
+                    draggable={false}
+                    onError={(e) => {
+                      if (e.currentTarget.parentElement) e.currentTarget.parentElement.style.display = 'none';
+                    }}
+                  />
+                </span>
+              )}
             </li>
           );
         })}

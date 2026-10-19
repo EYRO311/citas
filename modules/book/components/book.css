@@ -180,15 +180,27 @@
 
 .book-stage {
   position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
+  align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 8px 0 14px;
+  padding: 14px 10px 22px;
   touch-action: pan-y;
+  /* El tamaño de página sale del espacio libre del escenario (cqw/cqh): el libro
+     crece o se encoge con la pantalla sin perder la proporción 3:4 de cada página. */
+  container-type: size;
+  --page-h: min(100cqh, (100cqw / 2) * 4 / 3);
+  --page-w: calc(var(--page-h) * 3 / 4);
+}
+.book-view.is-single .book-stage {
+  --page-h: min(100cqh, 100cqw * 4 / 3);
 }
 
 .book {
   position: relative;
+  flex: none;
   width: calc(var(--page-w) * 2);
   height: var(--page-h);
   perspective: 2800px;
@@ -593,6 +605,7 @@
 /* Letras de colores (títulos) */
 .bk-colorword {
   display: inline-block;
+  white-space: nowrap;
   font-family: var(--bk-font-rye);
   line-height: 1;
   letter-spacing: 0.02em;
@@ -747,13 +760,13 @@
   gap: 0.12em;
 }
 .cv-title .cv-word-sm {
-  font-size: 1.75em;
+  font-size: 1.5em;
 }
 .cv-title .cv-word-md {
-  font-size: 2.85em;
+  font-size: 2.25em;
 }
 .cv-title .cv-word-lg {
-  font-size: 2.55em;
+  font-size: 2.05em;
 }
 .cv-emblem {
   position: absolute;
@@ -858,7 +871,7 @@
   position: static;
 }
 .cv-title-back .cv-word-lg {
-  font-size: 2.2em;
+  font-size: 1.8em;
 }
 .cv-back-note {
   font-family: var(--bk-font-hand);
@@ -1100,7 +1113,7 @@
 }
 .mem-photos {
   position: relative;
-  height: 58cqw;
+  height: 72cqw;
   margin: 2.5cqw 0 3.5cqw;
 }
 .polaroid-p {
@@ -1119,8 +1132,9 @@
   flex: 1;
   min-height: 0;
   width: 100%;
-  object-fit: cover;
-  background: #e5d6b4;
+  /* La foto se ve completa, sin recortes (sobra papel blanco si no es de la misma proporción) */
+  object-fit: contain;
+  background: #f7f1e3;
   filter: sepia(0.12) saturate(1.05);
   -webkit-user-drag: none;
 }
@@ -1554,6 +1568,7 @@
   display: block;
 }
 .gl-text {
+  flex: 1;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
@@ -1701,6 +1716,107 @@
     font-size: 1.1rem;
     padding: 0.35em 0.85em 0.3em;
   }
+}
+
+/* ------------------------------------------------------------------------------
+   CUENTA REGRESIVA
+   ------------------------------------------------------------------------------ */
+.bp-countdown {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.5em;
+}
+.bp-countdown .bp-tag {
+  align-self: center;
+}
+.cd-title {
+  font-family: var(--bk-font-hand);
+  font-size: 1.9em;
+  font-weight: 700;
+  color: #5a2d0c;
+}
+.cd-event {
+  font-family: var(--bk-font-serif);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.25em;
+  color: var(--bk-purple);
+}
+.cd-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5em;
+  width: 100%;
+  margin: 0.6em 0;
+}
+.cd-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5em 0.2em;
+  background: #fff9e8;
+  border: 1px dashed #b78a4a;
+  border-radius: 6px;
+  box-shadow: 1px 2px 3px rgba(80, 45, 10, 0.2);
+}
+.cd-cell:nth-child(odd) {
+  transform: rotate(-2deg);
+}
+.cd-cell:nth-child(even) {
+  transform: rotate(2deg);
+}
+.cd-value {
+  font-family: var(--bk-font-rye);
+  font-size: 1.7em;
+  line-height: 1;
+  color: var(--bk-red);
+}
+.cd-label {
+  font-family: var(--bk-font-type);
+  font-size: 0.6em;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--bk-ink-soft);
+}
+.cd-quote {
+  font-family: var(--bk-font-hand);
+  font-size: 1.25em;
+  line-height: 1.2;
+  color: var(--bk-ink);
+}
+.cd-flower {
+  width: 16cqw;
+  margin-top: 0.4em;
+}
+
+/* Foto pegada junto a un plan de la lista */
+.gl-photo {
+  position: relative;
+  flex: none;
+  width: 24cqw;
+  aspect-ratio: 1;
+  padding: 1.2cqw;
+  background: #fffdf6;
+  box-shadow: 0 2px 3px rgba(60, 30, 8, 0.3), 0 6px 10px -3px rgba(60, 30, 8, 0.35);
+  transform: rotate(3deg);
+}
+.gl-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Mesa oscura detrás del libro para que resalte sobre el fondo de flores */
+.book-desk {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(40, 22, 10, 0.2) 0%, rgba(25, 12, 4, 0.7) 75%),
+    linear-gradient(180deg, rgba(30, 16, 6, 0.3), rgba(30, 16, 6, 0.5));
 }
 
 @media (prefers-reduced-motion: reduce) {

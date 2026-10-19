@@ -14,7 +14,7 @@ const QUOTES = [
   '¡Prometo que esta salida será inolvidable!',
 ];
 
-function calculateNextDate(events: EventItem[]) {
+export function calculateNextDate(events: EventItem[]) {
   const now = Date.now();
   const visibleEvents = events.filter((e) => isEventReadyToDisplay(e));
 

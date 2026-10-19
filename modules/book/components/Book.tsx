@@ -15,6 +15,7 @@ import { triggerGlobalBurst } from '@/modules/petals/registry';
 import {
   AddMemoryPage,
   ChapterOpener,
+  CountdownPage,
   CoverBack,
   CoverFront,
   Endpaper,
@@ -23,11 +24,14 @@ import {
   EventPage,
   FinalePage,
   GoalsPage,
+  ideaImage,
   LetterPage,
   LockedEventPage,
+  MEMORY_PHOTOS_PER_PAGE,
   MemoryPage,
   NotesPage,
 } from './BookPages';
+import { memoryPhotosCoverFirst } from '../domain/bookHelpers';
 import { Icon } from '@/shared/icons/Icon';
 import './book.css';
 
@@ -40,7 +44,7 @@ const SECTIONS: { id: SectionId; label: string; color: string }[] = [
   { id: 'goals', label: 'Metas', color: '#e4572e' },
 ];
 
-const IDEAS_PER_PAGE = 5;
+const IDEAS_PAGE_CAPACITY = 5;
 const GOALS_DONE_KEY = 'propuesta_book_goals_done';
 const SPREAD_QUERY = '(min-width: 820px)';
 
@@ -186,8 +190,22 @@ export default function Book({
       color="#3bb0c1"
     />
   );
+  // Todas las fotos de cada recuerdo: si no caben en una página, siguen en la(s) siguiente(s).
   chronological.forEach((memory, i) => {
-    push(`memory-${memory.id}`, <MemoryPage memory={memory} number={i + 1} onOpen={setSelected} />);
+    const photos = memoryPhotosCoverFirst(memory);
+    const parts = Math.max(1, Math.ceil(photos.length / MEMORY_PHOTOS_PER_PAGE));
+    for (let part = 0; part < parts; part++) {
+      push(
+        part === 0 ? `memory-${memory.id}` : `memory-${memory.id}-${part}`,
+        <MemoryPage
+          memory={memory}
+          number={i + 1}
+          part={part}
+          photos={photos.slice(part * MEMORY_PHOTOS_PER_PAGE, (part + 1) * MEMORY_PHOTOS_PER_PAGE)}
+          onOpen={setSelected}
+        />
+      );
+    }
   });
   push('memories-add', <AddMemoryPage empty={chronological.length === 0} onAdd={() => uploadRef.current?.open()} />);
 
@@ -202,6 +220,7 @@ export default function Book({
       color="#8d5fa8"
     />
   );
+  push('agenda-countdown', <CountdownPage events={events} />);
   if (visibleEvents.length === 0) {
     push('agenda-empty', <EmptyAgendaPage />);
   }
@@ -232,11 +251,21 @@ export default function Book({
   if (ideas.length === 0) {
     push('goals-empty', <EmptyGoalsPage />);
   }
-  for (let i = 0; i < ideas.length; i += IDEAS_PER_PAGE) {
+  // Un plan con imagen ocupa el doble de espacio que uno solo de texto.
+  for (let i = 0; i < ideas.length; ) {
+    let end = i;
+    let used = 0;
+    while (end < ideas.length) {
+      const weight = ideaImage(ideas[end]) ? 2 : 1;
+      if (end > i && used + weight > IDEAS_PAGE_CAPACITY) break;
+      used += weight;
+      end++;
+    }
     push(
       `goals-${i}`,
-      <GoalsPage ideas={ideas.slice(i, i + IDEAS_PER_PAGE)} startNumber={i + 1} done={doneGoals} onToggle={toggleGoal} />
+      <GoalsPage ideas={ideas.slice(i, end)} startNumber={i + 1} done={doneGoals} onToggle={toggleGoal} />
     );
+    i = end;
   }
   push('finale', <FinalePage onCelebrate={onCelebrate} />);
 
