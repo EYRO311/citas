@@ -3557,17 +3557,8 @@ dialog::backdrop {
 }
 
 /* ==========================================================================
-   Lista de planes: tarjetas con imagen y edición desde la página
+   Lista de planes: tarjetas con imagen
    ========================================================================== */
-.ideas-actions-bar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin: 0 auto 20px;
-}
-
 .idea-card {
   display: flex;
   flex-direction: column;
@@ -3599,14 +3590,6 @@ dialog::backdrop {
   font-family: var(--font-display);
   font-size: 1.15rem;
   color: #b45309;
-}
-
-.idea-card-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: auto;
-  padding-top: 4px;
 }
 
 .idea-image-inputs {

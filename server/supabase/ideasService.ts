@@ -20,7 +20,7 @@ const EXTENSIONS: Record<string, string> = {
   'image/gif': 'gif',
 };
 
-// Solo links http(s): la lista se puede editar desde la pagina publica
+// Solo links http(s): se muestran tal cual en la pagina publica
 const cleanUrl = normalizeUrl;
 
 async function readIdeas(supabase: SupabaseClient): Promise<IdeaItem[]> {
