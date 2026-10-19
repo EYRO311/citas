@@ -5,7 +5,7 @@ import { triggerGlobalBurst } from '@/modules/petals/registry';
 import { sounds } from '@/shared/sounds';
 import { Icon } from '@/shared/icons/Icon';
 import { useLetter } from '../hooks/useLetter';
-import { downloadLetterImage } from '../domain/downloadLetter';
+import { downloadLetterHtml, downloadLetterImage } from '../domain/downloadLetter';
 
 export default function EnvelopeHero() {
   const envelopeRef = useRef<HTMLDivElement>(null);
@@ -350,9 +350,14 @@ export default function EnvelopeHero() {
             </footer>
 
             <div className="letter-cta">
-              <button type="button" className="btn-ghost-sm letter-download-btn" onClick={() => downloadLetterImage(letter)}>
-                <Icon name="download" className="ui-icon-blue" /> Descargar carta
-              </button>
+              <div className="letter-download" role="group" aria-label="Descargar carta">
+                <button type="button" className="btn-ghost-sm" onClick={() => downloadLetterImage(letter)}>
+                  <Icon name="download" className="ui-icon-blue" /> Descargar PNG
+                </button>
+                <button type="button" className="btn-ghost-sm" onClick={() => downloadLetterHtml(letter)}>
+                  <Icon name="download" className="ui-icon-blue" /> Descargar HTML
+                </button>
+              </div>
               <button className="btn-primary letter-cta-btn" onClick={closeLetter}>
                 <span>Ver nuestras dos citas especiales</span>
                 <span aria-hidden="true">→</span>

@@ -1,8 +1,8 @@
 import type { LetterContent } from '@/types/letter';
 
-// Genera una imagen PNG de la carta (o poema) con un diseño sencillo de papel y la
-// descarga. Se dibuja en un <canvas> con las mismas fuentes de la página, así que no
-// necesita librerías ni pasar por el servidor.
+// Descarga la carta (o poema) como imagen PNG o como página HTML, con un diseño
+// sencillo de papel. Todo se genera en el navegador: sin librerías ni servidor.
+// El PNG se dibuja en un <canvas> con las mismas fuentes de la página.
 
 const WIDTH = 1200;
 const MARGIN = 120;
@@ -135,10 +135,83 @@ export async function downloadLetterImage(letter: LetterContent): Promise<void> 
 
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
   if (!blob) return;
+  triggerDownload(blob, `${fileBaseName(letter)}.png`);
+}
+
+// Página HTML independiente con la carta: se abre en cualquier navegador, sin conexión
+// usa fuentes del sistema y con conexión las mismas de Google Fonts que el sitio.
+export function downloadLetterHtml(letter: LetterContent): void {
+  const isPoem = letter.mode === 'poem';
+  const blocks = letter.body.split(/\n\s*\n/).filter((b) => b.trim().length > 0);
+  const body = blocks
+    .map((block) =>
+      isPoem
+        ? `<p class="stanza">${block
+            .split('\n')
+            .filter((v) => v.trim())
+            .map((v) => escapeHtml(v.trim()))
+            .join('<br>')}</p>`
+        : `<p>${escapeHtml(block.replace(/\n/g, ' '))}</p>`
+    )
+    .join('\n      ');
+  const title = isPoem ? 'Un poema para Adi' : 'Una carta para Adi';
+
+  const html = `<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${title}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400;1,500&family=Playfair+Display:ital,wght@1,600&family=Alex+Brush&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px 16px; background: #efe6d2; color: ${COLORS.ink};
+      font-family: "Cormorant Garamond", Georgia, serif; font-size: 1.25rem; line-height: 1.6; }
+    main { max-width: 680px; margin: 0 auto; padding: clamp(28px, 7vw, 64px); background: ${COLORS.paper};
+      border: 1px solid ${COLORS.border}; }
+    h1 { margin: 0 0 1.4em; font: italic 600 clamp(1.8rem, 5vw, 2.4rem)/1.2 "Playfair Display", Georgia, serif;
+      color: ${COLORS.accent}; ${isPoem ? 'text-align: center;' : ''} }
+    p { margin: 0 0 1.1em; }
+    .stanza { text-align: center; font-style: italic; }
+    .question { margin: 2em 0; text-align: center; font: italic 600 1.5rem/1.3 "Playfair Display", Georgia, serif;
+      color: ${COLORS.accent}; }
+    .ps { font-style: italic; font-size: 1.05rem; color: ${COLORS.soft}; }
+    .ps strong { font-style: normal; }
+    .sign { margin-top: 2.5em; text-align: right; color: ${COLORS.soft}; font-style: italic; }
+    .sign span { display: block; font: 400 3rem/1.1 "Alex Brush", cursive; font-style: normal; color: ${COLORS.accent}; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>${escapeHtml(letter.greeting)}</h1>
+    <article>
+      ${body}
+    </article>
+    ${letter.question ? `<p class="question">${escapeHtml(letter.question)}</p>` : ''}
+    ${letter.psText ? `<p class="ps"><strong>${escapeHtml(letter.psLabel)}</strong> ${escapeHtml(letter.psText)}</p>` : ''}
+    <p class="sign">${escapeHtml(letter.signIntro)}<span>${escapeHtml(letter.signName)}</span></p>
+  </main>
+</body>
+</html>
+`;
+  triggerDownload(new Blob([html], { type: 'text/html;charset=utf-8' }), `${fileBaseName(letter)}.html`);
+}
+
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function fileBaseName(letter: LetterContent): string {
+  return letter.mode === 'poem' ? 'poema-para-adi' : 'carta-para-adi';
+}
+
+function triggerDownload(blob: Blob, fileName: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = letter.mode === 'poem' ? 'poema-para-adi.png' : 'carta-para-adi.png';
+  a.download = fileName;
   document.body.appendChild(a);
   a.click();
   a.remove();

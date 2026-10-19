@@ -10,7 +10,7 @@ import { formatDate, generateGoogleCalendarLink } from '@/modules/events/compone
 import { Balloon, BalloonBunch, BALLOON_COLORS, HeartMark, Sunflower, Tape } from './BookDecor';
 import { calculateNextDate } from '@/modules/events/components/CountdownTimer';
 import { isImageUrl, isSafeUrl, linkLabel } from '@/modules/ideas/domain/links';
-import { downloadLetterImage } from '@/modules/hero/domain/downloadLetter';
+import { downloadLetterHtml, downloadLetterImage } from '@/modules/hero/domain/downloadLetter';
 import { formatShortDate, getDateParts } from '../domain/bookHelpers';
 import type { NotesStatus } from '../hooks/useBookNotes';
 
@@ -190,9 +190,17 @@ export function LetterPage({ letter }: { letter: LetterContent }) {
         <span>{letter.signIntro}</span>
         <em>{letter.signName}</em>
       </p>
-      <button type="button" className="bk-link lt-download" onClick={() => downloadLetterImage(letter)}>
-        <Icon name="download" /> Descargar carta
-      </button>
+      <div className="lt-download">
+        <Icon name="download" />
+        <span>Descargar carta:</span>
+        <button type="button" className="bk-link" onClick={() => downloadLetterImage(letter)}>
+          PNG
+        </button>
+        <span aria-hidden="true">·</span>
+        <button type="button" className="bk-link" onClick={() => downloadLetterHtml(letter)}>
+          HTML
+        </button>
+      </div>
     </div>
   );
 }
