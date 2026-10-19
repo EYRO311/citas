@@ -182,11 +182,11 @@
   top: calc(8% + var(--slot, 0) * 21%);
 }
 .book-tab.is-future {
-  left: calc(100% + 6px);
+  left: calc(100% + 9px); /* fuera del borde de la tapa (7px) */
   border-radius: 0 4px 4px 0;
 }
 .book-tab.is-past {
-  left: calc(-6px - var(--tab-w));
+  left: calc(-9px - var(--tab-w));
   border-radius: 4px 0 0 4px;
   transform: rotate(180deg);
 }
@@ -216,11 +216,11 @@
   container-type: size;
   --tab-w: 24px;
   --tab-top: 26px;
-  --page-h: min(100cqh, ((100cqw - 2 * var(--tab-w) - 16px) / 2) * 4 / 3);
+  --page-h: min(100cqh, ((100cqw - 2 * var(--tab-w) - 22px) / 2) * 4 / 3);
   --page-w: calc(var(--page-h) * 3 / 4);
 }
 .book-view.is-single .book-stage {
-  --page-h: min(100cqh, (100cqw - 2 * var(--tab-w) - 16px) * 4 / 3);
+  --page-h: min(100cqh, (100cqw - 2 * var(--tab-w) - 22px) * 4 / 3);
 }
 .book {
   --current-x: 75%;
@@ -305,6 +305,11 @@
 }
 .book-sheet.is-flipped {
   transform: rotateY(-180deg);
+}
+/* En la vista de una página las hojas ya pasadas quedan giradas (invisibles) a la
+   izquierda del libro: sin esto tapan las pestañas de las secciones anteriores. */
+.book-view.is-single .book-sheet.is-flipped {
+  pointer-events: none;
 }
 
 .book-face {
