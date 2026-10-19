@@ -305,14 +305,12 @@ export function MemoryPage({
 export function AddMemoryPage({ onAdd, empty }: { onAdd: () => void; empty: boolean }) {
   return (
     <div className="bp bp-add">
-      <div className="add-frame">
-        <Icon name="camera" className="add-icon" />
-        <h3>{empty ? 'Aquí empezará nuestro álbum' : 'Un espacio para lo que viene'}</h3>
-        <p>{empty ? 'Aún no hay fotos pegadas en el libro.' : 'Cada nueva salida merece su propia página.'}</p>
-        <button type="button" className="bk-btn" onClick={onAdd}>
-          <Icon name="plus" /> Añadir nuevo recuerdo
-        </button>
-      </div>
+      <span className="add-rule" aria-hidden="true" />
+      <h3>{empty ? 'Aquí empezará nuestro álbum' : 'Un espacio para lo que viene'}</h3>
+      <p>{empty ? 'Aún no hay fotos pegadas en el libro.' : 'Cada nueva salida merece su propia página.'}</p>
+      <button type="button" className="bk-btn bk-btn-ghost" onClick={onAdd}>
+        <Icon name="plus" /> Añadir recuerdo
+      </button>
     </div>
   );
 }

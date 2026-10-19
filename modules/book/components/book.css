@@ -137,45 +137,68 @@
   overflow: clip;
 }
 
-/* Solapas de sección */
+/* Separadores de sección (como las pestañas de un cuaderno): la sección actual asoma
+   por arriba del libro, las que ya pasaste por el borde izquierdo y las que faltan por
+   el derecho. Viven dentro de .book y quedan detrás de las hojas. */
 .book-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
-  padding: 0 8px;
-  position: relative;
-  z-index: 5;
+  display: contents;
 }
 .book-tab {
-  position: relative;
+  position: absolute;
+  z-index: -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   border: 0;
   cursor: pointer;
-  font-family: var(--bk-font-hand);
-  font-size: 1.25rem;
+  font-family: var(--bk-font-serif);
+  font-size: 0.85rem;
   font-weight: 700;
+  letter-spacing: 0.04em;
   line-height: 1;
-  color: #fff8e6;
-  padding: 0.35em 1.1em 0.3em;
-  border-radius: 12px 12px 0 0;
+  white-space: nowrap;
+  color: #fffaf0;
   background: var(--tab-color);
-  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.35);
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
-  transform: translateY(7px);
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s;
+  opacity: 0.85;
+  transition:
+    top 0.45s ease,
+    left 0.45s ease,
+    transform 0.45s ease,
+    opacity 0.2s;
 }
 .book-tab:hover {
-  transform: translateY(2px);
-  filter: brightness(1.08);
-}
-.book-tab.is-active {
-  transform: translateY(0);
-  filter: brightness(1.12);
-  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.12), 0 -3px 10px rgba(255, 200, 120, 0.4);
+  opacity: 1;
 }
 .book-tab:focus-visible {
-  outline: 3px solid #fbeccb;
+  outline: 2px solid #fbeccb;
   outline-offset: 2px;
+}
+.book-tab.is-past,
+.book-tab.is-future {
+  writing-mode: vertical-rl;
+  width: var(--tab-w);
+  height: 19%;
+  top: calc(8% + var(--slot, 0) * 21%);
+}
+.book-tab.is-future {
+  left: calc(100% + 6px);
+  border-radius: 0 4px 4px 0;
+}
+.book-tab.is-past {
+  left: calc(-6px - var(--tab-w));
+  border-radius: 4px 0 0 4px;
+  transform: rotate(180deg);
+}
+.book-tab.is-current {
+  top: calc(-6px - var(--tab-top));
+  left: var(--current-x, 50%);
+  height: var(--tab-top);
+  padding: 0 1.2em;
+  border-radius: 4px 4px 0 0;
+  transform: translateX(-50%);
+  opacity: 1;
+  font-size: 0.95rem;
 }
 
 .book-stage {
@@ -186,16 +209,24 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  padding: 14px 10px 22px;
+  padding: calc(var(--tab-top) + 14px) 8px 16px;
   touch-action: pan-y;
   /* El tamaño de página sale del espacio libre del escenario (cqw/cqh): el libro
      crece o se encoge con la pantalla sin perder la proporción 3:4 de cada página. */
   container-type: size;
-  --page-h: min(100cqh, (100cqw / 2) * 4 / 3);
+  --tab-w: 24px;
+  --tab-top: 26px;
+  --page-h: min(100cqh, ((100cqw - 2 * var(--tab-w) - 16px) / 2) * 4 / 3);
   --page-w: calc(var(--page-h) * 3 / 4);
 }
 .book-view.is-single .book-stage {
-  --page-h: min(100cqh, 100cqw * 4 / 3);
+  --page-h: min(100cqh, (100cqw - 2 * var(--tab-w) - 16px) * 4 / 3);
+}
+.book {
+  --current-x: 75%;
+}
+.book-view.is-single .book {
+  --current-x: 50%;
 }
 
 .book {
@@ -346,55 +377,48 @@
   outline: 3px solid #f2b134;
 }
 
-/* Controles inferiores */
+/* Controles inferiores (discretos) */
 .book-controls {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   position: relative;
   z-index: 5;
 }
 .book-nav {
-  width: 46px;
-  height: 46px;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
   border-radius: 50%;
-  border: 2px solid #8a4513;
-  color: #6b3a14;
-  font-size: 1.2rem;
+  border: 1px solid rgba(251, 236, 203, 0.35);
+  color: rgba(251, 236, 203, 0.85);
+  font-size: 0.95rem;
   cursor: pointer;
-  background: radial-gradient(circle at 35% 30%, #fbefd0, #e3c288);
-  box-shadow: 0 4px 0 #8a4513, 0 8px 14px rgba(0, 0, 0, 0.35);
-  transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+  background: rgba(20, 10, 4, 0.2);
+  transition: background 0.2s, opacity 0.2s;
 }
 .book-nav:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 0 #8a4513, 0 10px 16px rgba(0, 0, 0, 0.35);
-}
-.book-nav:active:not(:disabled) {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 #8a4513;
+  background: rgba(251, 236, 203, 0.14);
 }
 .book-nav:disabled {
-  opacity: 0.35;
+  opacity: 0.3;
   cursor: default;
 }
 .book-nav:focus-visible {
-  outline: 3px solid #fbeccb;
-  outline-offset: 3px;
+  outline: 2px solid #fbeccb;
+  outline-offset: 2px;
 }
 .book-nav-arrow-left {
   transform: rotate(180deg);
 }
 .book-indicator {
-  min-width: 170px;
+  min-width: 140px;
   text-align: center;
-  font-family: var(--bk-font-hand);
-  font-size: 1.35rem;
+  font-family: var(--bk-font-serif);
+  font-size: 0.95rem;
   font-weight: 600;
-  color: #fbeccb;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.55);
+  color: rgba(251, 236, 203, 0.8);
 }
 
 /* ------------------------------------------------------------------------------
@@ -627,51 +651,45 @@
   width: 0.45em;
 }
 
-/* Botones dentro del libro */
+/* Botones dentro del libro (planos, sin brillos) */
 .bk-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.45em;
   cursor: pointer;
-  font-family: var(--bk-font-hand);
-  font-size: 1.15em;
+  font-family: var(--bk-font-serif);
+  font-size: 1em;
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.2;
   text-decoration: none;
-  color: #fff8e6;
-  padding: 0.45em 1.1em 0.4em;
-  border-radius: 999px;
-  border: 2px solid #8a4513;
-  background: linear-gradient(180deg, #ecA24a, #d9732a);
-  box-shadow: 0 3px 0 #8a4513, 0 6px 10px rgba(90, 45, 10, 0.25);
-  text-shadow: 0 1px 1px rgba(80, 35, 5, 0.45);
-  transition: transform 0.15s, box-shadow 0.15s, filter 0.2s;
+  color: var(--bk-paper);
+  padding: 0.45em 1em;
+  border-radius: 4px;
+  border: 1px solid var(--bk-ink);
+  background: var(--bk-ink);
+  transition: background 0.2s, color 0.2s;
 }
 .bk-btn:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.06);
-}
-.bk-btn:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 #8a4513;
+  background: #5a3c22;
 }
 .bk-btn:focus-visible,
 .bk-link:focus-visible,
 .gl-box:focus-visible,
 .polaroid-p:focus-visible {
-  outline: 3px solid #3bb0c1;
+  outline: 2px solid var(--bk-ink);
   outline-offset: 2px;
 }
 .bk-btn .ui-icon {
   color: inherit;
 }
 .bk-btn-ghost {
-  color: var(--bk-brown);
-  background: rgba(255, 252, 240, 0.65);
-  border: 2px dashed #b78a4a;
-  box-shadow: none;
-  text-shadow: none;
+  color: var(--bk-ink);
+  background: transparent;
+  border-color: rgba(62, 42, 24, 0.4);
+}
+.bk-btn-ghost:hover {
+  background: rgba(62, 42, 24, 0.06);
 }
 .bk-link {
   display: inline-flex;
@@ -680,11 +698,12 @@
   align-self: flex-start;
   background: none;
   border: 0;
+  padding: 0;
   cursor: pointer;
-  font-family: var(--bk-font-hand);
-  font-size: 1.05em;
-  color: var(--bk-brown);
-  text-decoration: underline wavy rgba(122, 74, 28, 0.5);
+  font-family: var(--bk-font-serif);
+  font-size: 0.95em;
+  color: var(--bk-ink-soft);
+  text-decoration: underline;
   text-underline-offset: 0.2em;
 }
 
@@ -1238,39 +1257,28 @@
 
 /* Página para añadir recuerdos */
 .bp-add {
-  justify-content: center;
-}
-.add-frame {
-  flex: 1;
-  margin: 2cqw 0;
-  border: 3px dashed #b78a4a;
-  border-radius: 14px;
-  display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.7em;
-  padding: 1.5em;
+  gap: 0.6em;
   text-align: center;
-  background: rgba(255, 250, 235, 0.45);
 }
-.add-icon {
-  width: 3.6em;
-  height: 3.6em;
-  color: #b78a4a;
-}
-.add-frame h3 {
+.bp-add h3 {
   font-family: var(--bk-font-hand);
-  font-size: 2em;
+  font-size: 1.7em;
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.05;
   color: #5a2d0c;
 }
-.add-frame p {
+.bp-add p {
   font-family: var(--bk-font-serif);
   font-style: italic;
-  font-weight: 600;
   color: var(--bk-ink-soft);
+  margin-bottom: 0.4em;
+}
+.add-rule {
+  width: 2.5em;
+  height: 1px;
+  background: rgba(62, 42, 24, 0.35);
 }
 
 /* ------------------------------------------------------------------------------
@@ -1713,8 +1721,10 @@
     font-size: 1.2rem;
   }
   .book-tab {
-    font-size: 1.1rem;
-    padding: 0.35em 0.85em 0.3em;
+    font-size: 0.75rem;
+  }
+  .book-tab.is-current {
+    font-size: 0.85rem;
   }
 }
 

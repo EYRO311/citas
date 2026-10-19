@@ -38,10 +38,10 @@ import './book.css';
 type SectionId = 'letter' | 'memories' | 'agenda' | 'goals';
 
 const SECTIONS: { id: SectionId; label: string; color: string }[] = [
-  { id: 'letter', label: 'Carta', color: '#e9953b' },
-  { id: 'memories', label: 'Recuerdos', color: '#3bb0c1' },
-  { id: 'agenda', label: 'Agenda', color: '#8d5fa8' },
-  { id: 'goals', label: 'Metas', color: '#e4572e' },
+  { id: 'letter', label: 'Carta', color: '#b9824f' },
+  { id: 'memories', label: 'Recuerdos', color: '#5f9198' },
+  { id: 'agenda', label: 'Agenda', color: '#7d6890' },
+  { id: 'goals', label: 'Metas', color: '#a9614b' },
 ];
 
 const IDEAS_PAGE_CAPACITY = 5;
@@ -328,6 +328,9 @@ export default function Book({
 
   const referenceIndex = rightIndex >= 0 ? rightIndex : leftIndex;
   const activeSection = SECTIONS.filter((s) => (sectionStart[s.id] ?? Infinity) <= referenceIndex).pop()?.id ?? null;
+  // Con la contraportada a la vista ya se pasaron todas las secciones.
+  const atBackCover = state === 'back' || (!spread && current === total - 1);
+  const activeIdx = atBackCover ? SECTIONS.length : SECTIONS.findIndex((s) => s.id === activeSection);
 
   let indicator: string;
   if (spread && current === 0) indicator = 'Portada';
@@ -381,20 +384,6 @@ export default function Book({
     <div className={`book-view ${spread ? 'is-spread' : 'is-single'}`}>
       <h1 className="bk-sr-only">Nuestro libro de aventuras</h1>
 
-      <nav className="book-tabs" aria-label="Secciones del libro">
-        {SECTIONS.map((section) => (
-          <button
-            key={section.id}
-            type="button"
-            className={`book-tab ${activeSection === section.id ? 'is-active' : ''}`}
-            style={{ ['--tab-color' as string]: section.color }}
-            onClick={() => jumpToPage(sectionStart[section.id] ?? 0)}
-          >
-            {section.label}
-          </button>
-        ))}
-      </nav>
-
       <div
         className="book-stage"
         data-state={state}
@@ -417,6 +406,24 @@ export default function Book({
         <div className="book">
           <div className="book-edge book-edge-left" aria-hidden="true" />
           <div className="book-edge book-edge-right" aria-hidden="true" />
+          <nav className="book-tabs" aria-label="Secciones del libro">
+            {SECTIONS.map((section, i) => {
+              const position = i < activeIdx ? 'past' : i === activeIdx ? 'current' : 'future';
+              const slot = position === 'past' ? i : i - activeIdx - 1;
+              return (
+                <button
+                  key={section.id}
+                  type="button"
+                  className={`book-tab is-${position}`}
+                  aria-current={position === 'current' ? 'true' : undefined}
+                  style={{ ['--tab-color' as string]: section.color, ['--slot' as string]: slot }}
+                  onClick={() => jumpToPage(sectionStart[section.id] ?? 0)}
+                >
+                  {section.label}
+                </button>
+              );
+            })}
+          </nav>
           {sheets}
           {state !== 'front' && (state === 'open' || state === 'back') && spread && (
             <button type="button" className="book-corner book-corner-prev" aria-label="Página anterior" onClick={goPrev} />
