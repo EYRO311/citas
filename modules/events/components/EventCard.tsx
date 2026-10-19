@@ -13,7 +13,7 @@ const SHY_PHRASES = [
   '¡Ya casi le das al Sí!',
 ];
 
-function formatDate(dateStr: string) {
+export function formatDate(dateStr: string) {
   if (!dateStr) return 'Próximamente';
   try {
     const parts = dateStr.split('-');
@@ -33,7 +33,7 @@ function formatDate(dateStr: string) {
   return dateStr;
 }
 
-function generateGoogleCalendarLink(event: EventItem) {
+export function generateGoogleCalendarLink(event: EventItem) {
   const title = encodeURIComponent(event.title);
   const details = encodeURIComponent(
     `${event.description}\n\n👗 Código de vestimenta: ${event.dressCode}\n🤫 Detalle: ${event.secretHint || ''}`

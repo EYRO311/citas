@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 import { useEvents } from '@/modules/events/hooks/useEvents';
 import CountdownTimer from '@/modules/events/components/CountdownTimer';
 import EventsInvitations from '@/modules/events/components/EventsInvitations';
@@ -10,9 +12,32 @@ import EnvelopeHero from '@/modules/hero/components/EnvelopeHero';
 import { triggerGlobalBurst } from '@/modules/petals/registry';
 import { sounds } from '@/shared/sounds';
 import { Icon } from '@/shared/icons/Icon';
+import BookModeSwitch from '@/modules/book/components/BookModeSwitch';
+import Book from '@/modules/book/components/Book';
+
+const BOOK_MODE_KEY = 'propuesta_book_mode';
 
 export default function Home() {
   const { events, refresh } = useEvents();
+  const [bookMode, setBookMode] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(BOOK_MODE_KEY) === '1') setBookMode(true);
+    } catch {
+      // almacenamiento no disponible: se queda en vista normal
+    }
+  }, []);
+
+  function handleBookModeChange(next: boolean) {
+    setBookMode(next);
+    try {
+      localStorage.setItem(BOOK_MODE_KEY, next ? '1' : '0');
+    } catch {
+      // ignorar
+    }
+    window.scrollTo({ top: 0 });
+  }
 
   function handleFinalCelebration() {
     sounds.playCelebration();
@@ -32,6 +57,12 @@ export default function Home() {
 
       <PetalsCanvas />
 
+      {bookMode && <div className="book-desk" aria-hidden="true"></div>}
+      <BookModeSwitch checked={bookMode} onChange={handleBookModeChange} />
+
+      {bookMode ? (
+        <Book events={events} refreshEvents={refresh} onCelebrate={handleFinalCelebration} />
+      ) : (
       <main className="main-wrapper">
         <EnvelopeHero />
 
@@ -83,6 +114,7 @@ export default function Home() {
           
         </footer>
       </main>
+      )}
     </>
   );
 }
