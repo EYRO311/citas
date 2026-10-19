@@ -1,17 +1,22 @@
 'use client';
 
+import { useRef } from 'react';
+import type { IdeaItem } from '@/types/ideas';
 import { useIdeas } from '../hooks/useIdeas';
+import { removeIdea } from '../data/ideasService';
+import { isImageUrl, isSafeUrl, linkLabel } from '../domain/links';
 import { Icon } from '@/shared/icons/Icon';
-
-function platformLabel(link: string): string {
-  const l = link.toLowerCase();
-  if (l.includes('tiktok.com')) return 'Ver en TikTok';
-  if (l.includes('instagram.com') || l.includes('instagr.am')) return 'Ver en Instagram';
-  return 'Ver enlace';
-}
+import IdeaEditorModal, { IdeaEditorModalHandle } from './IdeaEditorModal';
 
 export default function IdeasList() {
   const { ideas, connected, loading, refresh } = useIdeas();
+  const editorRef = useRef<IdeaEditorModalHandle>(null);
+
+  async function handleDelete(idea: IdeaItem) {
+    if (!confirm(`¿Eliminar "${idea.title}" de la lista?`)) return;
+    await removeIdea(idea.id);
+    refresh();
+  }
 
   return (
     <div id="ideas-container">
@@ -22,28 +27,35 @@ export default function IdeasList() {
         Ideas que quiero que hagamos juntos, inspiradas en cosas que vi por ahí y me recordaron a ti.
       </p>
 
-      {ideas.length > 0 && (
-        <div className={`drive-badge ${connected ? 'drive-connected' : 'drive-local'}`} onClick={refresh} style={{ margin: '0 auto 20px' }}>
-          {loading ? (
-            <>
-              <span className="status-dot yellow"></span>
-              <span>Sincronizando...</span>
-            </>
-          ) : connected ? (
-            <>
-              <span className="status-dot green"></span>
-              <span>
-                Lista en la nube <Icon name="cloud" className="ui-icon-blue" />
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="status-dot green"></span>
-              <span>Lista guardada en este dispositivo</span>
-            </>
-          )}
-        </div>
-      )}
+      <div className="ideas-actions-bar">
+        {ideas.length > 0 && (
+          <div className={`drive-badge ${connected ? 'drive-connected' : 'drive-local'}`} onClick={refresh}>
+            {loading ? (
+              <>
+                <span className="status-dot yellow"></span>
+                <span>Sincronizando...</span>
+              </>
+            ) : connected ? (
+              <>
+                <span className="status-dot green"></span>
+                <span>
+                  Lista en la nube <Icon name="cloud" className="ui-icon-blue" />
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="status-dot green"></span>
+                <span>Lista guardada en este dispositivo</span>
+              </>
+            )}
+          </div>
+        )}
+        <button type="button" className="btn-primary" onClick={() => editorRef.current?.open()}>
+          <span>
+            <Icon name="plus" className="ui-icon-white" /> Añadir plan
+          </span>
+        </button>
+      </div>
 
       {ideas.length === 0 ? (
         <div className="empty-gallery-card glass-panel">
@@ -51,22 +63,55 @@ export default function IdeasList() {
             <Icon name="sparkle" className="ui-icon-gold ui-icon-xl" />
           </span>
           <h3>Aún no hay planes en la lista</h3>
-          <p>Pronto iré añadiendo ideas de cosas que quiero que hagamos juntos.</p>
+          <p>Toca &quot;Añadir plan&quot; para guardar ideas de cosas que queremos hacer juntos.</p>
         </div>
       ) : (
         <div className="memories-grid">
-          {ideas.map((idea) => (
-            <div key={idea.id} className="glass-panel" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', color: '#b45309' }}>{idea.title}</h4>
-              {idea.link && (
-                <a href={idea.link} target="_blank" rel="noopener noreferrer" className="btn-calendar">
-                  <Icon name="arrowRight" className="ui-icon-blue" /> {platformLabel(idea.link)}
-                </a>
-              )}
-            </div>
-          ))}
+          {ideas.map((idea) => {
+            const linkIsImage = isImageUrl(idea.link);
+            const image = idea.image || (linkIsImage ? idea.link : '');
+            return (
+              <div key={idea.id} className="glass-panel idea-card">
+                {image && (
+                  <div className="idea-card-image">
+                    <img
+                      src={image}
+                      alt={idea.title}
+                      loading="lazy"
+                      onError={(e) => {
+                        if (e.currentTarget.parentElement) e.currentTarget.parentElement.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+                <div className="idea-card-body">
+                  <h4 className="idea-card-title">{idea.title}</h4>
+                  {isSafeUrl(idea.link) && !linkIsImage && (
+                    <a href={idea.link} target="_blank" rel="noopener noreferrer" className="btn-calendar">
+                      <Icon name="arrowRight" className="ui-icon-blue" /> {linkLabel(idea.link)}
+                    </a>
+                  )}
+                  <div className="idea-card-actions">
+                    <button type="button" className="btn-ghost-sm" onClick={() => editorRef.current?.open(idea)}>
+                      <Icon name="edit" className="ui-icon-blue" /> Editar
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-ghost-sm"
+                      style={{ color: '#ef4444', borderColor: '#fca5a5' }}
+                      onClick={() => handleDelete(idea)}
+                    >
+                      <Icon name="trash" className="ui-icon-rose" /> Eliminar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
+
+      <IdeaEditorModal ref={editorRef} onSaved={refresh} />
     </div>
   );
 }

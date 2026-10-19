@@ -1,4 +1,5 @@
 import type { IdeaItem, IdeaPayload } from '@/types/ideas';
+import { normalizeUrl } from '../domain/links';
 
 const STORAGE_KEY = 'propuesta_ideas';
 
@@ -31,12 +32,20 @@ export function saveIdeas(ideas: IdeaItem[]): void {
   }
 }
 
+// Sin nube, la imagen subida se guarda tal cual (base64) en este navegador
+function localImage(payload: IdeaPayload, previous?: string): string | undefined {
+  if (payload.imageUpload?.base64) return payload.imageUpload.base64;
+  if (payload.image !== undefined) return normalizeUrl(payload.image) || undefined;
+  return previous;
+}
+
 export function addIdea(payload: IdeaPayload): IdeaItem {
   const ideas = getIdeas();
   const newIdea: IdeaItem = {
     id: Date.now(),
     title: payload.title?.trim() || 'Nuevo plan',
-    link: (payload.link || '').trim(),
+    link: normalizeUrl(payload.link),
+    image: localImage(payload),
     createdAt: new Date().toISOString(),
   };
   ideas.unshift(newIdea);
@@ -50,9 +59,9 @@ export function updateIdea(id: number, payload: IdeaPayload): IdeaItem | null {
   if (index === -1) return null;
   ideas[index] = {
     ...ideas[index],
-    ...payload,
     title: payload.title !== undefined ? payload.title.trim() || ideas[index].title : ideas[index].title,
-    link: payload.link !== undefined ? payload.link.trim() : ideas[index].link,
+    link: payload.link !== undefined ? normalizeUrl(payload.link) : ideas[index].link,
+    image: localImage(payload, ideas[index].image),
   };
   saveIdeas(ideas);
   return ideas[index];

@@ -5,23 +5,28 @@ import type { IdeaItem } from '@/types/ideas';
 import { createIdea, editIdea, removeIdea } from '@/modules/ideas/data/ideasService';
 import { useIdeas } from '@/modules/ideas/hooks/useIdeas';
 import { Icon } from '@/shared/icons/Icon';
-
-const emptyForm = { title: '', link: '' };
+import IdeaFormFields, {
+  emptyIdeaForm,
+  formToPayload,
+  ideaToForm,
+  IdeaFormValue,
+} from '@/modules/ideas/components/IdeaFormFields';
+import { isSafeUrl } from '@/modules/ideas/domain/links';
 
 export default function IdeasAdminPanel({ onShowToast }: { onShowToast: (msg: string) => void }) {
   const { ideas, connected, refresh } = useIdeas();
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState<IdeaFormValue>(emptyIdeaForm);
   const [submitting, setSubmitting] = useState(false);
 
   function startEdit(idea: IdeaItem) {
     setEditingId(idea.id);
-    setForm({ title: idea.title, link: idea.link });
+    setForm(ideaToForm(idea));
   }
 
   function cancelEdit() {
     setEditingId(null);
-    setForm(emptyForm);
+    setForm(emptyIdeaForm);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -30,10 +35,10 @@ export default function IdeasAdminPanel({ onShowToast }: { onShowToast: (msg: st
 
     setSubmitting(true);
     if (editingId !== null) {
-      await editIdea(editingId, form);
+      await editIdea(editingId, formToPayload(form));
       onShowToast('¡Plan actualizado! ✨');
     } else {
-      await createIdea(form);
+      await createIdea(formToPayload(form));
       onShowToast('¡Nuevo plan añadido a la lista! 💡');
     }
     setSubmitting(false);
@@ -63,32 +68,7 @@ export default function IdeasAdminPanel({ onShowToast }: { onShowToast: (msg: st
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="form-label" htmlFor="idea-title">
-                Título *
-              </label>
-              <input
-                id="idea-title"
-                className="form-input"
-                placeholder="Ej: Ir a ese café que vimos en TikTok"
-                required
-                value={form.title}
-                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label" htmlFor="idea-link">
-                Link de TikTok o Instagram
-              </label>
-              <input
-                id="idea-link"
-                type="url"
-                className="form-input"
-                placeholder="https://www.tiktok.com/..."
-                value={form.link}
-                onChange={(e) => setForm((f) => ({ ...f, link: e.target.value }))}
-              />
-            </div>
+            <IdeaFormFields value={form} onChange={setForm} idPrefix="idea-admin" />
 
             <div className="form-actions-group">
               <button type="submit" className="btn-primary" disabled={submitting}>
@@ -131,6 +111,9 @@ export default function IdeasAdminPanel({ onShowToast }: { onShowToast: (msg: st
             ) : (
               ideas.map((idea) => (
                 <div key={idea.id} className="admin-event-card">
+                  {isSafeUrl(idea.image) && (
+                    <img src={idea.image} alt={idea.title} className="idea-admin-thumb" loading="lazy" />
+                  )}
                   <h3 className="admin-card-title">{idea.title}</h3>
                   {idea.link && (
                     <a

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabase } from '@/server/supabase/memoriesService';
 import { addIdea, deleteIdea, listIdeas, updateIdea } from '@/server/supabase/ideasService';
+import type { IdeaPayload } from '@/types/ideas';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -14,6 +15,19 @@ const NOT_CONFIGURED = {
   ideas: [],
   message: 'Supabase no configurado (faltan SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY).',
 };
+
+function ideaPayload(body: Record<string, unknown> | null): IdeaPayload {
+  const upload = body?.imageUpload as IdeaPayload['imageUpload'] | undefined;
+  return {
+    title: typeof body?.title === 'string' ? body.title : undefined,
+    link: typeof body?.link === 'string' ? body.link : undefined,
+    image: typeof body?.image === 'string' ? body.image : undefined,
+    imageUpload:
+      upload && typeof upload.base64 === 'string'
+        ? { base64: upload.base64, mimeType: typeof upload.mimeType === 'string' ? upload.mimeType : undefined }
+        : undefined,
+  };
+}
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
@@ -42,7 +56,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const idea = await addIdea(supabase, { title: body?.title, link: body?.link });
+    const idea = await addIdea(supabase, ideaPayload(body));
     return NextResponse.json({ success: true, idea }, { headers: CORS_HEADERS });
   } catch (error) {
     console.error('Error con Supabase Storage (ideas):', error);
@@ -63,7 +77,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'ID inválido' }, { status: 400, headers: CORS_HEADERS });
     }
 
-    const updated = await updateIdea(supabase, id, { title: body?.title, link: body?.link });
+    const updated = await updateIdea(supabase, id, ideaPayload(body));
     if (!updated) {
       return NextResponse.json({ error: 'Plan no encontrado' }, { status: 404, headers: CORS_HEADERS });
     }
