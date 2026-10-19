@@ -3473,6 +3473,22 @@ dialog::backdrop {
   background: rgba(220, 38, 38, 0.85);
 }
 
+/* Casilla "Añadir" al editar las fotos de un recuerdo */
+.cover-photo-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-blue-royal);
+  background: rgba(37, 99, 235, 0.06);
+  border: 2px dashed var(--color-blue-royal);
+}
+
 /* Carrusel del lightbox cuando un recuerdo tiene varias fotos */
 .lightbox-nav-btn {
   position: absolute;

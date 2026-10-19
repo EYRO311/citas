@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { deleteMemory, getSupabase, isValidId, listMemories, updateMemoryMeta } from '@/server/supabase/memoriesService';
+import { deleteMemory, getSupabase, isValidId, listMemories, updateMemory } from '@/server/supabase/memoriesService';
+import type { EditPhotoInput } from '@/types/memories';
+
+const MAX_PHOTOS = 6;
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -57,12 +60,25 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'ID inválido' }, { status: 400, headers: CORS_HEADERS });
     }
 
-    const updated = await updateMemoryMeta(supabase, id, {
-      title: body.title,
-      date: body.date,
-      location: body.location,
-      caption: body.caption,
-    });
+    const photos = Array.isArray(body.photos) ? (body.photos as EditPhotoInput[]) : undefined;
+    if (photos && photos.length > MAX_PHOTOS) {
+      return NextResponse.json(
+        { error: `Máximo ${MAX_PHOTOS} fotos por recuerdo` },
+        { status: 400, headers: CORS_HEADERS }
+      );
+    }
+
+    const updated = await updateMemory(
+      supabase,
+      id,
+      {
+        title: body.title,
+        date: body.date,
+        location: body.location,
+        caption: body.caption,
+      },
+      photos ? { photos, coverIndex: Number(body.coverIndex) || 0 } : undefined
+    );
     if (!updated) {
       return NextResponse.json({ error: 'Recuerdo no encontrado' }, { status: 404, headers: CORS_HEADERS });
     }

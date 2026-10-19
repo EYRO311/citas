@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
-import type { MemoryMeta, RemoteMemory } from '@/types/memories';
+import type { MemoryMeta, MemoryPhotosChange, RemoteMemory } from '@/types/memories';
 
 // ==============================================================================
 // Recuerdos en Supabase Storage (bucket compartido "anuncios", prefijo "propuesta/")
@@ -171,11 +171,17 @@ export async function listMemories(supabase: SupabaseClient): Promise<RemoteMemo
   return [...byId.values()].map((record) => toMemory(supabase, record));
 }
 
-// Actualiza solo el texto (title/date/location/caption) del .json de un recuerdo; no toca las fotos.
-export async function updateMemoryMeta(
+const stripDataUrl = (base64: string) => base64.replace(/^data:image\/\w+;base64,/, '');
+
+// Actualiza el texto (title/date/location/caption) del .json de un recuerdo y, si llega
+// `photosChange`, también sus fotos: las existentes se identifican por su URL pública, las
+// nuevas se suben con un nombre único (<id>_<timestamp>_<n>) para no chocar con la caché
+// de un año, y las que ya no están en la lista se borran del bucket.
+export async function updateMemory(
   supabase: SupabaseClient,
   id: string,
-  meta: Partial<MemoryMeta>
+  meta: Partial<MemoryMeta>,
+  photosChange?: MemoryPhotosChange
 ): Promise<RemoteMemory | null> {
   const bucket = supabase.storage.from(BUCKET);
   const { data: blob, error: dlError } = await bucket.download(`${PREFIX}/${id}.json`);
@@ -189,11 +195,66 @@ export async function updateMemoryMeta(
   }
 
   record = { ...record, ...meta, id };
+
+  const uploadedPaths: string[] = [];
+  let removedPaths: string[] = [];
+
+  if (photosChange) {
+    const currentPaths = recordImagePaths(record);
+    const pathByUrl = new Map(
+      currentPaths.map((p) => [bucket.getPublicUrl(p).data.publicUrl, p] as [string, string])
+    );
+
+    const stamp = Date.now();
+    const nextPaths: string[] = [];
+    for (const photo of photosChange.photos) {
+      if ('url' in photo) {
+        // Solo se aceptan fotos que ya pertenecían a este recuerdo
+        const path = pathByUrl.get(photo.url);
+        if (path) nextPaths.push(path);
+        continue;
+      }
+      const mimeType = photo.mimeType || 'image/jpeg';
+      const ext = EXTENSIONS[mimeType] || 'jpg';
+      const path = `${PREFIX}/${id}_${stamp}_${uploadedPaths.length}.${ext}`;
+      const { error } = await bucket.upload(path, Buffer.from(stripDataUrl(photo.base64), 'base64'), {
+        contentType: mimeType,
+        cacheControl: '31536000',
+        upsert: false,
+      });
+      if (error) {
+        if (uploadedPaths.length) await bucket.remove(uploadedPaths);
+        throw error;
+      }
+      uploadedPaths.push(path);
+      nextPaths.push(path);
+    }
+
+    if (nextPaths.length === 0) {
+      if (uploadedPaths.length) await bucket.remove(uploadedPaths);
+      throw new Error('Un recuerdo necesita al menos una foto');
+    }
+
+    removedPaths = currentPaths.filter((p) => !nextPaths.includes(p));
+    delete record.imagePath;
+    record.images = nextPaths;
+    record.coverIndex = Math.min(Math.max(photosChange.coverIndex || 0, 0), nextPaths.length - 1);
+  }
+
   const { error } = await bucket.upload(`${PREFIX}/${id}.json`, JSON.stringify(record), {
     contentType: 'application/json',
     upsert: true,
   });
-  if (error) throw error;
+  if (error) {
+    if (uploadedPaths.length) await bucket.remove(uploadedPaths);
+    throw error;
+  }
+
+  // Se borran al final: si algo falló antes, el recuerdo sigue apuntando a fotos que existen
+  if (removedPaths.length) {
+    const { error: removeError } = await bucket.remove(removedPaths);
+    if (removeError) console.warn('No se pudieron borrar fotos reemplazadas:', removeError);
+  }
 
   return toMemory(supabase, record);
 }

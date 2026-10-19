@@ -1,12 +1,27 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { LocalMemory, Memory, MemoryMeta } from '@/types/memories';
+import type { EditPhotoInput, LocalMemory, Memory, MemoryMeta } from '@/types/memories';
 import { deleteMemory as deleteLocalMemory, saveMemory as saveLocalMemory } from '../data/memoriesLocalRepository';
 import { deleteCloudMemory, updateCloudMemory } from '../data/memoriesApiClient';
+import { compressImage } from '../domain/compressImage';
 import { Icon } from '@/shared/icons/Icon';
 
 const FALLBACK_IMG = '/img/fondo.jpg';
+const MAX_PHOTOS = 6;
+
+interface DraftPhoto {
+  src: string;
+  /** Solo en fotos recién elegidas: hay que subirlas. */
+  mimeType?: string;
+  name?: string;
+}
+
+function memoryPhotos(memory: Memory): string[] {
+  if (memory.images && memory.images.length > 0) return memory.images;
+  const single = ('imageBase64' in memory && memory.imageBase64) || memory.imageUrl;
+  return single ? [single] : [];
+}
 
 export default function Lightbox({
   memory,
@@ -20,15 +35,22 @@ export default function Lightbox({
   onUpdated: () => void;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [meta, setMeta] = useState<MemoryMeta>({ title: '', date: '', location: '', caption: '' });
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [coverIndex, setCoverIndex] = useState(0);
+  const [draftPhotos, setDraftPhotos] = useState<DraftPhoto[]>([]);
+  const [draftCover, setDraftCover] = useState(0);
 
   useEffect(() => {
     if (memory) {
       setActiveIndex(memory.coverIndex || 0);
       setEditing(false);
+      setPhotos(memoryPhotos(memory));
+      setCoverIndex(memory.coverIndex || 0);
       setMeta({
         title: memory.title || '',
         date: memory.date || '',
@@ -46,45 +68,119 @@ export default function Lightbox({
   const driveFileId = 'driveFileId' in memory ? memory.driveFileId : undefined;
   const driveUrl = 'driveUrl' in memory ? memory.driveUrl : undefined;
   const storageId = 'storageId' in memory ? memory.storageId : undefined;
-  const canEditText = !driveFileId;
+  const canEdit = !driveFileId;
+
+  function startEditing() {
+    const cover = Math.min(coverIndex, Math.max(photos.length - 1, 0));
+    setDraftPhotos(photos.map((src) => ({ src })));
+    setDraftCover(cover);
+    setActiveIndex(cover);
+    setEditing(true);
+  }
+
+  function cancelEditing() {
+    setActiveIndex(Math.min(coverIndex, Math.max(photos.length - 1, 0)));
+    setEditing(false);
+  }
+
+  async function addDraftPhotos(fileList: FileList) {
+    const files = Array.from(fileList).slice(0, Math.max(0, MAX_PHOTOS - draftPhotos.length));
+    if (files.length === 0) return;
+    if (fileList.length > files.length) {
+      alert(`Puedes tener hasta ${MAX_PHOTOS} fotos por recuerdo. Se tomaron solo las primeras disponibles.`);
+    }
+
+    const compressed = await Promise.all(
+      files.map(async (file) => {
+        const result = await compressImage(file, 1600, 0.75);
+        const name = result.mimeType === 'image/jpeg' ? file.name.replace(/\.[^.]+$/, '') + '.jpg' : file.name;
+        return { src: result.dataUrl, mimeType: result.mimeType, name };
+      })
+    );
+
+    setDraftPhotos((prev) => [...prev, ...compressed]);
+  }
+
+  function removeDraftPhoto(index: number) {
+    setDraftPhotos((prev) => prev.filter((_, i) => i !== index));
+    setDraftCover((prev) => {
+      if (index === prev) return 0;
+      return index < prev ? prev - 1 : prev;
+    });
+    setActiveIndex(0);
+  }
 
   async function handleSaveEdit() {
     if (!memory) return;
+    if (draftPhotos.length === 0) {
+      alert('El recuerdo necesita al menos una foto.');
+      return;
+    }
+
     const cleaned: MemoryMeta = {
       title: meta.title.trim() || 'Recuerdo de nuestra salida',
       date: meta.date,
       location: meta.location.trim(),
       caption: meta.caption.trim(),
     };
+    const safeCover = Math.min(draftCover, draftPhotos.length - 1);
+    const photosChanged =
+      safeCover !== coverIndex ||
+      draftPhotos.length !== photos.length ||
+      draftPhotos.some((p, i) => p.src !== photos[i]);
 
     setSaving(true);
 
+    let finalPhotos = draftPhotos.map((p) => p.src);
+    let finalCover = safeCover;
+
     if (storageId) {
-      const updated = await updateCloudMemory(storageId, cleaned);
+      // Las fotos que ya estaban en la nube se mandan por su URL; las que solo tenemos
+      // en base64 (nuevas, o copia local de antes) se suben.
+      const photosInput: EditPhotoInput[] = draftPhotos.map((p) =>
+        p.src.startsWith('data:')
+          ? { base64: p.src, mimeType: p.mimeType || p.src.slice(5, p.src.indexOf(';')), name: p.name }
+          : { url: p.src }
+      );
+      const updated = await updateCloudMemory(
+        storageId,
+        cleaned,
+        photosChanged ? { photos: photosInput, coverIndex: safeCover } : undefined
+      );
       if (!updated) {
         alert('No se pudo guardar los cambios en la nube. Inténtalo de nuevo.');
         setSaving(false);
         return;
+      }
+      if (updated.images && updated.images.length > 0) {
+        finalPhotos = updated.images;
+        finalCover = updated.coverIndex || 0;
       }
     }
 
     await saveLocalMemory({
       ...memory,
       ...cleaned,
+      images: finalPhotos,
+      coverIndex: finalCover,
+      imageBase64: finalPhotos[finalCover],
       id: memory.id,
       isLocal: 'isLocal' in memory ? memory.isLocal : false,
       timestamp: memory.timestamp || Date.now(),
     } as LocalMemory);
 
     setMeta(cleaned);
+    setPhotos(finalPhotos);
+    setCoverIndex(finalCover);
+    setActiveIndex(finalCover);
     setSaving(false);
     setEditing(false);
     onUpdated();
   }
 
-  const gallery = memory.images && memory.images.length > 0 ? memory.images : null;
-  const singleFallback = ('imageBase64' in memory && memory.imageBase64) || memory.imageUrl || FALLBACK_IMG;
-  const displayImg = gallery ? gallery[Math.min(activeIndex, gallery.length - 1)] : singleFallback;
+  const shown = editing ? draftPhotos.map((p) => p.src) : photos;
+  const gallery = shown.length > 0 ? shown : null;
+  const displayImg = gallery ? gallery[Math.min(activeIndex, gallery.length - 1)] : FALLBACK_IMG;
 
   function goTo(delta: number) {
     if (!gallery) return;
@@ -141,13 +237,13 @@ export default function Lightbox({
                 ›
               </button>
               <span className="lightbox-photo-counter">
-                {activeIndex + 1} / {gallery.length}
+                {Math.min(activeIndex, gallery.length - 1) + 1} / {gallery.length}
               </span>
             </>
           )}
         </div>
 
-        {gallery && gallery.length > 1 && (
+        {!editing && gallery && gallery.length > 1 && (
           <div className="lightbox-thumb-strip">
             {gallery.map((src, index) => (
               <img
@@ -163,6 +259,58 @@ export default function Lightbox({
 
         {editing ? (
           <div className="form-group" style={{ marginTop: 12 }}>
+            <label className="form-label">
+              Fotos ({draftPhotos.length}/{MAX_PHOTOS}) · toca una para hacerla portada
+            </label>
+            <div className="cover-photo-picker" style={{ marginBottom: 14 }}>
+              {draftPhotos.map((photo, index) => (
+                <div
+                  key={`${index}-${photo.src.slice(-32)}`}
+                  className={`cover-photo-option ${index === draftCover ? 'is-cover' : ''}`}
+                  onClick={() => {
+                    setDraftCover(index);
+                    setActiveIndex(index);
+                  }}
+                >
+                  <img src={photo.src} alt={`Foto ${index + 1}`} />
+                  {index === draftCover && <span className="cover-photo-badge">Portada</span>}
+                  <button
+                    type="button"
+                    className="cover-photo-remove"
+                    aria-label="Quitar foto"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeDraftPhoto(index);
+                    }}
+                  >
+                    &times;
+                  </button>
+                </div>
+              ))}
+              {draftPhotos.length < MAX_PHOTOS && (
+                <button
+                  type="button"
+                  className="cover-photo-option cover-photo-add"
+                  aria-label="Añadir fotos"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Icon name="plus" className="ui-icon-blue" />
+                  <span>Añadir</span>
+                </button>
+              )}
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                if (e.target.files?.length) addDraftPhotos(e.target.files);
+                e.target.value = '';
+              }}
+            />
+
             <label className="form-label" htmlFor="lightbox-edit-title">
               Título
             </label>
@@ -237,14 +385,14 @@ export default function Lightbox({
               <Icon name="cloud" className="ui-icon-blue" /> Abrir en Google Drive
             </a>
           )}
-          {canEditText && !editing && (
-            <button type="button" className="btn-ghost-sm" onClick={() => setEditing(true)}>
-              <Icon name="edit" className="ui-icon-blue" /> Editar texto
+          {canEdit && !editing && (
+            <button type="button" className="btn-ghost-sm" onClick={startEditing}>
+              <Icon name="edit" className="ui-icon-blue" /> Editar fotos y texto
             </button>
           )}
           {editing && (
             <div style={{ display: 'flex', gap: 10 }}>
-              <button type="button" className="btn-ghost-sm" onClick={() => setEditing(false)} disabled={saving}>
+              <button type="button" className="btn-ghost-sm" onClick={cancelEditing} disabled={saving}>
                 Cancelar
               </button>
               <button type="button" className="btn-primary" onClick={handleSaveEdit} disabled={saving}>

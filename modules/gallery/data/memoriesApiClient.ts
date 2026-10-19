@@ -1,5 +1,5 @@
 import type { DriveStatusResponse } from '@/types/drive';
-import type { MemoriesListResponse, MemoryMeta, RemoteMemory, UploadRequestBody, UploadResponse } from '@/types/memories';
+import type { MemoriesListResponse, MemoryMeta, MemoryPhotosChange, RemoteMemory, UploadRequestBody, UploadResponse } from '@/types/memories';
 
 export async function fetchCloudMemories(): Promise<MemoriesListResponse> {
   try {
@@ -17,12 +17,16 @@ export async function deleteCloudMemory(storageId: string): Promise<boolean> {
   return true;
 }
 
-export async function updateCloudMemory(storageId: string, meta: Partial<MemoryMeta>): Promise<RemoteMemory | null> {
+export async function updateCloudMemory(
+  storageId: string,
+  meta: Partial<MemoryMeta>,
+  photosChange?: MemoryPhotosChange
+): Promise<RemoteMemory | null> {
   try {
     const res = await fetch('/api/memories', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: storageId, ...meta }),
+      body: JSON.stringify({ id: storageId, ...meta, ...photosChange }),
     });
     if (!res.ok) return null;
     const data = (await res.json()) as { memory?: RemoteMemory };

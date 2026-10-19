@@ -15,7 +15,10 @@ export function mergeMemories(
     const remote = key ? remoteByKey.get(key) : undefined;
     if (!remote) return memory;
     remoteByKey.delete(key as string);
-    // Conservamos las fotos locales (base64, ya disponibles al instante en este dispositivo)
+    // En Supabase están todas las fotos: mandan las remotas, porque si se editaron
+    // desde otro dispositivo la copia local quedó vieja.
+    if (remote.source === 'supabase') return { ...remote, id: memory.id } as Memory;
+    // Drive solo guarda la portada. Conservamos las fotos locales (base64, ya disponibles al instante en este dispositivo)
     // y solo tomamos del remoto los campos que no tenemos en caché local.
     return {
       ...remote,

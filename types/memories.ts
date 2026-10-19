@@ -59,6 +59,15 @@ export interface UploadImageInput {
   name?: string;
 }
 
+/** Una foto al editar un recuerdo: una que ya estaba (por su URL pública) o una nueva (base64). */
+export type EditPhotoInput = { url: string } | UploadImageInput;
+
+export interface MemoryPhotosChange {
+  /** Lista final de fotos, en orden. Las que no aparezcan se borran del bucket. */
+  photos: EditPhotoInput[];
+  coverIndex?: number;
+}
+
 export interface UploadRequestBody {
   images: UploadImageInput[];
   coverIndex?: number;
