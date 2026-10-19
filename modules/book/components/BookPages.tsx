@@ -665,7 +665,7 @@ export function EmptyGoalsPage() {
 /* Final y relleno                                                     */
 /* ------------------------------------------------------------------ */
 
-export function FinalePage({ onCelebrate }: { onCelebrate: () => void }) {
+export function FinalePage() {
   return (
     <div className="bp bp-finale">
       <Tape className="tape-tl" />
@@ -676,9 +676,6 @@ export function FinalePage({ onCelebrate }: { onCelebrate: () => void }) {
         Así como las flores buscan la luz del sol para florecer, cada día a tu lado se llena de alegría y calma. No importa a
         dónde vayamos, el mejor destino siempre será estar contigo.
       </p>
-      <button type="button" className="bk-btn" onClick={onCelebrate}>
-        <Icon name="balloon" /> Lluvia de globos
-      </button>
       <div className="fin-balloons" aria-hidden="true">
         {BALLOON_COLORS.map((c, i) => (
           <Balloon key={c} color={c} style={{ ['--i' as string]: i }} />
@@ -732,12 +729,8 @@ export function WritableNotesPage({
   );
 }
 
-export function NotesPage() {
-  return (
-    <div className="bp bp-notes">
-      <span className="bp-tag">Notas</span>
-      <div className="nt-lines" aria-hidden="true" />
-      <Balloon color="#f2b134" className="nt-balloon" />
-    </div>
-  );
+// Página de relleno (papel en blanco) para que cada capítulo empiece en página
+// izquierda y la contraportada quede en su lugar.
+export function BlankPage() {
+  return <div className="bp bp-blank" aria-hidden="true" />;
 }

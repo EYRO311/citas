@@ -29,7 +29,7 @@ import {
   LockedEventPage,
   MEMORY_PHOTOS_PER_PAGE,
   MemoryPage,
-  NotesPage,
+  BlankPage,
   WritableNotesPage,
 } from './BookPages';
 import { memoryPhotosCoverFirst } from '../domain/bookHelpers';
@@ -75,11 +75,9 @@ function PageShell({ side, number, children }: { side: 'left' | 'right'; number:
 export default function Book({
   events,
   refreshEvents,
-  onCelebrate,
 }: {
   events: EventItem[];
   refreshEvents: () => void;
-  onCelebrate: () => void;
 }) {
   const { letter } = useLetter();
   const { memories, refresh: refreshMemories } = useMemories();
@@ -168,7 +166,7 @@ export default function Book({
   const push = (id: string, node: React.ReactNode, cover = false) => pages.push({ id, node, cover });
   // Las aperturas de capítulo siempre caen en página izquierda (índice impar).
   const padToLeft = () => {
-    if (pages.length % 2 === 0) push(`pad-${pages.length}`, <NotesPage />);
+    if (pages.length % 2 === 0) push(`pad-${pages.length}`, <BlankPage />);
   };
 
   const chronological = [...memories].reverse();
@@ -274,10 +272,10 @@ export default function Book({
     'notes-main',
     <WritableNotesPage text={notes.text} status={notes.status} maxLength={notes.maxLength} onChange={notes.update} />
   );
-  push('finale', <FinalePage onCelebrate={onCelebrate} />);
+  push('finale', <FinalePage />);
 
   // La contraportada es la cara trasera de la última hoja: debe quedar en índice impar.
-  if (pages.length % 2 === 0) push(`pad-${pages.length}`, <NotesPage />);
+  if (pages.length % 2 === 0) push(`pad-${pages.length}`, <BlankPage />);
   push('cover-back', <CoverBack onRestart={restart} />, true);
 
   const total = pages.length;

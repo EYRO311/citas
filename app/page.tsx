@@ -61,7 +61,7 @@ export default function Home() {
       <BookModeSwitch checked={bookMode} onChange={handleBookModeChange} />
 
       {bookMode ? (
-        <Book events={events} refreshEvents={refresh} onCelebrate={handleFinalCelebration} />
+        <Book events={events} refreshEvents={refresh} />
       ) : (
       <main className="main-wrapper">
         <EnvelopeHero />
