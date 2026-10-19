@@ -23,16 +23,20 @@ function memoryPhotos(memory: Memory): string[] {
   return single ? [single] : [];
 }
 
+// Visor de un recuerdo. Editar (fotos y texto) y eliminar solo aparecen con `editable`,
+// que se activa desde el panel admin; en la página pública es de solo lectura.
 export default function Lightbox({
   memory,
   onClose,
   onDeleted,
   onUpdated,
+  editable = false,
 }: {
   memory: Memory | null;
   onClose: () => void;
-  onDeleted: () => void;
-  onUpdated: () => void;
+  onDeleted?: () => void;
+  onUpdated?: () => void;
+  editable?: boolean;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -68,7 +72,7 @@ export default function Lightbox({
   const driveFileId = 'driveFileId' in memory ? memory.driveFileId : undefined;
   const driveUrl = 'driveUrl' in memory ? memory.driveUrl : undefined;
   const storageId = 'storageId' in memory ? memory.storageId : undefined;
-  const canEdit = !driveFileId;
+  const canEdit = editable && !driveFileId;
 
   function startEditing() {
     const cover = Math.min(coverIndex, Math.max(photos.length - 1, 0));
@@ -175,7 +179,7 @@ export default function Lightbox({
     setActiveIndex(finalCover);
     setSaving(false);
     setEditing(false);
-    onUpdated();
+    onUpdated?.();
   }
 
   const shown = editing ? draftPhotos.map((p) => p.src) : photos;
@@ -199,7 +203,7 @@ export default function Lightbox({
     }
     await deleteLocalMemory(memory.id);
     onClose();
-    onDeleted();
+    onDeleted?.();
   }
 
   return (
@@ -400,7 +404,7 @@ export default function Lightbox({
               </button>
             </div>
           )}
-          {!driveFileId && !editing && (
+          {canEdit && !editing && (
             <button type="button" className="btn-ghost-sm" style={{ color: '#ef4444', borderColor: '#fca5a5' }} onClick={handleDelete}>
               <Icon name="trash" className="ui-icon-rose" /> Eliminar foto
             </button>

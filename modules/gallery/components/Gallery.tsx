@@ -11,7 +11,7 @@ import MemoryCard from './MemoryCard';
 import UploadMemoryModal, { UploadMemoryModalHandle } from './UploadMemoryModal';
 import Lightbox from './Lightbox';
 
-export default function Gallery() {
+export default function Gallery({ editable = false }: { editable?: boolean }) {
   const [memories, setMemories] = useState<Memory[]>([]);
   const [driveStatus, setDriveStatus] = useState<DriveStatusResponse>({ connected: false, mode: 'local', memories: [] });
   const [cloudConnected, setCloudConnected] = useState(false);
@@ -97,7 +97,13 @@ export default function Gallery() {
       </div>
 
       <UploadMemoryModal ref={uploadRef} onSaved={refresh} />
-      <Lightbox memory={selected} onClose={() => setSelected(null)} onDeleted={refresh} onUpdated={refresh} />
+      <Lightbox
+        memory={selected}
+        onClose={() => setSelected(null)}
+        onDeleted={refresh}
+        onUpdated={refresh}
+        editable={editable}
+      />
     </div>
   );
 }

@@ -142,7 +142,7 @@ export default function AdminDashboard() {
 
           {tab === 'gallery' && (
             <div className="admin-tab-section">
-              <Gallery />
+              <Gallery editable />
             </div>
           )}
 
