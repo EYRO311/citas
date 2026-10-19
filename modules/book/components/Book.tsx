@@ -30,8 +30,10 @@ import {
   MEMORY_PHOTOS_PER_PAGE,
   MemoryPage,
   NotesPage,
+  WritableNotesPage,
 } from './BookPages';
 import { memoryPhotosCoverFirst } from '../domain/bookHelpers';
+import { useBookNotes } from '../hooks/useBookNotes';
 import { Icon } from '@/shared/icons/Icon';
 import './book.css';
 
@@ -82,6 +84,7 @@ export default function Book({
   const { letter } = useLetter();
   const { memories, refresh: refreshMemories } = useMemories();
   const { ideas } = useIdeas();
+  const notes = useBookNotes();
 
   const [selected, setSelected] = useState<Memory | null>(null);
   const uploadRef = useRef<UploadMemoryModalHandle>(null);
@@ -267,6 +270,10 @@ export default function Book({
     );
     i = end;
   }
+  push(
+    'notes-main',
+    <WritableNotesPage text={notes.text} status={notes.status} maxLength={notes.maxLength} onChange={notes.update} />
+  );
   push('finale', <FinalePage onCelebrate={onCelebrate} />);
 
   // La contraportada es la cara trasera de la última hoja: debe quedar en índice impar.

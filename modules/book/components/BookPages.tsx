@@ -10,7 +10,9 @@ import { formatDate, generateGoogleCalendarLink } from '@/modules/events/compone
 import { Balloon, BalloonBunch, BALLOON_COLORS, HeartMark, Sunflower, Tape } from './BookDecor';
 import { calculateNextDate } from '@/modules/events/components/CountdownTimer';
 import { isImageUrl, isSafeUrl, linkLabel } from '@/modules/ideas/domain/links';
+import { downloadLetterImage } from '@/modules/hero/domain/downloadLetter';
 import { formatShortDate, getDateParts } from '../domain/bookHelpers';
+import type { NotesStatus } from '../hooks/useBookNotes';
 
 const FALLBACK_IMG = '/img/fondo.jpg';
 const LETTER_COLORS = ['#e9953b', '#8d5fa8', '#3bb0c1', '#e4572e', '#f2c14e', '#6aa84f'];
@@ -188,6 +190,9 @@ export function LetterPage({ letter }: { letter: LetterContent }) {
         <span>{letter.signIntro}</span>
         <em>{letter.signName}</em>
       </p>
+      <button type="button" className="bk-link lt-download" onClick={() => downloadLetterImage(letter)}>
+        <Icon name="download" /> Descargar carta
+      </button>
     </div>
   );
 }
@@ -671,6 +676,50 @@ export function FinalePage({ onCelebrate }: { onCelebrate: () => void }) {
           <Balloon key={c} color={c} style={{ ['--i' as string]: i }} />
         ))}
       </div>
+    </div>
+  );
+}
+
+const NOTES_STATUS_LABEL: Record<NotesStatus, string> = {
+  loading: 'Cargando…',
+  idle: '',
+  saving: 'Guardando…',
+  saved: 'Guardado',
+  local: 'Guardado solo en este dispositivo',
+};
+
+// Página principal de notas: la única del libro donde se puede escribir.
+export function WritableNotesPage({
+  text,
+  status,
+  maxLength,
+  onChange,
+}: {
+  text: string;
+  status: NotesStatus;
+  maxLength: number;
+  onChange: (text: string) => void;
+}) {
+  return (
+    <div className="bp bp-notes bp-notes-main">
+      <span className="bp-tag">Notas</span>
+      <label htmlFor="bk-notes" className="bk-sr-only">
+        Escribe tus notas
+      </label>
+      <textarea
+        id="bk-notes"
+        className="nt-input"
+        value={text}
+        maxLength={maxLength}
+        placeholder="Escribe aquí lo que quieras…"
+        disabled={status === 'loading'}
+        onChange={(e) => onChange(e.target.value)}
+        // Que seleccionar texto arrastrando no pase la página
+        onPointerDown={(e) => e.stopPropagation()}
+      />
+      <span className="nt-status" aria-live="polite">
+        {NOTES_STATUS_LABEL[status]}
+      </span>
     </div>
   );
 }

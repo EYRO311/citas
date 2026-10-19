@@ -2023,6 +2023,9 @@ dialog::backdrop {
 /* Botón final */
 .letter-cta {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
   justify-content: center;
   margin-top: clamp(26px, 5vw, 34px);
   padding-top: clamp(20px, 4vw, 26px);
