@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EventItem } from '@/types/events';
-import type { Memory } from '@/types/memories';
+import type { LocalMemory, Memory } from '@/types/memories';
 import { isEventReadyToDisplay } from '@/modules/events/domain/eventRules';
 import { setEventRSVP } from '@/modules/events/data/eventsService';
 import { isEventSecretUnlocked, lockSecretEvent, unlockSecretEvent } from '@/modules/events/data/secretsRepository';
@@ -511,7 +511,22 @@ export default function Book({
       </div>
 
       <Lightbox memory={selected} onClose={() => setSelected(null)} onDeleted={refreshMemories} onUpdated={refreshMemories} />
-      <UploadMemoryModal ref={uploadRef} onSaved={refreshMemories} />
+      <UploadMemoryModal
+        ref={uploadRef}
+        mode="book"
+        onSaved={(savedMemory) => {
+          refreshMemories();
+          const memStart = sectionStart.memories;
+          if (savedMemory && typeof memStart === 'number') {
+            setTimeout(() => {
+              // Navegar al final de la sección recuerdos donde quedó pegada la nueva foto
+              const targetPage =
+                typeof sectionStart.agenda === 'number' ? Math.max(0, sectionStart.agenda - 1) : memStart + 1;
+              jumpToPage(targetPage);
+            }, 300);
+          }
+        }}
+      />
     </div>
   );
 }

@@ -17,6 +17,7 @@ export default function Gallery({ editable = false }: { editable?: boolean }) {
   const [cloudConnected, setCloudConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Memory | null>(null);
+  const [justAddedId, setJustAddedId] = useState<string | null>(null);
   const uploadRef = useRef<UploadMemoryModalHandle>(null);
 
   const refresh = useCallback(async () => {
@@ -26,6 +27,23 @@ export default function Gallery({ editable = false }: { editable?: boolean }) {
     setMemories(mergeMemories(local, cloud.memories, drive.memories));
     setLoading(false);
   }, []);
+
+  const handleMemorySaved = useCallback(
+    (savedMemory?: { id: string }) => {
+      refresh();
+      if (savedMemory?.id) {
+        setJustAddedId(savedMemory.id);
+        setTimeout(() => {
+          setJustAddedId(null);
+        }, 4000);
+        const container = document.getElementById('gallery-container');
+        if (container) {
+          container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    },
+    [refresh]
+  );
 
   useEffect(() => {
     refresh();
@@ -92,11 +110,18 @@ export default function Gallery({ editable = false }: { editable?: boolean }) {
             <p>Toca &quot;Añadir nuevo recuerdo&quot; o sube fotos directo a nuestra carpeta de Google Drive y aparecerán aquí.</p>
           </div>
         ) : (
-          memories.map((memory) => <MemoryCard key={memory.id} memory={memory} onClick={() => setSelected(memory)} />)
+          memories.map((memory) => (
+            <MemoryCard
+              key={memory.id}
+              memory={memory}
+              isHighlighted={memory.id === justAddedId}
+              onClick={() => setSelected(memory)}
+            />
+          ))
         )}
       </div>
 
-      <UploadMemoryModal ref={uploadRef} onSaved={refresh} />
+      <UploadMemoryModal ref={uploadRef} onSaved={handleMemorySaved} mode="album" />
       <Lightbox
         memory={selected}
         onClose={() => setSelected(null)}

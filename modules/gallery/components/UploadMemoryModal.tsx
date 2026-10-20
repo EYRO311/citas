@@ -7,6 +7,7 @@ import { uploadMemoryToCloud } from '../data/memoriesApiClient';
 import { triggerGlobalBurst } from '@/modules/petals/registry';
 import { Icon } from '@/shared/icons/Icon';
 import type { LocalMemory } from '@/types/memories';
+import MemoryAlbumAnimation from './MemoryAlbumAnimation';
 
 export interface UploadMemoryModalHandle {
   open: () => void;
@@ -20,8 +21,13 @@ interface SelectedPhoto {
   name: string;
 }
 
-const UploadMemoryModal = forwardRef<UploadMemoryModalHandle, { onSaved: () => void }>(function UploadMemoryModal(
-  { onSaved },
+interface UploadMemoryModalProps {
+  onSaved: (savedMemory?: LocalMemory) => void;
+  mode?: 'album' | 'book';
+}
+
+const UploadMemoryModal = forwardRef<UploadMemoryModalHandle, UploadMemoryModalProps>(function UploadMemoryModal(
+  { onSaved, mode = 'album' },
   ref
 ) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -31,6 +37,7 @@ const UploadMemoryModal = forwardRef<UploadMemoryModalHandle, { onSaved: () => v
   const [dragging, setDragging] = useState(false);
   const [status, setStatus] = useState<{ text: string; color: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [animationMemory, setAnimationMemory] = useState<LocalMemory | null>(null);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -103,186 +110,199 @@ const UploadMemoryModal = forwardRef<UploadMemoryModalHandle, { onSaved: () => v
     };
 
     await saveMemory(newMemory);
-    triggerGlobalBurst(window.innerWidth / 2, window.innerHeight / 2, 45);
-    onSaved();
 
-    try {
-      setStatus({ text: 'Subiendo a la nube ☁️...', color: '#d97706' });
-      const data = await uploadMemoryToCloud({
-        images: photos.map((p) => ({ base64: p.dataUrl, mimeType: p.mimeType, name: p.name })),
-        coverIndex: safeCoverIndex,
-        title: newMemory.title,
-        date: newMemory.date,
-        location: newMemory.location,
-        caption: newMemory.caption,
-        webhookUrl: (localStorage.getItem('propuesta_drive_webhook_url') || '').trim() || undefined,
-        folderId: (localStorage.getItem('propuesta_drive_folder_id') || '').trim() || undefined,
-      });
-
-      if (data.storageId) {
-        newMemory.storageId = data.storageId;
-        newMemory.isLocal = false;
-        await saveMemory(newMemory);
-        onSaved();
-      } else if (data.driveFileId) {
-        newMemory.driveUrl = data.driveUrl || `https://drive.google.com/file/d/${data.driveFileId}/view`;
-        newMemory.driveFileId = data.driveFileId;
-        newMemory.isLocal = false;
-        await saveMemory(newMemory);
-        onSaved();
-      }
-    } catch (err) {
-      console.warn('Aviso: Recuerdo almacenado en álbum local (nube pendiente):', err);
-    }
-
+    // Cerrar el modal y lanzar la animación del recuerdo de inmediato
+    dialogRef.current?.close();
+    setAnimationMemory(newMemory);
     setSubmitting(false);
-    setStatus({ text: '¡Recuerdo guardado con éxito! ✨', color: '#16a34a' });
+    setStatus(null);
+    form.reset();
+    setPhotos([]);
+    setCoverIndex(0);
 
-    setTimeout(() => {
-      dialogRef.current?.close();
-      setStatus(null);
-      form.reset();
-      setPhotos([]);
-      setCoverIndex(0);
-    }, 1200);
+    // Sincronización en segundo plano con la nube
+    (async () => {
+      try {
+        const data = await uploadMemoryToCloud({
+          images: photos.map((p) => ({ base64: p.dataUrl, mimeType: p.mimeType, name: p.name })),
+          coverIndex: safeCoverIndex,
+          title: newMemory.title,
+          date: newMemory.date,
+          location: newMemory.location,
+          caption: newMemory.caption,
+          webhookUrl: (localStorage.getItem('propuesta_drive_webhook_url') || '').trim() || undefined,
+          folderId: (localStorage.getItem('propuesta_drive_folder_id') || '').trim() || undefined,
+        });
+
+        if (data.storageId) {
+          newMemory.storageId = data.storageId;
+          newMemory.isLocal = false;
+          await saveMemory(newMemory);
+          onSaved(newMemory);
+        } else if (data.driveFileId) {
+          newMemory.driveUrl = data.driveUrl || `https://drive.google.com/file/d/${data.driveFileId}/view`;
+          newMemory.driveFileId = data.driveFileId;
+          newMemory.isLocal = false;
+          await saveMemory(newMemory);
+          onSaved(newMemory);
+        }
+      } catch (err) {
+        console.warn('Aviso: Recuerdo almacenado en álbum local (nube pendiente):', err);
+      }
+    })();
   }
 
   return (
-    <dialog ref={dialogRef} id="modal-upload-memory">
-      <div className="modal-card">
-        <button type="button" className="modal-close-btn" aria-label="Cerrar" onClick={() => dialogRef.current?.close()}>
-          &times;
-        </button>
-        <div className="modal-header-styled">
-          <h3 className="modal-title-styled">
-            Guardar Recuerdo de Nuestra Salida <Icon name="camera" className="ui-icon-blue" />
-          </h3>
-          <p style={{ fontSize: '0.9rem', color: '#64748b' }}>
-            Puedes subir varias fotos; elige cuál será la portada que se ve en el álbum.
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">Fotos de la cita</label>
-            <div
-              className="photo-dropzone"
-              style={{ background: dragging ? '#fde68a' : undefined }}
-              onClick={() => fileInputRef.current?.click()}
-              onDragOver={(e) => {
-                e.preventDefault();
-                setDragging(true);
-              }}
-              onDragLeave={() => setDragging(false)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setDragging(false);
-                if (e.dataTransfer.files?.length) processSelectedFiles(e.dataTransfer.files);
-              }}
-            >
-              <span className="dropzone-icon">
-                <Icon name="camera" className="ui-icon-xl ui-icon-blue" />
-              </span>
-              {photos.length === 0 ? (
-                <strong>Toca aquí o arrastra una o varias fotos</strong>
-              ) : (
-                <strong>
-                  Toca aquí para añadir más fotos ({photos.length}/{MAX_PHOTOS})
-                </strong>
-              )}
-              <p style={{ fontSize: '0.8rem', color: '#78716c', marginTop: 4 }}>Formatos JPG, PNG, WEBP</p>
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              style={{ display: 'none' }}
-              onChange={(e) => {
-                if (e.target.files?.length) processSelectedFiles(e.target.files);
-                e.target.value = '';
-              }}
-            />
+    <>
+      <dialog ref={dialogRef} id="modal-upload-memory">
+        <div className="modal-card">
+          <button type="button" className="modal-close-btn" aria-label="Cerrar" onClick={() => dialogRef.current?.close()}>
+            &times;
+          </button>
+          <div className="modal-header-styled">
+            <h3 className="modal-title-styled">
+              Guardar Recuerdo de Nuestra Salida <Icon name="camera" className="ui-icon-blue" />
+            </h3>
+            <p style={{ fontSize: '0.9rem', color: '#64748b' }}>
+              Puedes subir varias fotos; elige cuál será la portada que se ve en el álbum.
+            </p>
           </div>
 
-          {photos.length > 0 && (
+          <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label className="form-label">Elige la foto de portada (se verá en el álbum)</label>
-              <div className="cover-photo-picker">
-                {photos.map((photo, index) => (
-                  <div
-                    key={index}
-                    className={`cover-photo-option ${index === coverIndex ? 'is-cover' : ''}`}
-                    onClick={() => setCoverIndex(index)}
-                  >
-                    <img src={photo.dataUrl} alt={`Foto ${index + 1}`} />
-                    {index === coverIndex && <span className="cover-photo-badge">Portada</span>}
-                    <button
-                      type="button"
-                      className="cover-photo-remove"
-                      aria-label="Quitar foto"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removePhoto(index);
-                      }}
+              <label className="form-label">Fotos de la cita</label>
+              <div
+                className="photo-dropzone"
+                style={{ background: dragging ? '#fde68a' : undefined }}
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragging(true);
+                }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragging(false);
+                  if (e.dataTransfer.files?.length) processSelectedFiles(e.dataTransfer.files);
+                }}
+              >
+                <span className="dropzone-icon">
+                  <Icon name="camera" className="ui-icon-xl ui-icon-blue" />
+                </span>
+                {photos.length === 0 ? (
+                  <strong>Toca aquí o arrastra una o varias fotos</strong>
+                ) : (
+                  <strong>
+                    Toca aquí para añadir más fotos ({photos.length}/{MAX_PHOTOS})
+                  </strong>
+                )}
+                <p style={{ fontSize: '0.8rem', color: '#78716c', marginTop: 4 }}>Formatos JPG, PNG, WEBP</p>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  if (e.target.files?.length) processSelectedFiles(e.target.files);
+                  e.target.value = '';
+                }}
+              />
+            </div>
+
+            {photos.length > 0 && (
+              <div className="form-group">
+                <label className="form-label">Elige la foto de portada (se verá en el álbum)</label>
+                <div className="cover-photo-picker">
+                  {photos.map((photo, index) => (
+                    <div
+                      key={index}
+                      className={`cover-photo-option ${index === coverIndex ? 'is-cover' : ''}`}
+                      onClick={() => setCoverIndex(index)}
                     >
-                      &times;
-                    </button>
-                  </div>
-                ))}
+                      <img src={photo.dataUrl} alt={`Foto ${index + 1}`} />
+                      {index === coverIndex && <span className="cover-photo-badge">Portada</span>}
+                      <button
+                        type="button"
+                        className="cover-photo-remove"
+                        aria-label="Quitar foto"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removePhoto(index);
+                        }}
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="memory-title">
+                Título del recuerdo
+              </label>
+              <input id="memory-title" name="title" className="form-input" placeholder="Nuestra salida especial" />
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label" htmlFor="memory-date">
+                  Fecha
+                </label>
+                <input id="memory-date" name="date" type="date" className="form-input" defaultValue={today} />
+              </div>
+              <div className="form-group">
+                <label className="form-label" htmlFor="memory-location">
+                  Lugar
+                </label>
+                <input id="memory-location" name="location" className="form-input" />
               </div>
             </div>
-          )}
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="memory-title">
-              Título del recuerdo
-            </label>
-            <input id="memory-title" name="title" className="form-input" placeholder="Nuestra salida especial" />
-          </div>
-
-          <div className="form-row">
             <div className="form-group">
-              <label className="form-label" htmlFor="memory-date">
-                Fecha
+              <label className="form-label" htmlFor="memory-caption">
+                Mensaje o recuerdo especial
               </label>
-              <input id="memory-date" name="date" type="date" className="form-input" defaultValue={today} />
+              <textarea id="memory-caption" name="caption" className="form-textarea" rows={3} />
             </div>
-            <div className="form-group">
-              <label className="form-label" htmlFor="memory-location">
-                Lugar
-              </label>
-              <input id="memory-location" name="location" className="form-input" />
+
+            {status && (
+              <p style={{ color: status.color, marginBottom: 14, textAlign: 'center', fontWeight: 600 }}>{status.text}</p>
+            )}
+
+            <div className="form-actions-group">
+              <button type="submit" className="btn-primary" disabled={submitting}>
+                <span>
+                  {submitting ? (
+                    '⏳ Guardando...'
+                  ) : (
+                    <>
+                      <Icon name="save" className="ui-icon-white" /> Guardar recuerdo
+                    </>
+                  )}
+                </span>
+              </button>
             </div>
-          </div>
+          </form>
+        </div>
+      </dialog>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="memory-caption">
-              Mensaje o recuerdo especial
-            </label>
-            <textarea id="memory-caption" name="caption" className="form-textarea" rows={3} />
-          </div>
-
-          {status && (
-            <p style={{ color: status.color, marginBottom: 14, textAlign: 'center', fontWeight: 600 }}>{status.text}</p>
-          )}
-
-          <div className="form-actions-group">
-            <button type="submit" className="btn-primary" disabled={submitting}>
-              <span>
-                {submitting ? (
-                  '⏳ Guardando...'
-                ) : (
-                  <>
-                    <Icon name="save" className="ui-icon-white" /> Guardar recuerdo
-                  </>
-                )}
-              </span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </dialog>
+      <MemoryAlbumAnimation
+        memory={animationMemory}
+        isOpen={!!animationMemory}
+        mode={mode}
+        onComplete={() => {
+          const finished = animationMemory;
+          setAnimationMemory(null);
+          if (finished) {
+            onSaved(finished);
+          }
+        }}
+      />
+    </>
   );
 });
 

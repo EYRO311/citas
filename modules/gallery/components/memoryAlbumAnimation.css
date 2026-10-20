@@ -1,0 +1,471 @@
+/* ==============================================================================
+   ANIMACIÓN DE RECUERDO: PEGANDO LA FOTO AL ÁLBUM DE AVENTURAS 📖✨
+   Efecto táctil de foto Polaroid con cinta adhesiva (washi tape), sello de cera
+   dorado, destellos y desplazamiento cinemático hacia el álbum.
+   ============================================================================== */
+
+.album-anim-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, rgba(15, 23, 42, 0.75) 0%, rgba(2, 6, 23, 0.92) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 1.5rem;
+  overflow: hidden;
+  animation: albumAnimFadeIn 0.35s ease-out forwards;
+}
+
+.album-anim-overlay.is-exiting {
+  animation: albumAnimFadeOut 0.5s ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes albumAnimFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes albumAnimFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Banner de estado superior */
+.album-anim-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 1.4rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 0 20px rgba(245, 158, 11, 0.4);
+  font-family: var(--font-display, inherit);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #78350f;
+  margin-bottom: 2rem;
+  z-index: 2;
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  animation: albumBannerPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes albumBannerPop {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Escenario 3D */
+.album-anim-stage {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  z-index: 2;
+}
+
+/* La tarjeta Polaroid */
+.album-anim-polaroid {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  background: #fdfbf7;
+  padding: 14px 14px 24px 14px;
+  border-radius: 6px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55), 0 0 35px rgba(245, 158, 11, 0.3), 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  transform-style: preserve-3d;
+  animation: polaroidFloatIn 0.7s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+  transition: transform 0.65s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease;
+}
+
+/* Estado de rebote al pegarse la cinta */
+.album-anim-polaroid.has-taped {
+  animation: polaroidTapeBounce 0.45s ease-out forwards;
+}
+
+/* Estado de vuelo hacia el álbum */
+.album-anim-polaroid.is-flying-to-album {
+  animation: polaroidFlyToAlbum 0.75s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes polaroidFloatIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-80px) rotate(-10deg) scale(0.75);
+  }
+  70% {
+    transform: translateY(8px) rotate(-2deg) scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(-3deg) scale(1);
+  }
+}
+
+@keyframes polaroidTapeBounce {
+  0% {
+    transform: translateY(0) rotate(-3deg) scale(1);
+  }
+  30% {
+    transform: translateY(6px) rotate(-1deg) scale(0.97);
+  }
+  60% {
+    transform: translateY(-4px) rotate(-3.5deg) scale(1.02);
+  }
+  100% {
+    transform: translateY(0) rotate(-3deg) scale(1);
+  }
+}
+
+@keyframes polaroidFlyToAlbum {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(-3deg) scale(1);
+  }
+  40% {
+    opacity: 0.95;
+    transform: translateY(-30px) rotate(4deg) scale(0.85);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(280px) rotate(-15deg) scale(0.25);
+  }
+}
+
+/* Marco de la foto */
+.album-anim-photo-box {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #1e293b;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.album-anim-photo-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Resplandor suave sobre la foto */
+.album-anim-photo-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 50%);
+  pointer-events: none;
+}
+
+/* Pie de la polaroid */
+.album-anim-caption-box {
+  padding-top: 14px;
+  text-align: center;
+}
+
+.album-anim-title {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #292524;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.album-anim-sub {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #78716c;
+  font-weight: 500;
+}
+
+/* ==============================================================================
+   CINTAS ADHESIVAS (WASHI TAPE)
+   ============================================================================== */
+.album-anim-tape {
+  position: absolute;
+  width: 90px;
+  height: 28px;
+  z-index: 10;
+  border-radius: 2px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+}
+
+/* Cinta izquierda (dorada floral / rayas vintage) */
+.album-anim-tape-left {
+  top: -14px;
+  left: -20px;
+  transform: rotate(-28deg) scale(1.6);
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(254, 240, 138, 0.92),
+    rgba(254, 240, 138, 0.92) 8px,
+    rgba(253, 224, 71, 0.88) 8px,
+    rgba(253, 224, 71, 0.88) 16px
+  );
+  border-left: 2px dashed rgba(202, 138, 4, 0.5);
+  border-right: 2px dashed rgba(202, 138, 4, 0.5);
+}
+
+.album-anim-tape-left.tape-active {
+  animation: tapeStickLeft 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes tapeStickLeft {
+  0% {
+    opacity: 0;
+    transform: translate(-30px, -40px) rotate(-40deg) scale(1.5);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(2px, 2px) rotate(-26deg) scale(0.96);
+  }
+  100% {
+    opacity: 0.95;
+    transform: translate(0, 0) rotate(-28deg) scale(1);
+  }
+}
+
+/* Cinta derecha (rosa melocotón / romántica) */
+.album-anim-tape-right {
+  top: -12px;
+  right: -18px;
+  transform: rotate(24deg) scale(1.6);
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(254, 205, 211, 0.92),
+    rgba(254, 205, 211, 0.92) 8px,
+    rgba(253, 164, 175, 0.88) 8px,
+    rgba(253, 164, 175, 0.88) 16px
+  );
+  border-left: 2px dashed rgba(244, 63, 94, 0.45);
+  border-right: 2px dashed rgba(244, 63, 94, 0.45);
+}
+
+.album-anim-tape-right.tape-active {
+  animation: tapeStickRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.18s forwards;
+}
+
+@keyframes tapeStickRight {
+  0% {
+    opacity: 0;
+    transform: translate(30px, -40px) rotate(35deg) scale(1.5);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(-2px, 2px) rotate(22deg) scale(0.96);
+  }
+  100% {
+    opacity: 0.95;
+    transform: translate(0, 0) rotate(24deg) scale(1);
+  }
+}
+
+/* ==============================================================================
+   SELLO DE CERA REALISTA (A + E CON CORAZÓN)
+   ============================================================================== */
+.album-anim-seal {
+  position: absolute;
+  bottom: -16px;
+  right: -16px;
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fbbf24 0%, #d97706 60%, #92400e 100%);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45), inset 0 2px 5px rgba(255, 255, 255, 0.7),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 12;
+  opacity: 0;
+  border: 2px solid rgba(254, 240, 138, 0.85);
+}
+
+.album-anim-seal.seal-active {
+  animation: sealStampImpact 0.45s cubic-bezier(0.2, 0.85, 0.4, 1.35) 0.35s forwards;
+}
+
+@keyframes sealStampImpact {
+  0% {
+    opacity: 0;
+    transform: scale(2.2) rotate(30deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.9) rotate(-8deg);
+  }
+  85% {
+    transform: scale(1.08) rotate(4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.album-anim-seal-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fffbeb;
+  text-shadow: 0 1px 2px rgba(120, 53, 15, 0.8);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.5px;
+}
+
+.album-anim-seal-monogram {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #fffbeb;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Destellos flotantes alrededor de la polaroid */
+.album-anim-sparkle {
+  position: absolute;
+  pointer-events: none;
+  font-size: 1.5rem;
+  z-index: 8;
+  animation: sparkleTwinkle 1.2s ease-in-out infinite alternate;
+}
+
+.sparkle-1 {
+  top: -24px;
+  right: 20%;
+  animation-delay: 0.1s;
+}
+
+.sparkle-2 {
+  bottom: 20px;
+  left: -20px;
+  animation-delay: 0.3s;
+}
+
+.sparkle-3 {
+  top: 40%;
+  right: -28px;
+  animation-delay: 0.5s;
+}
+
+@keyframes sparkleTwinkle {
+  0% {
+    transform: scale(0.6) rotate(0deg);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1.2) rotate(25deg);
+    opacity: 1;
+  }
+}
+
+/* Botón saltar */
+.album-anim-skip-btn {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  padding: 0.4rem 0.9rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 100;
+}
+
+.album-anim-skip-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+/* ==============================================================================
+   RESPLANDOR EN LA TARJETA DEL ÁLBUM CUANDO SE ACABA DE PEGAR
+   ============================================================================== */
+.polaroid-card.is-just-added {
+  animation: newMemoryPulse 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  position: relative;
+  z-index: 5;
+}
+
+@keyframes newMemoryPulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  }
+  20% {
+    transform: scale(1.04);
+    box-shadow: 0 0 25px 8px rgba(245, 158, 11, 0.6), 0 20px 30px rgba(0, 0, 0, 0.25);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 15px 4px rgba(245, 158, 11, 0.4);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: none;
+  }
+}
+
+/* Distintivo "¡Nuevo!" sobre la tarjeta recién colocada */
+.polaroid-card.is-just-added::after {
+  content: '✨ ¡Recién pegado!';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  box-shadow: 0 4px 10px rgba(217, 119, 6, 0.4);
+  pointer-events: none;
+  animation: badgeFadeOut 3.5s ease-out forwards;
+}
+
+@keyframes badgeFadeOut {
+  0%, 75% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}

@@ -5,7 +5,15 @@ import { Icon } from '@/shared/icons/Icon';
 
 const FALLBACK_IMG = '/img/fondo.jpg';
 
-export default function MemoryCard({ memory, onClick }: { memory: Memory; onClick: () => void }) {
+export default function MemoryCard({
+  memory,
+  onClick,
+  isHighlighted = false,
+}: {
+  memory: Memory;
+  onClick: () => void;
+  isHighlighted?: boolean;
+}) {
   const displayImg =
     ('imageBase64' in memory && memory.imageBase64) ||
     ('thumbUrl' in memory && memory.thumbUrl) ||
@@ -14,7 +22,7 @@ export default function MemoryCard({ memory, onClick }: { memory: Memory; onClic
   const driveUrl = 'driveUrl' in memory ? memory.driveUrl : undefined;
 
   return (
-    <div className="polaroid-card" onClick={onClick}>
+    <div className={`polaroid-card ${isHighlighted ? 'is-just-added' : ''}`} onClick={onClick}>
       <div className="polaroid-inner">
         <div className="polaroid-photo-frame">
           <img
