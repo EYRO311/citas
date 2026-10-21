@@ -50,6 +50,8 @@ const ICON_PATHS = {
   disconnect:
     '<path d="M14.59 8L12 5.41 9.41 8 8 6.59 12 2.58l4 4.01L14.59 8zM12 21.42l-4-4.01L9.41 16 12 18.59 14.59 16 16 17.41l-4 4.01zM11 11h2v2h-2v-2z"/>',
   arrowRight: '<path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>',
+  arrowUp: '<path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.59 5.58L20 12l-8-8z"/>',
+  arrowDown: '<path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.59-5.58L4 12l8 8z"/>',
 } as const;
 
 export type IconName = keyof typeof ICON_PATHS;

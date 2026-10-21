@@ -39,6 +39,27 @@ export interface RemoteMemory {
 
 export type Memory = LocalMemory | RemoteMemory;
 
+/**
+ * Orden en el que se muestran los recuerdos en el libro:
+ * - 'date': por la fecha que se puso al recuerdo (de más antigua a más reciente).
+ * - 'manual': el orden exacto que se acomodó a mano en el admin.
+ * - 'created': por la fecha en la que se subió/creó el recuerdo.
+ */
+export type MemoriesSortMode = 'date' | 'manual' | 'created';
+
+export interface MemoriesSettings {
+  sortMode: MemoriesSortMode;
+  /** Claves estables (ver `memoryKey`) en el orden elegido a mano, de primera a última página. */
+  manualOrder: string[];
+}
+
+export interface MemoriesSettingsResponse {
+  connected: boolean;
+  settings: MemoriesSettings;
+  message?: string;
+  error?: string;
+}
+
 export interface MemoryMeta {
   title: string;
   date: string;

@@ -9,6 +9,7 @@ import PinLock from './PinLock';
 import EventEditorForm from './EventEditorForm';
 import EventsAdminList from './EventsAdminList';
 import DriveSettingsPanel from './DriveSettingsPanel';
+import MemoriesOrderPanel from './MemoriesOrderPanel';
 import LetterEditorForm from './LetterEditorForm';
 import IdeasAdminPanel from './IdeasAdminPanel';
 import ChangePinModal, { ChangePinModalHandle } from './ChangePinModal';
@@ -142,6 +143,7 @@ export default function AdminDashboard() {
 
           {tab === 'gallery' && (
             <div className="admin-tab-section">
+              <MemoriesOrderPanel onShowToast={showToast} />
               <Gallery editable />
             </div>
           )}

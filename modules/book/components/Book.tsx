@@ -9,6 +9,8 @@ import { isEventSecretUnlocked, lockSecretEvent, unlockSecretEvent } from '@/mod
 import { useLetter } from '@/modules/hero/hooks/useLetter';
 import { useIdeas } from '@/modules/ideas/hooks/useIdeas';
 import { useMemories } from '@/modules/gallery/hooks/useMemories';
+import { useMemoriesSettings } from '@/modules/gallery/hooks/useMemoriesSettings';
+import { sortMemories } from '@/modules/gallery/domain/sortMemories';
 import Lightbox from '@/modules/gallery/components/Lightbox';
 import UploadMemoryModal, { UploadMemoryModalHandle } from '@/modules/gallery/components/UploadMemoryModal';
 import { triggerGlobalBurst } from '@/modules/petals/registry';
@@ -81,6 +83,7 @@ export default function Book({
 }) {
   const { letter } = useLetter();
   const { memories, refresh: refreshMemories } = useMemories();
+  const { settings: memoriesSettings } = useMemoriesSettings();
   const { ideas } = useIdeas();
   const notes = useBookNotes();
 
@@ -169,7 +172,7 @@ export default function Book({
     if (pages.length % 2 === 0) push(`pad-${pages.length}`, <BlankPage />);
   };
 
-  const chronological = [...memories].reverse();
+  const chronological = sortMemories(memories, memoriesSettings);
 
   const goNext = useCallback(() => setFlipped((v) => v + 1), []);
   const restart = useCallback(() => setFlipped(0), []);

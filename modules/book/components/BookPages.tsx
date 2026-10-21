@@ -133,7 +133,10 @@ export function Endpaper() {
         <HeartMark />
         <span />
       </div>
-      <p className="ep-note">y a su compañero de aventuras, Eyro</p>
+      <h2 className="ep-name">
+        <ColorWord text="Emi" offset={3} />
+      </h2>
+      <p className="ep-note">compañeros de aventuras</p>
       <BalloonBunch className="ep-balloons" />
       <p className="ep-quote">«¡La aventura está allá afuera!»</p>
     </div>
@@ -459,7 +462,7 @@ export function LockedEventPage({ event, onUnlock }: { event: EventItem; onUnloc
       onUnlock(event.id, point);
       return;
     }
-    setError('Mmm... esa no es la palabra mágica. ¡Pídele una pista a Eyro!');
+    setError('Mmm... esa no es la palabra mágica. ¡Pídele una pista a Emi!');
     setShake(true);
     setTimeout(() => setShake(false), 600);
   }
@@ -471,13 +474,13 @@ export function LockedEventPage({ event, onUnlock }: { event: EventItem; onUnloc
         <Icon name="lock" />
       </div>
       <h3 className="lk-title">Una cita secreta te espera…</h3>
-      <p className="ag-desc">Eyro preparó una sorpresa. Para descubrir el lugar, la hora y todos los detalles, abre esta página.</p>
+      <p className="ag-desc">Emi preparó una sorpresa. Para descubrir el lugar, la hora y todos los detalles, abre esta página.</p>
 
       {event.secretClue && (
         <div className="lk-clue">
           <Icon name="key" />
           <div>
-            <span className="ag-label">Pista de Eyro para Adi</span>
+            <span className="ag-label">Pista de Emi para Adi</span>
             <p>“{event.secretClue}”</p>
           </div>
         </div>

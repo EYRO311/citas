@@ -1,5 +1,14 @@
 import type { DriveStatusResponse } from '@/types/drive';
-import type { MemoriesListResponse, MemoryMeta, MemoryPhotosChange, RemoteMemory, UploadRequestBody, UploadResponse } from '@/types/memories';
+import type {
+  MemoriesListResponse,
+  MemoriesSettings,
+  MemoriesSettingsResponse,
+  MemoryMeta,
+  MemoryPhotosChange,
+  RemoteMemory,
+  UploadRequestBody,
+  UploadResponse,
+} from '@/types/memories';
 
 export async function fetchCloudMemories(): Promise<MemoriesListResponse> {
   try {
@@ -50,6 +59,29 @@ export async function fetchDriveStatus(): Promise<DriveStatusResponse> {
     return (await res.json()) as DriveStatusResponse;
   } catch {
     return { connected: false, mode: 'local', memories: [] };
+  }
+}
+
+export async function fetchMemoriesSettings(): Promise<MemoriesSettingsResponse> {
+  try {
+    const res = await fetch('/api/memories/settings');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return (await res.json()) as MemoriesSettingsResponse;
+  } catch {
+    return { connected: false, settings: { sortMode: 'date', manualOrder: [] } };
+  }
+}
+
+export async function saveMemoriesSettings(settings: MemoriesSettings): Promise<boolean> {
+  try {
+    const res = await fetch('/api/memories/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(settings),
+    });
+    return res.ok;
+  } catch {
+    return false;
   }
 }
 
