@@ -1,0 +1,204 @@
+/* ==============================================================================
+   MODO MEDALLA EN EL SOBRE INTERACTIVO 🏅✨
+   Medalla dorada animada (cae, se mece y brilla) para celebrar un logro,
+   como la participación en AllStar Cup, dentro de la carta.
+   ============================================================================== */
+
+.letter-medal-title {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #b45309;
+  text-shadow: 0 1px 2px rgba(180, 83, 9, 0.12);
+}
+
+.letter-medal-closing {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 3.7vw, 1.34rem);
+  font-style: italic;
+  font-weight: 700;
+  color: #b45309;
+}
+
+.medal-badge-stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: clamp(20px, 4.5vw, 32px) auto clamp(22px, 4.5vw, 30px);
+}
+
+.medal-badge {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: medalDropIn 0.8s cubic-bezier(0.32, 1.1, 0.4, 1.15) forwards,
+    medalSway 4.2s ease-in-out 0.85s infinite;
+  transform-origin: top center;
+}
+
+.medal-ribbon-tail {
+  position: absolute;
+  top: -34px;
+  width: 26px;
+  height: 46px;
+  background: linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%);
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%);
+}
+
+.medal-ribbon-tail-left {
+  left: calc(50% - 20px);
+  transform: rotate(-8deg);
+}
+
+.medal-ribbon-tail-right {
+  left: calc(50% - 6px);
+  transform: rotate(8deg);
+  background: linear-gradient(180deg, #d4af37 0%, #b8860b 100%);
+}
+
+.medal-ribbon-knot {
+  position: absolute;
+  top: -14px;
+  width: 34px;
+  height: 16px;
+  border-radius: 3px;
+  background: linear-gradient(135deg, #2563eb, #d4af37);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.medal-disc {
+  position: relative;
+  width: clamp(92px, 20vw, 118px);
+  height: clamp(92px, 20vw, 118px);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: radial-gradient(circle at 34% 28%, #fff6d6 0%, #f5d060 32%, #d4af37 62%, #92610f 100%);
+  box-shadow:
+    0 10px 22px rgba(146, 97, 15, 0.45),
+    inset 0 2px 5px rgba(255, 255, 255, 0.65),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.25);
+  border: 2px solid rgba(254, 240, 138, 0.9);
+  overflow: hidden;
+}
+
+.medal-disc-shine {
+  position: absolute;
+  top: -40%;
+  left: -60%;
+  width: 60%;
+  height: 180%;
+  background: linear-gradient(100deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.75) 50%, rgba(255, 255, 255, 0) 100%);
+  transform: rotate(12deg);
+  animation: medalShine 3.2s ease-in-out 0.9s infinite;
+}
+
+.medal-disc-star {
+  width: 34%;
+  height: 34%;
+  fill: #92400e;
+  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.4));
+}
+
+.medal-disc-caption {
+  font-family: var(--font-ui);
+  font-size: clamp(0.56rem, 1.6vw, 0.66rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #78350f;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.35);
+  max-width: 78%;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.medal-sparkle {
+  position: absolute;
+  font-size: 1.3rem;
+  pointer-events: none;
+  animation: medalSparkleTwinkle 1.4s ease-in-out infinite alternate;
+}
+
+.medal-sparkle-1 {
+  top: -8px;
+  left: calc(50% - 72px);
+  animation-delay: 0.15s;
+}
+
+.medal-sparkle-2 {
+  top: 10px;
+  left: calc(50% + 54px);
+  animation-delay: 0.5s;
+}
+
+@keyframes medalDropIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-70px) rotate(-12deg) scale(0.6);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(6px) rotate(4deg) scale(1.05);
+  }
+  85% {
+    transform: translateY(-3px) rotate(-2deg) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes medalSway {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+@keyframes medalShine {
+  0% {
+    transform: translateX(-20%) rotate(12deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 0.8;
+  }
+  70% {
+    transform: translateX(220%) rotate(12deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(220%) rotate(12deg);
+    opacity: 0;
+  }
+}
+
+@keyframes medalSparkleTwinkle {
+  0% {
+    transform: scale(0.6) rotate(0deg);
+    opacity: 0.35;
+  }
+  100% {
+    transform: scale(1.15) rotate(20deg);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .medal-badge,
+  .medal-disc-shine,
+  .medal-sparkle {
+    animation: none;
+  }
+}

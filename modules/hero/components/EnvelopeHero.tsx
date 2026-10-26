@@ -6,12 +6,14 @@ import { sounds } from '@/shared/sounds';
 import { Icon } from '@/shared/icons/Icon';
 import { useLetter } from '../hooks/useLetter';
 import { downloadLetterHtml, downloadLetterImage } from '../domain/downloadLetter';
+import './letterMedalAnimation.css';
 
 export default function EnvelopeHero() {
   const envelopeRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const { letter } = useLetter();
   const isPoem = letter.mode === 'poem';
+  const isMedal = letter.mode === 'medal';
   const stanzas = letter.body.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
 
   function openLetter(e: React.MouseEvent | React.KeyboardEvent) {
@@ -54,8 +56,12 @@ export default function EnvelopeHero() {
           className="envelope-interactive-container"
           role="button"
           tabIndex={0}
-          aria-label={isPoem ? 'Abrir poema de amor para Adi' : 'Abrir carta de amor para Adi'}
-          title={isPoem ? 'Toca para abrir el poema de amor' : 'Toca para abrir la carta de amor'}
+          aria-label={
+            isPoem ? 'Abrir poema de amor para Adi' : isMedal ? 'Abrir reconocimiento de orgullo para Adi' : 'Abrir carta de amor para Adi'
+          }
+          title={
+            isPoem ? 'Toca para abrir el poema de amor' : isMedal ? 'Toca para abrir el reconocimiento de orgullo' : 'Toca para abrir la carta de amor'
+          }
           onClick={openLetter}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -84,7 +90,9 @@ export default function EnvelopeHero() {
                   </div>
                   <div className="peek-callout">
                     <Icon name="heart" className="ui-icon-rose peek-heart" />
-                    <span>{isPoem ? 'Toca para desplegar el poema' : 'Toca para desplegar la carta'}</span>
+                    <span>
+                      {isPoem ? 'Toca para desplegar el poema' : isMedal ? 'Toca para desplegar el reconocimiento' : 'Toca para desplegar la carta'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -204,7 +212,11 @@ export default function EnvelopeHero() {
             <span className="prompt-pill">
               <Icon name="envelope" className="ui-icon-gold prompt-icon-left" />
               <span className="prompt-text">
-                {isPoem ? 'Toca el sobre sellado para leer tu poema' : 'Toca el sobre sellado para leer tu carta'}
+                {isPoem
+                  ? 'Toca el sobre sellado para leer tu poema'
+                  : isMedal
+                  ? 'Toca el sobre sellado para ver tu reconocimiento'
+                  : 'Toca el sobre sellado para leer tu carta'}
               </span>
               <Icon name="heart" className="ui-icon-rose prompt-icon-right" />
             </span>
@@ -278,30 +290,51 @@ export default function EnvelopeHero() {
 
               <div className="letter-meta">
                 <span className="letter-meta-label">
-                  {isPoem ? 'Versos del corazón' : 'Correspondencia privada'}
+                  {isPoem ? 'Versos del corazón' : isMedal ? 'Reconocimiento de orgullo' : 'Correspondencia privada'}
                 </span>
                 <span className="letter-meta-date">
-                  {isPoem ? 'Poema de amor · Para Adi' : 'Septiembre · con todo mi amor'}
+                  {isPoem ? 'Poema de amor · Para Adi' : isMedal ? `${letter.medalCaption || 'AllStar Cup'} · con todo mi orgullo` : 'Septiembre · con todo mi amor'}
                 </span>
               </div>
             </header>
 
-            <h2 id="letter-greeting" className={`letter-greeting ${isPoem ? 'letter-poem-title' : ''}`}>
+            <h2 id="letter-greeting" className={`letter-greeting ${isPoem ? 'letter-poem-title' : ''} ${isMedal ? 'letter-medal-title' : ''}`}>
               {letter.greeting}
             </h2>
-            <div className="letter-ornament" aria-hidden="true">
-              <span className="letter-ornament-line"></span>
-              <svg viewBox="0 0 24 24" className="letter-ornament-flower">
-                <g transform="translate(12 12)" fill="#C5A059">
-                  <ellipse rx="2" ry="4.6" cy="-5.6" /><ellipse rx="2" ry="4.6" cy="-5.6" transform="rotate(45)" />
-                  <ellipse rx="2" ry="4.6" cy="-5.6" transform="rotate(90)" /><ellipse rx="2" ry="4.6" cy="-5.6" transform="rotate(135)" />
-                  <ellipse rx="2" ry="4.6" cy="-5.6" transform="rotate(180)" /><ellipse rx="2" ry="4.6" cy="-5.6" transform="rotate(225)" />
-                  <ellipse rx="2" ry="4.6" cy="-5.6" transform="rotate(270)" /><ellipse rx="2" ry="4.6" cy="-5.6" transform="rotate(315)" />
-                </g>
-                <circle cx="12" cy="12" r="3" fill="#1D4ED8" />
-              </svg>
-              <span className="letter-ornament-line"></span>
-            </div>
+            {!isMedal && (
+              <div className="letter-ornament" aria-hidden="true">
+                <span className="letter-ornament-line"></span>
+                <svg viewBox="0 0 24 24" className="letter-ornament-flower">
+                  <g transform="translate(12 12)" fill="#C5A059">
+                    <ellipse rx="2" ry="4.6" cy="-5.6" /><ellipse rx="2" ry="4.6" cy="-5.6" transform="rotate(45)" />
+                    <ellipse rx="2" ry="4.6" cy="-5.6" transform="rotate(90)" /><ellipse rx="2" ry="4.6" cy="-5.6" transform="rotate(135)" />
+                    <ellipse rx="2" ry="4.6" cy="-5.6" transform="rotate(180)" /><ellipse rx="2" ry="4.6" cy="-5.6" transform="rotate(225)" />
+                    <ellipse rx="2" ry="4.6" cy="-5.6" transform="rotate(270)" /><ellipse rx="2" ry="4.6" cy="-5.6" transform="rotate(315)" />
+                  </g>
+                  <circle cx="12" cy="12" r="3" fill="#1D4ED8" />
+                </svg>
+                <span className="letter-ornament-line"></span>
+              </div>
+            )}
+
+            {isMedal && (
+              <div className="medal-badge-stage" aria-hidden="true">
+                <div className="medal-sparkle medal-sparkle-1">✨</div>
+                <div className="medal-sparkle medal-sparkle-2">✨</div>
+                <div className="medal-badge">
+                  <span className="medal-ribbon-tail medal-ribbon-tail-left"></span>
+                  <span className="medal-ribbon-tail medal-ribbon-tail-right"></span>
+                  <span className="medal-ribbon-knot"></span>
+                  <div className="medal-disc">
+                    <div className="medal-disc-shine"></div>
+                    <svg viewBox="0 0 24 24" className="medal-disc-star">
+                      <path d="M12 2.5l2.47 5.4 5.93.6-4.46 4.02 1.37 5.82L12 15.4l-5.31 2.94 1.37-5.82L3.6 8.5l5.93-.6L12 2.5z" />
+                    </svg>
+                    <span className="medal-disc-caption">{letter.medalCaption || 'AllStar Cup'}</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {isPoem ? (
               <div className="letter-poem-body">
@@ -333,7 +366,9 @@ export default function EnvelopeHero() {
               </div>
             )}
 
-            <p className={`letter-question ${isPoem ? 'letter-poem-closing' : ''}`}>{letter.question}</p>
+            <p className={`letter-question ${isPoem ? 'letter-poem-closing' : ''} ${isMedal ? 'letter-medal-closing' : ''}`}>
+              {letter.question}
+            </p>
 
             <p className="letter-ps">
               <span className="letter-ps-label">{letter.psLabel}</span> {letter.psText}

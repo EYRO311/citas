@@ -2619,6 +2619,12 @@ dialog::backdrop {
   box-shadow: 0 4px 10px rgba(180, 83, 9, 0.25);
 }
 
+.letter-mode-tab.active-medal {
+  background: linear-gradient(135deg, #ca8a04, #f59e0b);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(202, 138, 4, 0.3);
+}
+
 .mode-desc-banner {
   font-size: 0.85rem;
   line-height: 1.5;
@@ -2668,6 +2674,17 @@ dialog::backdrop {
 .btn-mode-preset.poem-preset:hover {
   background: #fef3c7;
   border-color: #f59e0b;
+}
+
+.btn-mode-preset.medal-preset {
+  color: #92400e;
+  border-color: #fcd34d;
+  background: #fffbeb;
+}
+
+.btn-mode-preset.medal-preset:hover {
+  background: #fef3c7;
+  border-color: #ca8a04;
 }
 
 .letter-preview-box {

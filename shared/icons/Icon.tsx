@@ -52,6 +52,8 @@ const ICON_PATHS = {
   arrowRight: '<path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>',
   arrowUp: '<path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.59 5.58L20 12l-8-8z"/>',
   arrowDown: '<path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.59-5.58L4 12l8 8z"/>',
+  medal:
+    '<path d="M7 2h3l2 4 2-4h3l-3.3 7.6a6 6 0 1 1-3.4 0L7 2z"/><circle cx="12" cy="15.2" r="5.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 12.7l.95 1.9 2.1.3-1.52 1.47.36 2.1-1.89-1-1.89 1 .36-2.1-1.52-1.47 2.1-.3z"/>',
 } as const;
 
 export type IconName = keyof typeof ICON_PATHS;

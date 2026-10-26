@@ -13,6 +13,7 @@ import { isImageUrl, isSafeUrl, linkLabel } from '@/modules/ideas/domain/links';
 import { downloadLetterHtml, downloadLetterImage } from '@/modules/hero/domain/downloadLetter';
 import { formatShortDate, getDateParts } from '../domain/bookHelpers';
 import type { NotesStatus } from '../hooks/useBookNotes';
+import '@/modules/hero/components/letterMedalAnimation.css';
 
 const FALLBACK_IMG = '/img/fondo.jpg';
 const LETTER_COLORS = ['#e9953b', '#8d5fa8', '#3bb0c1', '#e4572e', '#f2c14e', '#6aa84f'];
@@ -149,18 +150,40 @@ export function Endpaper() {
 
 export function LetterPage({ letter }: { letter: LetterContent }) {
   const isPoem = letter.mode === 'poem';
+  const isMedal = letter.mode === 'medal';
   const blocks = splitParagraphs(letter.body);
 
   return (
     <div className="bp bp-letter">
       <Tape className="tape-tl" />
-      <span className="bp-tag">{isPoem ? 'Versos del corazón' : 'Una carta para ti'}</span>
+      <span className="bp-tag">{isPoem ? 'Versos del corazón' : isMedal ? 'Reconocimiento de orgullo' : 'Una carta para ti'}</span>
       <h2 className={`lt-greeting ${isPoem ? 'is-poem' : ''}`}>{letter.greeting}</h2>
-      <div className="lt-ornament" aria-hidden="true">
-        <span />
-        <Sunflower />
-        <span />
-      </div>
+      {!isMedal && (
+        <div className="lt-ornament" aria-hidden="true">
+          <span />
+          <Sunflower />
+          <span />
+        </div>
+      )}
+
+      {isMedal && (
+        <div className="medal-badge-stage" aria-hidden="true">
+          <div className="medal-sparkle medal-sparkle-1">✨</div>
+          <div className="medal-sparkle medal-sparkle-2">✨</div>
+          <div className="medal-badge">
+            <span className="medal-ribbon-tail medal-ribbon-tail-left"></span>
+            <span className="medal-ribbon-tail medal-ribbon-tail-right"></span>
+            <span className="medal-ribbon-knot"></span>
+            <div className="medal-disc">
+              <div className="medal-disc-shine"></div>
+              <svg viewBox="0 0 24 24" className="medal-disc-star">
+                <path d="M12 2.5l2.47 5.4 5.93.6-4.46 4.02 1.37 5.82L12 15.4l-5.31 2.94 1.37-5.82L3.6 8.5l5.93-.6L12 2.5z" />
+              </svg>
+              <span className="medal-disc-caption">{letter.medalCaption || 'AllStar Cup'}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isPoem ? (
         <div className="lt-poem">

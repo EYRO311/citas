@@ -1,8 +1,9 @@
-export type LetterMode = 'letter' | 'poem';
+export type LetterMode = 'letter' | 'poem' | 'medal';
 
 export interface LetterContent {
   mode?: LetterMode;
   poemTitle?: string;
+  medalCaption?: string;
   peekSalutation: string;
   greeting: string;
   body: string;

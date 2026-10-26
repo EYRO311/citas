@@ -154,7 +154,7 @@ export function downloadLetterHtml(letter: LetterContent): void {
         : `<p>${escapeHtml(block.replace(/\n/g, ' '))}</p>`
     )
     .join('\n      ');
-  const title = isPoem ? 'Un poema para Adi' : 'Una carta para Adi';
+  const title = isPoem ? 'Un poema para Adi' : letter.mode === 'medal' ? 'Un reconocimiento de orgullo para Adi' : 'Una carta para Adi';
 
   const html = `<!doctype html>
 <html lang="es">
@@ -204,7 +204,9 @@ function escapeHtml(text: string): string {
 }
 
 function fileBaseName(letter: LetterContent): string {
-  return letter.mode === 'poem' ? 'poema-para-adi' : 'carta-para-adi';
+  if (letter.mode === 'poem') return 'poema-para-adi';
+  if (letter.mode === 'medal') return 'reconocimiento-para-adi';
+  return 'carta-para-adi';
 }
 
 function triggerDownload(blob: Blob, fileName: string) {

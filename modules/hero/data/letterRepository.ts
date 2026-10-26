@@ -42,6 +42,21 @@ porque es contigo donde florecer quiero.`,
   signName: 'Eyro',
 };
 
+export const DEFAULT_MEDAL: LetterContent = {
+  mode: 'medal',
+  medalCaption: 'AllStar Cup',
+  peekSalutation: 'Un reconocimiento de orgullo para mi campeona, Adi',
+  greeting: '¡Felicidades, campeona! 🏅',
+  body: `Adi, de verdad estoy muy orgulloso de que hayas perseguido esta oportunidad en AllStar Cup y de ver todo el resultado de tu esfuerzo hecho realidad arriba de ese escenario.
+
+Cada práctica, cada madrugada y cada intento valieron la pena. Verte brillar ahí es uno de mis recuerdos favoritos.`,
+  question: 'Realmente estoy orgulloso de ti, amor. Sigue así, hermosa.',
+  psLabel: 'P.D.',
+  psText: 'Esta medalla es solo el reflejo de lo grande que eres por dentro. 🌻',
+  signIntro: 'Orgulloso siempre de ti,',
+  signName: 'Eyro',
+};
+
 export function getLocalLetter(): LetterContent {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
