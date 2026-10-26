@@ -13,7 +13,7 @@ Tengo preparadas dos citas para nosotros dos. Dos momentos pensados para detener
   psLabel: 'P.D.',
   psText: 'Cada flor de este lienzo guarda una razón por la que eres y siempre serás mi persona favorita en el universo entero. 🌻',
   signIntro: 'Siempre tuyo,',
-  signName: 'Eyro',
+  signName: 'Emi',
 };
 
 export const DEFAULT_POEM: LetterContent = {
@@ -39,7 +39,7 @@ porque es contigo donde florecer quiero.`,
   psLabel: 'P.D.',
   psText: 'Cada verso nació pensando en la magia que llevas dentro. 🌻',
   signIntro: 'Con todo mi amor,',
-  signName: 'Eyro',
+  signName: 'Emi',
 };
 
 export const DEFAULT_MEDAL: LetterContent = {
@@ -54,7 +54,7 @@ Cada práctica, cada madrugada y cada intento valieron la pena. Verte brillar ah
   psLabel: 'P.D.',
   psText: 'Esta medalla es solo el reflejo de lo grande que eres por dentro. 🌻',
   signIntro: 'Orgulloso siempre de ti,',
-  signName: 'Eyro',
+  signName: 'Emi',
 };
 
 export function getLocalLetter(): LetterContent {
