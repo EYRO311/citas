@@ -102,19 +102,19 @@ export default function EnvelopeHero() {
                   <defs>
                     <linearGradient id="foldLeftGrad" x1="0%" y1="0%" x2="100%" y2="80%">
                       <stop offset="0%" stopColor="#FFFFFF" />
-                      <stop offset="60%" stopColor="#FAF5EC" />
-                      <stop offset="100%" stopColor="#EDE2CF" />
+                      <stop offset="60%" stopColor="#E4EEFC" />
+                      <stop offset="100%" stopColor="#BBD6F4" />
                     </linearGradient>
                     <linearGradient id="foldRightGrad" x1="100%" y1="0%" x2="0%" y2="80%">
-                      <stop offset="0%" stopColor="#FBF7F0" />
-                      <stop offset="60%" stopColor="#F4ECE0" />
-                      <stop offset="100%" stopColor="#E8DCB7" />
+                      <stop offset="0%" stopColor="#F7FAFF" />
+                      <stop offset="60%" stopColor="#DCE9FA" />
+                      <stop offset="100%" stopColor="#A9C8EC" />
                     </linearGradient>
                     <linearGradient id="foldBottomGrad" x1="50%" y1="100%" x2="50%" y2="0%">
-                      <stop offset="0%" stopColor="#F5EFE3" />
-                      <stop offset="35%" stopColor="#FAF7F1" />
+                      <stop offset="0%" stopColor="#E3EDFB" />
+                      <stop offset="35%" stopColor="#F4F8FD" />
                       <stop offset="85%" stopColor="#FFFFFF" />
-                      <stop offset="100%" stopColor="#FCFAF5" />
+                      <stop offset="100%" stopColor="#FBFDFF" />
                     </linearGradient>
                     <linearGradient id="bottomGoldFoil" x1="0%" y1="0%" x2="100%" y2="0%">
                       <stop offset="0%" stopColor="rgba(197, 160, 89, 0.2)" />
@@ -161,8 +161,8 @@ export default function EnvelopeHero() {
                   <defs>
                     <linearGradient id="flapGrad" x1="50%" y1="0%" x2="50%" y2="100%">
                       <stop offset="0%" stopColor="#FFFFFF" />
-                      <stop offset="50%" stopColor="#FAF6EE" />
-                      <stop offset="100%" stopColor="#F1E7D5" />
+                      <stop offset="50%" stopColor="#EAF1FC" />
+                      <stop offset="100%" stopColor="#CFE0F7" />
                     </linearGradient>
                     <linearGradient id="flapGoldTrim" x1="0%" y1="0%" x2="100%" y2="0%">
                       <stop offset="0%" stopColor="rgba(197, 160, 89, 0.4)" />
