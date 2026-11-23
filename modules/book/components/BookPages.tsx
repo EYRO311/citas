@@ -13,6 +13,7 @@ import { isImageUrl, isSafeUrl, linkLabel } from '@/modules/ideas/domain/links';
 import { downloadLetterHtml, downloadLetterImage } from '@/modules/hero/domain/downloadLetter';
 import { formatShortDate, getDateParts } from '../domain/bookHelpers';
 import type { NotesStatus } from '../hooks/useBookNotes';
+import DriveVideoGallery from '@/modules/gallery/components/DriveVideoGallery';
 import '@/modules/hero/components/letterMedalAnimation.css';
 
 const FALLBACK_IMG = '/img/fondo.jpg';
@@ -337,6 +338,17 @@ export function MemoryPage({
           {memory.caption && <p className="mem-caption">{memory.caption}</p>}
         </>
       )}
+    </div>
+  );
+}
+
+export function VideosPage() {
+  return (
+    <div className="bp bp-add">
+      <span className="add-rule" aria-hidden="true" />
+      <h3>Nuestros videos 🎬</h3>
+      <p>Los videos que subas a la carpeta de Drive aparecen acá solos, sin que tengas que tocar nada.</p>
+      <DriveVideoGallery />
     </div>
   );
 }

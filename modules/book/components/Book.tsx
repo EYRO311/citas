@@ -32,6 +32,7 @@ import {
   MEMORY_PHOTOS_PER_PAGE,
   MemoryPage,
   BlankPage,
+  VideosPage,
   WritableNotesPage,
 } from './BookPages';
 import { memoryPhotosCoverFirst } from '../domain/bookHelpers';
@@ -212,6 +213,7 @@ export default function Book({
     }
   });
   push('memories-add', <AddMemoryPage empty={chronological.length === 0} onAdd={() => uploadRef.current?.open()} />);
+  push('memories-videos', <VideosPage />);
 
   padToLeft();
   sectionStart.agenda = pages.length;

@@ -7,6 +7,7 @@ import CountdownTimer from '@/modules/events/components/CountdownTimer';
 import EventsInvitations from '@/modules/events/components/EventsInvitations';
 import IdeasList from '@/modules/ideas/components/IdeasList';
 import Gallery from '@/modules/gallery/components/Gallery';
+import DriveVideoGallery from '@/modules/gallery/components/DriveVideoGallery';
 import PetalsCanvas from '@/modules/petals/components/PetalsCanvas';
 import EnvelopeHero from '@/modules/hero/components/EnvelopeHero';
 import { triggerGlobalBurst } from '@/modules/petals/registry';
@@ -84,6 +85,16 @@ export default function Home() {
 
         <section id="gallery-section" aria-label="Álbum de recuerdos de nuestras citas">
           <Gallery />
+        </section>
+
+        <section id="drive-videos-section" aria-label="Videos de nuestra carpeta de Google Drive">
+          <header className="events-section-header">
+            <h2 className="section-title">Nuestros Videos 🎬</h2>
+            <p className="section-subtitle">
+              Los videos que subas a la carpeta de Drive aparecen acá solos, sin que tenga que tocar nada.
+            </p>
+          </header>
+          <DriveVideoGallery />
         </section>
 
         <section id="ideas-section" aria-label="Lista de planes futuros">
