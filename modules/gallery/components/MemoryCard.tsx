@@ -20,6 +20,7 @@ export default function MemoryCard({
     memory.imageUrl ||
     FALLBACK_IMG;
   const driveUrl = 'driveUrl' in memory ? memory.driveUrl : undefined;
+  const isVideo = memory.kind === 'video';
 
   return (
     <div className={`polaroid-card ${isHighlighted ? 'is-just-added' : ''}`} onClick={onClick}>
@@ -34,6 +35,28 @@ export default function MemoryCard({
               e.currentTarget.src = FALLBACK_IMG;
             }}
           />
+          {isVideo && (
+            <span
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 44,
+                height: 44,
+                borderRadius: '50%',
+                background: 'rgba(0,0,0,0.5)',
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 18,
+              }}
+            >
+              ▶
+            </span>
+          )}
           {driveUrl && (
             <span className="drive-sync-indicator" title="Guardada en la nube">
               <Icon name="cloud" className="ui-icon-blue" /> Nube

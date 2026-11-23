@@ -4,6 +4,8 @@ export interface LocalMemory {
   date: string;
   location: string;
   caption: string;
+  /** 'photo' si falta, por compatibilidad con recuerdos viejos que no tienen este campo. */
+  kind?: 'photo' | 'video';
   /** Todas las fotos de este recuerdo (base64), en el orden en que se subieron. */
   images?: string[];
   /** Índice dentro de `images` que se usa como portada. */
@@ -14,6 +16,10 @@ export interface LocalMemory {
   driveUrl?: string | null;
   driveFileId?: string | null;
   storageId?: string;
+  /** Solo para kind: 'video'. ID del archivo en Google Drive y URL de nuestro proxy de streaming. */
+  videoDriveId?: string;
+  videoUrl?: string;
+  durationSec?: number;
   isLocal: boolean;
   timestamp: number;
 }
@@ -24,6 +30,8 @@ export interface RemoteMemory {
   date: string;
   location: string;
   caption: string;
+  /** 'photo' si falta, por compatibilidad con recuerdos viejos que no tienen este campo. */
+  kind?: 'photo' | 'video';
   /** URLs públicas de todas las fotos del recuerdo, en orden. */
   images?: string[];
   /** Índice dentro de `images` que se usa como portada. */
@@ -33,6 +41,10 @@ export interface RemoteMemory {
   driveUrl?: string;
   driveFileId?: string;
   storageId?: string;
+  /** Solo para kind: 'video'. ID del archivo en Google Drive (carpeta privada) y URL de nuestro proxy de streaming. */
+  videoDriveId?: string;
+  videoUrl?: string;
+  durationSec?: number;
   source: 'supabase' | 'drive';
   timestamp: number;
 }
@@ -111,5 +123,51 @@ export interface UploadResponse {
   driveUrl?: string | null;
   downloadUrl?: string;
   message?: string;
+  error?: string;
+}
+
+// ==============================================================================
+// Recuerdos en video: el archivo pesado va directo del navegador a Google Drive
+// (sesión resumable iniciada por nuestro servidor); Supabase solo guarda el
+// metadata + una miniatura, igual que un recuerdo de foto normal.
+// ==============================================================================
+
+export const MAX_VIDEO_BYTES = 500 * 1024 * 1024; // 500MB
+export const MAX_VIDEO_DURATION_SEC = 5 * 60; // 5 minutos
+export const VIDEO_UPLOAD_CHUNK_BYTES = 8 * 1024 * 1024; // 8MB por chunk
+
+export interface VideoSessionRequestBody {
+  name: string;
+  mimeType: string;
+  size: number;
+}
+
+export interface VideoSessionResponse {
+  success: boolean;
+  /** URI de sesión resumable de Drive; única credencial que toca el navegador. */
+  uploadUrl?: string;
+  error?: string;
+}
+
+export interface VideoSessionAvailability {
+  available: boolean;
+  message?: string;
+}
+
+export interface VideoFinishRequestBody {
+  kind: 'video';
+  driveFileId: string;
+  title?: string;
+  date?: string;
+  location?: string;
+  caption?: string;
+  durationSec?: number;
+  /** Miniatura (poster frame), igual formato que las fotos (data URL base64). */
+  thumbnail: UploadImageInput;
+}
+
+export interface VideoFinishResponse {
+  success: boolean;
+  memory?: RemoteMemory;
   error?: string;
 }

@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
-import type { MemoryMeta, MemoryPhotosChange, RemoteMemory } from '@/types/memories';
+import type { MemoryMeta, MemoryPhotosChange, RemoteMemory, UploadImageInput } from '@/types/memories';
 
 // ==============================================================================
 // Recuerdos en Supabase Storage (bucket compartido "anuncios", prefijo "propuesta/")
@@ -47,6 +47,11 @@ interface MemoryRecord extends MemoryMeta {
   /** Formato antiguo (una sola foto). */
   imagePath?: string;
   createdAt?: string;
+  /** 'photo' si falta, por compatibilidad con recuerdos viejos. `images` guarda su miniatura. */
+  kind?: 'photo' | 'video';
+  /** Solo si kind === 'video': ID del archivo en la carpeta privada de Drive. */
+  videoDriveId?: string;
+  durationSec?: number;
 }
 
 function recordImagePaths(record: MemoryRecord): string[] {
@@ -68,10 +73,14 @@ function toMemory(supabase: SupabaseClient, record: MemoryRecord): RemoteMemory 
     date: record.date || (record.createdAt || '').slice(0, 10),
     location: record.location || '',
     caption: record.caption || '',
+    kind: record.kind || 'photo',
     images: urls,
     coverIndex,
     thumbUrl: coverUrl,
     imageUrl: coverUrl,
+    videoDriveId: record.videoDriveId,
+    videoUrl: record.videoDriveId ? `/api/drive-video?id=${encodeURIComponent(record.videoDriveId)}` : undefined,
+    durationSec: record.durationSec,
     source: 'supabase',
     timestamp: Date.parse(record.createdAt || '') || 0,
   };
@@ -117,6 +126,54 @@ export async function uploadMemory(
   });
   if (json.error) {
     await bucket.remove(uploadedPaths);
+    throw json.error;
+  }
+
+  return toMemory(supabase, record);
+}
+
+// El video pesado ya vive en Drive (subido directo desde el navegador); acá solo
+// guardamos su miniatura (como una foto normal, una sola) y el metadata del recuerdo.
+export async function createVideoMemory(
+  supabase: SupabaseClient,
+  {
+    driveFileId,
+    meta,
+    thumbnail,
+    durationSec,
+  }: { driveFileId: string; meta: MemoryMeta; thumbnail: UploadImageInput; durationSec?: number }
+): Promise<RemoteMemory> {
+  const bucket = supabase.storage.from(BUCKET);
+  const id = randomUUID();
+
+  const mimeType = thumbnail.mimeType || 'image/jpeg';
+  const ext = EXTENSIONS[mimeType] || 'jpg';
+  const path = `${PREFIX}/${id}_0.${ext}`;
+  const buffer = Buffer.from(stripDataUrl(thumbnail.base64), 'base64');
+
+  const { error: uploadError } = await bucket.upload(path, buffer, {
+    contentType: mimeType,
+    cacheControl: '31536000',
+    upsert: false,
+  });
+  if (uploadError) throw uploadError;
+
+  const record: MemoryRecord = {
+    id,
+    ...meta,
+    kind: 'video',
+    videoDriveId: driveFileId,
+    durationSec,
+    images: [path],
+    coverIndex: 0,
+    createdAt: new Date().toISOString(),
+  };
+  const json = await bucket.upload(`${PREFIX}/${id}.json`, JSON.stringify(record), {
+    contentType: 'application/json',
+    upsert: true,
+  });
+  if (json.error) {
+    await bucket.remove([path]);
     throw json.error;
   }
 

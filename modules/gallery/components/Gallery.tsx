@@ -10,6 +10,7 @@ import { Icon } from '@/shared/icons/Icon';
 import MemoryCard from './MemoryCard';
 import UploadMemoryModal, { UploadMemoryModalHandle } from './UploadMemoryModal';
 import Lightbox from './Lightbox';
+import ReelsFeed from './ReelsFeed';
 
 export default function Gallery({ editable = false }: { editable?: boolean }) {
   const [memories, setMemories] = useState<Memory[]>([]);
@@ -18,7 +19,10 @@ export default function Gallery({ editable = false }: { editable?: boolean }) {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Memory | null>(null);
   const [justAddedId, setJustAddedId] = useState<string | null>(null);
+  const [reelsStartId, setReelsStartId] = useState<string | null>(null);
   const uploadRef = useRef<UploadMemoryModalHandle>(null);
+
+  const videoMemories = memories.filter((m) => m.kind === 'video');
 
   const refresh = useCallback(async () => {
     const [local, cloud, drive] = await Promise.all([getMemories(), fetchCloudMemories(), fetchDriveStatus()]);
@@ -92,6 +96,16 @@ export default function Gallery({ editable = false }: { editable?: boolean }) {
               </>
             )}
           </div>
+          {videoMemories.length > 0 && (
+            <button
+              type="button"
+              className="btn-primary"
+              style={{ background: '#111827' }}
+              onClick={() => setReelsStartId(videoMemories[0].id)}
+            >
+              <span>🎬 Ver Reels</span>
+            </button>
+          )}
           <button type="button" className="btn-primary" onClick={() => uploadRef.current?.open()}>
             <span>
               <Icon name="plus" className="ui-icon-white" /> Añadir nuevo recuerdo
@@ -115,7 +129,7 @@ export default function Gallery({ editable = false }: { editable?: boolean }) {
               key={memory.id}
               memory={memory}
               isHighlighted={memory.id === justAddedId}
-              onClick={() => setSelected(memory)}
+              onClick={() => (memory.kind === 'video' ? setReelsStartId(memory.id) : setSelected(memory))}
             />
           ))
         )}
@@ -129,6 +143,9 @@ export default function Gallery({ editable = false }: { editable?: boolean }) {
         onUpdated={refresh}
         editable={editable}
       />
+      {reelsStartId && (
+        <ReelsFeed memories={videoMemories} startId={reelsStartId} onClose={() => setReelsStartId(null)} />
+      )}
     </div>
   );
 }

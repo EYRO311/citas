@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { deleteMemory, getSupabase, isValidId, listMemories, updateMemory } from '@/server/supabase/memoriesService';
-import type { EditPhotoInput } from '@/types/memories';
+import {
+  createVideoMemory,
+  deleteMemory,
+  getSupabase,
+  isValidId,
+  listMemories,
+  updateMemory,
+} from '@/server/supabase/memoriesService';
+import type { EditPhotoInput, VideoFinishRequestBody } from '@/types/memories';
 
 const MAX_PHOTOS = 6;
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, PATCH, DELETE, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
   'Cache-Control': 'no-store',
 };
@@ -36,6 +43,49 @@ export async function GET() {
     return NextResponse.json(
       { connected: false, memories: [], error: (error as Error).message },
       { headers: CORS_HEADERS }
+    );
+  }
+}
+
+// Cierra el flujo de subida de video: el archivo ya está en Drive (lo subió el
+// navegador directo con la sesión resumable), acá solo se guarda el metadata +
+// la miniatura, igual que un recuerdo de foto.
+export async function POST(req: NextRequest) {
+  const supabase = getSupabase();
+  if (!supabase) {
+    return NextResponse.json(
+      { success: false, error: 'Supabase no configurado (faltan SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY).' },
+      { status: 503, headers: CORS_HEADERS }
+    );
+  }
+
+  try {
+    const body = (await req.json()) as VideoFinishRequestBody;
+    if (body?.kind !== 'video' || !body.driveFileId || !body.thumbnail?.base64) {
+      return NextResponse.json(
+        { success: false, error: 'Faltan datos del video (driveFileId, thumbnail)' },
+        { status: 400, headers: CORS_HEADERS }
+      );
+    }
+
+    const memory = await createVideoMemory(supabase, {
+      driveFileId: body.driveFileId,
+      durationSec: body.durationSec,
+      thumbnail: body.thumbnail,
+      meta: {
+        title: body.title || '',
+        date: body.date || new Date().toISOString().split('T')[0],
+        location: body.location || '',
+        caption: body.caption || '',
+      },
+    });
+
+    return NextResponse.json({ success: true, memory }, { headers: CORS_HEADERS });
+  } catch (error) {
+    console.error('Error guardando recuerdo de video:', error);
+    return NextResponse.json(
+      { success: false, error: (error as Error).message || 'Error interno al guardar el video' },
+      { status: 500, headers: CORS_HEADERS }
     );
   }
 }
